@@ -626,9 +626,15 @@ class UserAnalyticsView(APIView):
         analytics = calculate_user_analytics(request.user)
 
         return Response(
-            analytics,
-            status=status.HTTP_200_OK
-        )
+    {
+        "user": {
+            "id": request.user.id,
+            "username": request.user.username,
+            "email": request.user.email,
+        },
+        **analytics,
+    }
+)
 class OrganizationAnalyticsView(APIView):
     permission_classes = [IsAuthenticated, IsOrganizationAdmin]
 
