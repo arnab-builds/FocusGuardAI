@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'users',
     'rest_framework_simplejwt.token_blacklist',
+    'django_celery_beat',
+     "reports",
+     "notifications",
 ]
 
 MIDDLEWARE = [
@@ -147,3 +150,22 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool)
 
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+# -----------------------
+# CELERY CONFIGURATION
+# -----------------------
+
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
+
+CELERY_ACCEPT_CONTENT = ["json"]
+
+CELERY_TASK_SERIALIZER = "json"
+
+CELERY_RESULT_SERIALIZER = "json"
+
+CELERY_TIMEZONE = "Asia/Kolkata"
+
+# Notification Settings
+
+BREAK_REMINDER_HOURS = 3

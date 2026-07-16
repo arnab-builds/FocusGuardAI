@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "FocusGuard AI",
+  "version": "1.0.0",
+  "description": "AI-powered browser activity tracker for productivity monitoring.",
+
+  "permissions": [
+    "tabs",
+    "storage",
+    "idle"
+  ],
+
+  "host_permissions": [
+    "http://127.0.0.1:8000/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "FocusGuard AI"
+  }
+}

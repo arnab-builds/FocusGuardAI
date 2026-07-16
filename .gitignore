@@ -1,5 +1,17 @@
-venv/
+.venv/
 __pycache__/
 *.pyc
+
 .env
+FocusGuard-Backend/.env
+
 db.sqlite3
+
+# Celery Beat
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal
+
+FocusGuard-Backend/celerybeat-schedule
+FocusGuard-Backend/celerybeat-schedule-shm
+FocusGuard-Backend/celerybeat-schedule-wal
