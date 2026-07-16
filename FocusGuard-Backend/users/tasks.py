@@ -1,5 +1,6 @@
 from celery import shared_task
 from notifications.services import check_break_notifications
+from recommendations.services import generate_recommendations
 
 
 @shared_task
@@ -95,3 +96,8 @@ def generate_user_analytics():
     check_break_notifications()
 
     print("🔔 Notifications Checked")
+
+    for analytics in UserAnalytics.objects.all():
+     generate_recommendations(analytics.user)
+
+    print("💡 Recommendations Generated")

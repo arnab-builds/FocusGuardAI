@@ -25,4 +25,8 @@ urlpatterns = [
     "api/notifications/",
     include("notifications.urls"),
 ),
+path(
+    "api/recommendations/",
+    include("recommendations.urls"),
+),
 ]
