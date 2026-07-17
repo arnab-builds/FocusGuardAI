@@ -1,6 +1,9 @@
+
 from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     ActivityStartView,
+    ActivityStopView,
     AdminActivityView,
     ApproveOrganizationDeactivationRequestView,
     EmployeeDeactivationRequestView,
@@ -30,6 +33,11 @@ from .views import (
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
     path("login/", CustomLoginView.as_view(), name="login"),
+    path(
+    "token/refresh/",
+    TokenRefreshView.as_view(),
+    name="token-refresh",
+),
     path("profile/", ProfileView.as_view(), name="profile"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path(
@@ -150,5 +158,10 @@ path(
     "organization/deactivation-request/<int:request_id>/reject/",
         RejectOrganizationDeactivationRequestView.as_view(),
     name="reject-organization-deactivation-request",
+),
+path(
+    "activity/stop/",
+    ActivityStopView.as_view(),
+    name="activity-stop",
 ),
 ]

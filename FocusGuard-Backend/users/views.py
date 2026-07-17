@@ -558,6 +558,7 @@ def calculate_user_analytics(user):
 
     productive_time = timedelta()
     non_productive_time = timedelta()
+    idle_time = timedelta()
 
     category_summary = defaultdict(timedelta)
     website_summary = defaultdict(timedelta)
@@ -574,7 +575,6 @@ def calculate_user_analytics(user):
         url = activity.website_url or ""
         category = activity.category or DEFAULT_CATEGORY
 
-        # Calculate duration
         if activity.duration:
             duration = activity.duration
         elif activity.is_active:
@@ -590,13 +590,28 @@ def calculate_user_analytics(user):
             website_urls[website] = url
 
         category_summary[category] += duration
-
         website_summary[website] += duration
 
         if category in PRODUCTIVE_CATEGORIES:
             productive_time += duration
         else:
             non_productive_time += duration
+
+    # -------------------------
+    # Inactivity Calculation
+    # -------------------------
+
+    inactivity_logs = UserInactivity.objects.filter(user=user)
+
+    for inactivity in inactivity_logs:
+
+        if inactivity.duration:
+            idle_time += inactivity.duration
+
+        elif inactivity.is_active:
+            idle_time += (
+                timezone.now() - inactivity.inactive_from
+            )
 
     website_report = {}
 
@@ -610,6 +625,7 @@ def calculate_user_analytics(user):
     return {
         "productive_time": str(productive_time),
         "non_productive_time": str(non_productive_time),
+        "idle_time": str(idle_time),
         "total_websites_visited": len(websites),
         "total_tab_switches": tab_switches,
         "category_summary": {
@@ -1068,4 +1084,33 @@ class RejectOrganizationDeactivationRequestView(APIView):
         return Response({
             "message": "Organization deactivation request rejected successfully."
         })
-    
+class ActivityStopView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        activity = ActivityLog.objects.filter(
+            user=request.user,
+            is_active=True
+        ).order_by("-start_time").first()
+
+        if not activity:
+            return Response(
+                {"message": "No active activity found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        activity.end_time = timezone.now()
+        activity.duration = (
+            activity.end_time - activity.start_time
+        )
+        activity.is_active = False
+        activity.save()
+
+        return Response(
+            {
+                "message": "Activity stopped successfully.",
+                "activity": ActivityLogSerializer(activity).data,
+            },
+            status=status.HTTP_200_OK,
+        )

@@ -161,7 +161,7 @@ REST_FRAMEWORK = {
 # ------------------------------------------------------------------------------
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
 
@@ -209,6 +209,18 @@ CELERY_RESULT_SERIALIZER = "json"
 
 CELERY_TIMEZONE = "Asia/Kolkata"
 
+CELERY_BEAT_SCHEDULE = {
+    "generate-user-analytics": {
+        "task": "users.tasks.generate_user_analytics",
+        "schedule": 60.0,
+    },
+
+    "generate-ai-recommendations": {
+        "task": "users.tasks.generate_ai_recommendations",
+        "schedule": 3600.0,
+    },
+}
+
 # ------------------------------------------------------------------------------
 # NOTIFICATION SETTINGS
 # ------------------------------------------------------------------------------
@@ -219,3 +231,4 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 CORS_ALLOW_CREDENTIALS = True
+

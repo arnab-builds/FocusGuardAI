@@ -27,11 +27,15 @@ function Login() {
     try {
       const data = await loginUser(formData);
 
+      console.log("Login Response:", data);
+
       localStorage.setItem("access", data.access);
       localStorage.setItem("refresh", data.refresh);
 
       navigate("/dashboard");
     } catch (err) {
+      console.error(err.response?.data);
+
       setError(
         err.response?.data?.error ||
         err.response?.data?.message ||
@@ -45,7 +49,6 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100">
       <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8">
-
         <h1 className="text-3xl font-bold text-center mb-2">
           FocusGuard
         </h1>
@@ -61,12 +64,12 @@ function Login() {
         )}
 
         <input
-        type="text"
-         name="username"
+          type="text"
+          name="username"
           placeholder="Username"
           value={formData.username}
-           onChange={handleChange}
-           className="w-full border rounded-lg p-3 mb-4"
+          onChange={handleChange}
+          className="w-full border rounded-lg p-3 mb-4"
         />
 
         <input
@@ -81,11 +84,14 @@ function Login() {
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700"
+          className={`w-full p-3 rounded-lg text-white transition ${
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
           {loading ? "Logging in..." : "Login"}
         </button>
-
       </div>
     </div>
   );

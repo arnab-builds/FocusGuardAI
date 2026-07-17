@@ -1,17 +1,11 @@
-from celery import shared_task
-from notifications.services import check_break_notifications
-from recommendations.services import generate_recommendations
-
-
-@shared_task
-def test_task():
-
-    print("🚀 Celery is Working!")
-
-    return "Success"
 from datetime import timedelta
+import traceback
 
+from celery import shared_task
 from django.contrib.auth import get_user_model
+
+from notifications.services import check_break_notifications
+from recommendations.services import generate_ai_recommendation
 
 from .models import (
     ActivityLog,
@@ -21,11 +15,11 @@ from .models import (
 
 User = get_user_model()
 
-
 PRODUCTIVE_CATEGORIES = {
     "Development",
     "Coding Practice",
     "Education",
+    "Learning",
     "Documentation",
     "Professional Networking",
     "AI Tools",
@@ -33,26 +27,45 @@ PRODUCTIVE_CATEGORIES = {
 
 
 @shared_task
+def test_task():
+    print("🚀 Celery is Working!")
+    return "Success"
+
+
+@shared_task
 def generate_user_analytics():
+    """
+    Runs every minute.
+
+    - Calculates productive time
+    - Calculates non-productive time
+    - Calculates idle time
+    - Counts unique websites visited
+    - Counts tab switches
+    - Updates UserAnalytics
+    - Checks break notifications
+    """
 
     for user in User.objects.all():
 
         productive_time = timedelta()
-
         non_productive_time = timedelta()
-
         idle_time = timedelta()
 
-        websites = 0
+        activities = (
+            ActivityLog.objects
+            .filter(user=user)
+            .order_by("start_time")
+        )
 
-        tab_switches = 0
+        unique_websites = {
+            activity.website_url or activity.website_name
+            for activity in activities
+        }
 
-        activities = ActivityLog.objects.filter(user=user)
-
-        websites = activities.count()
-
-        if websites > 0:
-            tab_switches = websites - 1
+        websites = len(unique_websites)
+        activity_count = activities.count()
+        tab_switches = max(activity_count - 1, 0)
 
         for activity in activities:
 
@@ -72,23 +85,14 @@ def generate_user_analytics():
                 idle_time += log.duration
 
         UserAnalytics.objects.update_or_create(
-
             user=user,
-
             defaults={
-
                 "productive_time": productive_time,
-
                 "non_productive_time": non_productive_time,
-
                 "idle_time": idle_time,
-
                 "websites_visited": websites,
-
                 "tab_switches": tab_switches,
-
-            }
-
+            },
         )
 
     print("✅ Analytics Updated Successfully")
@@ -97,7 +101,34 @@ def generate_user_analytics():
 
     print("🔔 Notifications Checked")
 
-    for analytics in UserAnalytics.objects.all():
-     generate_recommendations(analytics.user)
 
-    print("💡 Recommendations Generated")
+@shared_task
+def generate_ai_recommendations():
+    """
+    Runs every 5 minutes in the current testing schedule.
+
+    Generates AI recommendations
+    using the latest analytics.
+    """
+
+    analytics_list = UserAnalytics.objects.select_related("user")
+
+    for analytics in analytics_list:
+
+        try:
+            recommendation = generate_ai_recommendation(
+                analytics.user,
+                analytics,
+            )
+
+            print(
+                "✅ AI Recommendation "
+                f"{recommendation.id} generated for {analytics.user.username}"
+            )
+
+        except Exception:
+
+            print(f"\n❌ Gemini failed for {analytics.user.username}")
+            traceback.print_exc()
+
+    print("🤖 AI Recommendations Generated Successfully")

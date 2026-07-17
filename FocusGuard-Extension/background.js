@@ -7,6 +7,11 @@ console.log("FocusGuard Background Service Started");
 // Current tracked activity
 let currentActivity = null;
 
+async function isAuthenticated() {
+    const result = await chrome.storage.local.get("access");
+    return Boolean(result.access);
+}
+
 function isValidTab(tab) {
 
     if (!tab.url) {
@@ -31,6 +36,11 @@ function isValidTab(tab) {
     );
 }
 async function processTab(tab) {
+
+    if (!(await isAuthenticated())) {
+        currentActivity = null;
+        return;
+    }
 
     if (!isValidTab(tab)) {
         return;
@@ -119,3 +129,34 @@ chrome.tabs.onUpdated.addListener(
     }
 
 );
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type !== "FOCUSGUARD_AUTH_CHANGED") {
+        return false;
+    }
+
+    chrome.tabs.query(
+        {
+            active: true,
+            currentWindow: true,
+        },
+        async ([tab]) => {
+            try {
+                if (tab) {
+                    currentActivity = null;
+                    await processTab(tab);
+                }
+
+                sendResponse({ ok: true });
+            } catch (error) {
+                console.error(error);
+                sendResponse({
+                    ok: false,
+                    error: error.message,
+                });
+            }
+        }
+    );
+
+    return true;
+});
