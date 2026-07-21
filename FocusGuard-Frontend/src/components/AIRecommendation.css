@@ -1,0 +1,67 @@
+.ai-card{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:12px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+
+    max-width:650px;
+
+    margin:auto;
+
+}
+
+.ai-card h2{
+
+    margin-bottom:20px;
+
+}
+
+.ai-card select{
+
+    width:100%;
+
+    padding:10px;
+
+    margin-bottom:15px;
+
+}
+
+.ai-card button{
+
+    width:100%;
+
+    padding:12px;
+
+    border:none;
+
+    background:#2563eb;
+
+    color:white;
+
+    cursor:pointer;
+
+    border-radius:8px;
+
+}
+
+.ai-card button:hover{
+
+    background:#1d4ed8;
+
+}
+
+.recommendation-box{
+
+    margin-top:25px;
+
+    background:#f7f7f7;
+
+    padding:20px;
+
+    border-radius:8px;
+
+}

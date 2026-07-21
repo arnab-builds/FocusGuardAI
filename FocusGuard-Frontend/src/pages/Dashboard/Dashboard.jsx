@@ -1,15 +1,62 @@
 import { useEffect, useState } from "react";
 import { getProfile } from "../../services/profileService";
 import { getAnalytics } from "../../services/analyticsService";
-import { getAIRecommendations } from "../../services/aiRecommendationService";
 import { getActivityHistory } from "../../services/activityService";
 import { formatDuration } from "../../utils/timeFormatter";
-
+import {
+  getAIRecommendations,
+  analyzeRecommendation,
+} from "../../services/aiRecommendationService";
 function Dashboard() {
   const [profile, setProfile] = useState(null);
   const [analytics, setAnalytics] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [selectedRange, setSelectedRange] = useState("today");
+  const [startDate, setStartDate] = useState("");
+const [endDate, setEndDate] = useState("");
+  const [loadingRecommendation, setLoadingRecommendation] = useState(false);
+  const handleAnalyze = async () => {
+    if (selectedRange === "custom") {
+      if (!startDate || !endDate) {
+        alert("Please select both start and end dates.");
+        return;
+      }
+
+      if (new Date(startDate) > new Date(endDate)) {
+        alert("Start date cannot be after end date.");
+        return;
+      }
+    }
+  try {
+    setLoadingRecommendation(true);
+
+    const payload = {
+      range: selectedRange,
+    };
+
+    if (selectedRange === "custom") {
+      payload.start_date = startDate;
+      payload.end_date = endDate;
+    }
+
+    await analyzeRecommendation(payload);
+
+const updatedRecommendations = await getAIRecommendations();
+
+setRecommendations(
+  Array.isArray(updatedRecommendations)
+    ? updatedRecommendations
+    : []
+);
+
+  } catch (error) {
+    console.error(error);
+    alert("Failed to generate recommendation");
+  } finally {
+    setLoadingRecommendation(false);
+  }
+};
 
 useEffect(() => {
   const fetchData = async () => {
@@ -193,87 +240,110 @@ useEffect(() => {
       </div>
 
       {/* AI Recommendation */}
-      <div className="mt-10 bg-white rounded-xl shadow p-6">
-        <h2 className="text-2xl font-bold mb-5">
-          🤖 AI Recommendation
-        </h2>
+<div className="mt-10 bg-white rounded-xl shadow p-6">
 
-        {latestRecommendation ? (
-          <>
-            <h3 className="text-xl font-semibold text-green-600">
-              {latestRecommendation.title}
-            </h3>
+  <div className="flex items-center justify-between mb-6">
 
-            <p className="mt-3 text-gray-700">
-              {latestRecommendation.message}
-            </p>
+    <h2 className="text-2xl font-bold">
+      🤖 AI Productivity Coach
+    </h2>
 
-            <div className="mt-4 inline-block rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-              {latestRecommendation.recommendation_type}
-            </div>
-          </>
-        ) : (
-          <p className="text-gray-500">
-            No AI recommendations available.
-          </p>
-        )}
+    <div className="flex flex-wrap gap-3 items-center">
+
+      <select
+        value={selectedRange}
+        onChange={(e) => {
+            const value = e.target.value;
+            setSelectedRange(value);
+
+            if (value !== "custom") {
+                setStartDate("");
+                setEndDate("");
+            }
+        }}
+        className="border rounded-lg px-3 py-2"
+      >
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="last_week">Last Week</option>
+        <option value="last_month">Last Month</option>
+        <option value="custom">Custom Range</option>
+      </select>
+
+      {selectedRange === "custom" && (
+        <>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="border rounded-lg px-3 py-2"
+          />
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="border rounded-lg px-3 py-2"
+          />
+        </>
+      )}
+
+      <button
+        onClick={handleAnalyze}
+        disabled={loadingRecommendation}
+        className={`px-5 py-2 rounded-lg text-white ${
+            loadingRecommendation
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+        }`}
+      >
+        {loadingRecommendation
+          ? "Analyzing..."
+          : "Analyze"}
+      </button>
+
+    </div>
+
+  </div>
+
+  {latestRecommendation ? (
+
+    <>
+
+      <h3 className="text-xl font-semibold text-green-600">
+        {latestRecommendation.title}
+      </h3>
+
+      <p className="mt-4 text-gray-700 whitespace-pre-line">
+        {latestRecommendation.message}
+      </p>
+
+      <div className="mt-6">
+
+        <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+
+          {latestRecommendation.recommendation_type}
+
+        </span>
+
       </div>
-            {/* Activity History */}
-      <div className="mt-10 bg-white rounded-xl shadow p-6">
-        <h2 className="text-2xl font-bold mb-5">
-          🕒 Recent Activity
-        </h2>
 
-        {activities.length === 0 ? (
-          <p className="text-gray-500">
-            No activity found.
-          </p>
-        ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left py-2">Website</th>
-                <th className="text-left py-2">Category</th>
-                <th className="text-left py-2">Duration</th>
-                <th className="text-left py-2">Status</th>
-              </tr>
-            </thead>
+    </>
 
-            <tbody>
-              {activities.slice(0, 10).map((activity) => (
-                <tr
-                  key={activity.id}
-                  className="border-b hover:bg-slate-50"
-                >
-                  <td className="py-3">
-                    {activity.website_name}
-                  </td>
+  ) : (
 
-                  <td>
-                    {activity.category}
-                  </td>
+    <div className="text-center py-10">
 
-                  <td>
-                    {formatDuration(activity.duration)}
-                  </td>
+      <p className="text-gray-500">
 
-                  <td>
-                    {activity.is_active ? (
-                      <span className="text-green-600 font-semibold">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="text-gray-500">
-                        Completed
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+        Click <strong>Analyze</strong> to generate an AI recommendation.
+
+      </p>
+
+    </div>
+
+  )}
+
+</div>
     </div>
   );
 }

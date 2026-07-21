@@ -1,16 +1,75 @@
 from collections import defaultdict
+from datetime import timedelta
 import traceback
 
-from .models import Recommendation
-from users.models import ActivityLog
+from users.models import ActivityLog, UserInactivity
 
 from llm.manager import LLMManager
 from llm.prompts import SYSTEM_PROMPT
 
+from .models import Recommendation
 
-def generate_ai_recommendation(user, analytics):
+
+PRODUCTIVE_CATEGORIES = {
+    "Development",
+    "Coding Practice",
+    "Education",
+    "Learning",
+    "Documentation",
+    "Professional Networking",
+    "AI Tools",
+}
+
+
+def calculate_analytics(user, start_date, end_date):
+    productive_time = timedelta()
+    non_productive_time = timedelta()
+    idle_time = timedelta()
+
+    activities = ActivityLog.objects.filter(
+        user=user,
+        start_time__date__range=[start_date, end_date],
+    ).order_by("start_time")
+
+    unique_websites = {
+        activity.website_url or activity.website_name
+        for activity in activities
+    }
+
+    for activity in activities:
+
+        if not activity.duration:
+            continue
+
+        if activity.category in PRODUCTIVE_CATEGORIES:
+            productive_time += activity.duration
+        else:
+            non_productive_time += activity.duration
+
+    inactivity_logs = UserInactivity.objects.filter(
+    user=user,
+    inactive_from__date__range=[start_date, end_date],
+     )
+
+    for log in inactivity_logs:
+
+        if log.duration:
+            idle_time += log.duration
+
+    return {
+        "productive_time": productive_time,
+        "non_productive_time": non_productive_time,
+        "idle_time": idle_time,
+        "websites_visited": len(unique_websites),
+        "tab_switches": max(activities.count() - 1, 0),
+        "activities": activities,
+    }
+
+
+def generate_ai_recommendation(user, start_date, end_date):
     """
-    Generate AI-powered productivity recommendation.
+    Generate AI-powered productivity recommendation
+    for the selected date range.
     """
 
     print("\n==============================")
@@ -19,21 +78,52 @@ def generate_ai_recommendation(user, analytics):
 
     manager = LLMManager()
 
-    productive = analytics.productive_time.total_seconds() / 60
-    non_productive = analytics.non_productive_time.total_seconds() / 60
-    idle = analytics.idle_time.total_seconds() / 60
+    analytics = calculate_analytics(
+        user,
+        start_date,
+        end_date,
+    )
 
-    activities = ActivityLog.objects.filter(user=user)
+    productive = (
+        analytics["productive_time"].total_seconds() / 60
+    )
+
+    non_productive = (
+        analytics["non_productive_time"].total_seconds() / 60
+    )
+
+    idle = (
+        analytics["idle_time"].total_seconds() / 60
+    )
+
+    activities = analytics["activities"]
+    # Add this block here
+    if not activities.exists():
+     Recommendation.objects.filter(user=user).delete()
+
+     return Recommendation.objects.create(
+        user=user,
+        recommendation_type="PRODUCTIVITY",
+        title="No Activity Found",
+        message="No browsing activity was found for the selected date range.",
+    )
 
     category_summary = defaultdict(int)
-    website_summary = defaultdict(lambda: {"time": 0, "visits": 0})
+    website_summary = defaultdict(
+        lambda: {
+            "time": 0,
+            "visits": 0,
+        }
+    )
 
     for activity in activities:
 
         if not activity.duration:
             continue
 
-        minutes = round(activity.duration.total_seconds() / 60)
+        minutes = round(
+            activity.duration.total_seconds() / 60
+        )
 
         category = activity.category or "Other"
         website = activity.website_name or "Unknown"
@@ -46,7 +136,9 @@ def generate_ai_recommendation(user, analytics):
     category_text = ""
 
     for category, minutes in category_summary.items():
-        category_text += f"- {category}: {minutes} minutes\n"
+        category_text += (
+            f"- {category}: {minutes} minutes\n"
+        )
 
     website_text = ""
 
@@ -72,10 +164,10 @@ Idle Time:
 {idle:.0f} minutes
 
 Websites Visited:
-{analytics.websites_visited}
+{analytics["websites_visited"]}
 
 Tab Switches:
-{analytics.tab_switches}
+{analytics["tab_switches"]}
 
 Category Summary:
 {category_text if category_text else "No category data"}
@@ -96,25 +188,29 @@ Message:
 """
 
     try:
-        print("✅ STEP 1 - Calling Gemini...")
 
         response = manager.generate(
             SYSTEM_PROMPT,
             prompt,
         )
 
-        print("✅ STEP 2 - Gemini Response:")
-        print(response)
-
         if not response:
-            raise ValueError("Gemini returned an empty response.")
+            raise ValueError(
+                "LLM returned an empty response."
+            )
 
         title = "AI Recommendation"
         message = response.strip()
 
-        if "Title:" in response and "Message:" in response:
+        if (
+            "Title:" in response
+            and "Message:" in response
+        ):
 
-            parts = response.split("Message:", 1)
+            parts = response.split(
+                "Message:",
+                1,
+            )
 
             title = (
                 parts[0]
@@ -124,13 +220,9 @@ Message:
 
             message = parts[1].strip()
 
-        print("✅ STEP 3 - Parsed Response")
-        print("Title:", title)
-        print("Message:", message)
-
-        Recommendation.objects.filter(user=user).delete()
-
-        print("✅ STEP 4 - Old recommendation deleted")
+        Recommendation.objects.filter(
+            user=user
+        ).delete()
 
         recommendation = Recommendation.objects.create(
             user=user,
@@ -139,13 +231,8 @@ Message:
             message=message,
         )
 
-        print("✅ STEP 5 - Recommendation Saved")
-        print("Recommendation ID:", recommendation.id)
-        print("Recommendation Count:", Recommendation.objects.count())
-
         return recommendation
 
     except Exception:
-        print("\n❌ ERROR INSIDE generate_ai_recommendation()")
         traceback.print_exc()
         raise

@@ -192,6 +192,8 @@ OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
 PRIMARY_LLM = config("PRIMARY_LLM", default="gemini")
 
 GEMINI_MODEL = config("GEMINI_MODEL", default="gemini-3.5-flash")
+GROQ_API_KEY = config("GROQ_API_KEY")
+GROQ_MODEL = config("GROQ_MODEL")
 
 # ------------------------------------------------------------------------------
 # CELERY CONFIGURATION
@@ -214,13 +216,7 @@ CELERY_BEAT_SCHEDULE = {
         "task": "users.tasks.generate_user_analytics",
         "schedule": 60.0,
     },
-
-    "generate-ai-recommendations": {
-        "task": "users.tasks.generate_ai_recommendations",
-        "schedule": 3600.0,
-    },
 }
-
 # ------------------------------------------------------------------------------
 # NOTIFICATION SETTINGS
 # ------------------------------------------------------------------------------
