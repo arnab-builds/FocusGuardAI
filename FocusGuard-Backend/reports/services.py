@@ -21,29 +21,27 @@ def generate_report(user, days):
 
     non_productive_time = timedelta()
 
+    neutral_time = timedelta()
+
     websites = set()
 
     tab_switches = activities.count()
-
-    productive_categories = [
-        "Development",
-        "Coding Practice",
-        "Education",
-        "Documentation",
-        "AI Tools",
-    ]
 
     for activity in activities:
 
         if activity.duration:
 
-            if activity.category in productive_categories:
+            if activity.productivity_type == "PRODUCTIVE":
 
                 productive_time += activity.duration
 
-            else:
+            elif activity.productivity_type == "NON_PRODUCTIVE":
 
                 non_productive_time += activity.duration
+
+            else:
+
+                neutral_time += activity.duration
 
         if activity.website_url:
 
@@ -83,6 +81,8 @@ def generate_report(user, days):
         "productive_time": productive_time,
 
         "non_productive_time": non_productive_time,
+
+        "neutral_time": neutral_time,
 
         "idle_time": idle_time,
 

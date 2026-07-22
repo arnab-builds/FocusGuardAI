@@ -108,6 +108,18 @@ class ActivityLog(models.Model):
     null=True
 )
 
+    PRODUCTIVITY_TYPES = [
+        ("PRODUCTIVE", "Productive"),
+        ("NON_PRODUCTIVE", "Non Productive"),
+        ("NEUTRAL", "Neutral"),
+    ]
+
+    productivity_type = models.CharField(
+        max_length=20,
+        choices=PRODUCTIVITY_TYPES,
+        default="NEUTRAL",
+    )
+
     start_time = models.DateTimeField()
 
     end_time = models.DateTimeField(
@@ -272,6 +284,8 @@ class UserAnalytics(models.Model):
     productive_time = models.DurationField(default=timedelta)
 
     non_productive_time = models.DurationField(default=timedelta)
+
+    neutral_time = models.DurationField(default=timedelta)
 
     idle_time = models.DurationField(default=timedelta)
 

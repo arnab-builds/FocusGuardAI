@@ -7,7 +7,7 @@ let currentWebsite = null;
 
 export function updateCurrentWebsite(activity) {
 
-    currentWebsite = activity;
+    currentWebsite = activity ? { ...activity } : null;
 
 }
 
@@ -31,8 +31,9 @@ chrome.idle.onStateChanged.addListener(
 
         if (state === "active") {
 
-            await stopInactivity();
-
+            if (currentWebsite) {
+           await stopInactivity();
+}
         }
 
     }

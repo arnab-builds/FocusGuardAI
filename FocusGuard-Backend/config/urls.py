@@ -29,4 +29,9 @@ path(
     "api/recommendations/",
     include("recommendations.urls"),
 ),
+path(
+    "api/website-categories/",
+    include("website_categories.urls"),
+),
+path("api/settings/", include("settings.urls")),
 ]

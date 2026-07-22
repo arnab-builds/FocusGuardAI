@@ -10,20 +10,10 @@ from llm.prompts import SYSTEM_PROMPT
 from .models import Recommendation
 
 
-PRODUCTIVE_CATEGORIES = {
-    "Development",
-    "Coding Practice",
-    "Education",
-    "Learning",
-    "Documentation",
-    "Professional Networking",
-    "AI Tools",
-}
-
-
 def calculate_analytics(user, start_date, end_date):
     productive_time = timedelta()
     non_productive_time = timedelta()
+    neutral_time = timedelta()
     idle_time = timedelta()
 
     activities = ActivityLog.objects.filter(
@@ -41,10 +31,12 @@ def calculate_analytics(user, start_date, end_date):
         if not activity.duration:
             continue
 
-        if activity.category in PRODUCTIVE_CATEGORIES:
+        if activity.productivity_type == "PRODUCTIVE":
             productive_time += activity.duration
-        else:
+        elif activity.productivity_type == "NON_PRODUCTIVE":
             non_productive_time += activity.duration
+        else:
+            neutral_time += activity.duration
 
     inactivity_logs = UserInactivity.objects.filter(
     user=user,
@@ -59,6 +51,7 @@ def calculate_analytics(user, start_date, end_date):
     return {
         "productive_time": productive_time,
         "non_productive_time": non_productive_time,
+        "neutral_time": neutral_time,
         "idle_time": idle_time,
         "websites_visited": len(unique_websites),
         "tab_switches": max(activities.count() - 1, 0),
@@ -90,6 +83,9 @@ def generate_ai_recommendation(user, start_date, end_date):
 
     non_productive = (
         analytics["non_productive_time"].total_seconds() / 60
+    )
+    neutral = (
+        analytics["neutral_time"].total_seconds() / 60
     )
 
     idle = (
@@ -159,6 +155,9 @@ Productive Time:
 
 Non Productive Time:
 {non_productive:.0f} minutes
+
+Neutral Time:
+{neutral:.0f} minutes
 
 Idle Time:
 {idle:.0f} minutes

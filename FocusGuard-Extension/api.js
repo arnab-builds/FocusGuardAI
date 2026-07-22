@@ -217,6 +217,93 @@ export async function startInactivity(activity) {
 
 }
 
+function normalizeDomain(domain) {
+    return String(domain || "")
+        .trim()
+        .toLowerCase()
+        .replace(/^www\./i, "");
+}
+
+function getCategoryCacheKey(domain) {
+    return `category_${domain}`;
+}
+
+async function readCategoryCache(cacheKey) {
+    try {
+        const cachedResult = await chrome.storage.local.get(cacheKey);
+        return cachedResult?.[cacheKey] ?? null;
+    } catch (error) {
+        console.error("Category Cache Read Error:", error);
+        return null;
+    }
+}
+
+async function writeCategoryCache(cacheKey, data) {
+    try {
+        await chrome.storage.local.set({ [cacheKey]: data });
+        console.log("💾 Category Cached", cacheKey);
+    } catch (error) {
+        console.error("Category Cache Write Error:", error);
+    }
+}
+
+export async function getWebsiteCategory(domain) {
+    const normalizedDomain = normalizeDomain(domain);
+
+    if (!normalizedDomain) {
+        console.error("❌ Category Fetch Failed - Invalid domain", domain);
+        return null;
+    }
+
+    const cacheKey = getCategoryCacheKey(normalizedDomain);
+
+    const cachedCategory = await readCategoryCache(cacheKey);
+
+    if (cachedCategory) {
+        console.log("✅ Category Loaded From Local Cache", normalizedDomain);
+        return cachedCategory;
+    }
+
+    console.log("🤖 Fetching Category From Backend", normalizedDomain);
+
+    try {
+        const response = await apiFetch(
+            `${CONFIG.BASE_URL}/website-categories/check/`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ domain: normalizedDomain }),
+            }
+        );
+
+        if (!response) {
+            console.error("❌ Category Fetch Failed", normalizedDomain);
+            return null;
+        }
+
+        if (!response.ok) {
+            console.error("❌ Category Fetch Failed", normalizedDomain, response.status);
+            return null;
+        }
+
+        const data = await response.json();
+
+        if (!data?.data) {
+            console.error("❌ Category Fetch Failed - Invalid response", normalizedDomain, data);
+            return null;
+        }
+
+        await writeCategoryCache(cacheKey, data.data);
+
+        return data.data;
+    } catch (error) {
+        console.error("❌ Category Fetch Failed", normalizedDomain, error);
+        return null;
+    }
+}
+
 /**
  * Stop Inactivity
  */
@@ -240,6 +327,98 @@ export async function stopInactivity() {
     } catch (error) {
 
         console.error("Stop Inactivity Error:", error);
+
+    }
+}
+
+export async function generateNotification(notification_type) {
+    try {
+        const response = await apiFetch(
+            `${CONFIG.BASE_URL}/notifications/generate/`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                 event: notification_type,
+                })
+            }
+        );
+
+        if (!response) {
+            return null;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Notification API Error:", error);
+        return null;
+    }
+}
+/**
+ * Get User Notification Settings
+ */
+export async function getUserSettings() {
+
+    try {
+
+        const response = await apiFetch(
+            `${CONFIG.BASE_URL}/settings/`,
+            {
+                method: "GET",
+            }
+        );
+
+        if (!response) {
+            return null;
+        }
+
+        if (!response.ok) {
+            console.error("Failed to fetch settings.");
+            return null;
+        }
+
+        return await response.json();
+
+    } catch (error) {
+
+        console.error("Settings API Error:", error);
+        return null;
+
+    }
+
+}
+export async function updateUserSettings(settings) {
+
+    try {
+
+        const response = await apiFetch(
+            `${CONFIG.BASE_URL}/settings/`,
+            {
+                method: "PATCH",
+                headers:{
+                    "Content-Type":"application/json",
+                },
+                body:JSON.stringify(settings),
+            }
+        );
+
+        if (!response) {
+        return null;
+      }
+
+      if (!response.ok) {
+      console.error("Failed to update settings.");
+      return null;
+        }
+
+return await response.json();
+
+    } catch(error){
+
+        console.error(error);
+        return null;
 
     }
 

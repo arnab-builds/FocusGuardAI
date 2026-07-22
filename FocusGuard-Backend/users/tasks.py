@@ -4,7 +4,6 @@ import traceback
 from celery import shared_task
 from django.contrib.auth import get_user_model
 
-from notifications.services import check_break_notifications
 from recommendations.services import generate_ai_recommendation
 
 from .models import (
@@ -14,16 +13,6 @@ from .models import (
 )
 
 User = get_user_model()
-
-PRODUCTIVE_CATEGORIES = {
-    "Development",
-    "Coding Practice",
-    "Education",
-    "Learning",
-    "Documentation",
-    "Professional Networking",
-    "AI Tools",
-}
 
 
 @shared_task
@@ -43,13 +32,13 @@ def generate_user_analytics():
     - Counts unique websites visited
     - Counts tab switches
     - Updates UserAnalytics
-    - Checks break notifications
     """
 
     for user in User.objects.all():
 
         productive_time = timedelta()
         non_productive_time = timedelta()
+        neutral_time = timedelta()
         idle_time = timedelta()
 
         activities = (
@@ -72,10 +61,12 @@ def generate_user_analytics():
             if not activity.duration:
                 continue
 
-            if activity.category in PRODUCTIVE_CATEGORIES:
+            if activity.productivity_type == "PRODUCTIVE":
                 productive_time += activity.duration
-            else:
+            elif activity.productivity_type == "NON_PRODUCTIVE":
                 non_productive_time += activity.duration
+            else:
+                neutral_time += activity.duration
 
         inactivity_logs = UserInactivity.objects.filter(user=user)
 
@@ -89,6 +80,7 @@ def generate_user_analytics():
             defaults={
                 "productive_time": productive_time,
                 "non_productive_time": non_productive_time,
+                "neutral_time": neutral_time,
                 "idle_time": idle_time,
                 "websites_visited": websites,
                 "tab_switches": tab_switches,
@@ -96,10 +88,6 @@ def generate_user_analytics():
         )
 
     print("✅ Analytics Updated Successfully")
-
-    check_break_notifications()
-
-    print("🔔 Notifications Checked")
 
 
 @shared_task
@@ -118,7 +106,8 @@ def generate_ai_recommendations():
         try:
             recommendation = generate_ai_recommendation(
                 analytics.user,
-                analytics,
+                analytics.generated_at.date(),
+                analytics.generated_at.date(),
             )
 
             print(

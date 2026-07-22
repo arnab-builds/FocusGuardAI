@@ -7,6 +7,8 @@ class DailyReportSerializer(serializers.Serializer):
 
     non_productive_time = serializers.SerializerMethodField()
 
+    neutral_time = serializers.SerializerMethodField()
+
     idle_time = serializers.SerializerMethodField()
 
     websites_visited = serializers.IntegerField()
@@ -40,6 +42,12 @@ class DailyReportSerializer(serializers.Serializer):
 
         return self.format_duration(
             obj["non_productive_time"]
+        )
+
+    def get_neutral_time(self, obj):
+
+        return self.format_duration(
+            obj.get("neutral_time")
         )
 
     def get_idle_time(self, obj):

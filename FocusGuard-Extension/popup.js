@@ -82,7 +82,7 @@ async function login() {
         });
 
         await chrome.runtime.sendMessage({
-            type: "FOCUSGUARD_AUTH_CHANGED",
+            type: "FOCUSGUARD_LOGIN_SUCCESS",
         });
 
         loginContainer.style.display = "none";
@@ -104,13 +104,13 @@ async function logout() {
 
     try {
 
-        const module = await import("./api.js");
-
-        await module.stopActivity();
+        await chrome.runtime.sendMessage({
+            type: "FOCUSGUARD_LOGOUT",
+        });
 
     } catch (error) {
 
-        console.log("No active activity to stop.");
+        console.log("Background logout cleanup failed.", error);
 
     }
 

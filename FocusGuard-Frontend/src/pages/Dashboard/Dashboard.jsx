@@ -7,6 +7,7 @@ import {
   getAIRecommendations,
   analyzeRecommendation,
 } from "../../services/aiRecommendationService";
+import { useNavigate } from "react-router-dom";
 function Dashboard() {
   const [profile, setProfile] = useState(null);
   const [analytics, setAnalytics] = useState(null);
@@ -16,6 +17,8 @@ function Dashboard() {
   const [startDate, setStartDate] = useState("");
 const [endDate, setEndDate] = useState("");
   const [loadingRecommendation, setLoadingRecommendation] = useState(false);
+  const navigate = useNavigate();
+  
   const handleAnalyze = async () => {
     if (selectedRange === "custom") {
       if (!startDate || !endDate) {
@@ -118,6 +121,23 @@ useEffect(() => {
       <h1 className="text-4xl font-bold">
         Welcome, {profile.username} 👋
       </h1>
+      <div className="flex gap-4 mt-4">
+
+  <button
+    onClick={() => navigate("/notifications")}
+    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+  >
+    🔔 View Notifications
+  </button>
+
+  <button
+    onClick={() => navigate("/settings")}
+    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+  >
+    ⚙ Settings
+  </button>
+
+</div>
 
       {/* Profile */}
       <div className="mt-8 bg-white rounded-xl shadow p-6 max-w-xl">

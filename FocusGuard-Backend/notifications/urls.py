@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    GenerateNotificationAPIView,
     NotificationListAPIView,
     MarkNotificationReadAPIView,
 )
@@ -18,6 +19,12 @@ urlpatterns = [
         "<int:pk>/read/",
         MarkNotificationReadAPIView.as_view(),
         name="notification-read",
+    ),
+
+    path(
+        "generate/",
+        GenerateNotificationAPIView.as_view(),
+        name="notification-generate",
     ),
 
 ]

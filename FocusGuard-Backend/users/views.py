@@ -331,51 +331,11 @@ class OrganizationMembersView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-CATEGORY_MAP = {
-    "chatgpt": "AI Tools",
-    "openai": "AI Tools",
-
-    "github": "Development",
-
-    "python": "Documentation",
-    "docs": "Documentation",
-
-    "linkedin": "Professional Networking",
-
-    "gmail": "Communication",
-    "outlook": "Communication",
-
-    "instagram": "Social Media",
-    "facebook": "Social Media",
-    "twitter": "Social Media",
-    "x.com": "Social Media",
-    "twitter": "Social Media",
-
-    "youtube": "Entertainment",
-
-    "leetcode": "Coding Practice",
-    "hackerrank": "Coding Practice",
-
-    "stackoverflow": "Development",
-
-    "geeksforgeeks": "Learning",
-
-    "w3schools": "Learning",
-}
-PRODUCTIVE_CATEGORIES = [
-    "Development",
-    "Documentation",
-    "Learning",
-    "Professional Networking",
-    "AI Tools",
-    "Coding Practice",
-]
-
 class ActivityStartView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-
+        print("RAW REQUEST DATA:", request.data)
         serializer = ActivityLogSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -398,21 +358,15 @@ class ActivityStartView(APIView):
         # Start new activity
         website_name = serializer.validated_data["website_name"]
         website_url = serializer.validated_data.get("website_url", "")
-
-        search_text = f"{website_name} {website_url}".lower()
-
-        category = DEFAULT_CATEGORY
-
-        for keyword, value in CATEGORY_MAP.items():
-            if keyword in search_text:
-                category = value
-                break
+        category = serializer.validated_data.get("category")
+        productivity_type = serializer.validated_data.get("productivity_type", "NEUTRAL")
 
         activity = ActivityLog.objects.create(
             user=request.user,
             website_name=website_name,
             website_url=website_url,
             category=category,
+            productivity_type=productivity_type,
             tab_title=serializer.validated_data.get("tab_title"),
             start_time=timezone.now(),
             is_active=True,
@@ -558,6 +512,7 @@ def calculate_user_analytics(user):
 
     productive_time = timedelta()
     non_productive_time = timedelta()
+    neutral_time = timedelta()
     idle_time = timedelta()
 
     category_summary = defaultdict(timedelta)
@@ -592,14 +547,12 @@ def calculate_user_analytics(user):
         category_summary[category] += duration
         website_summary[website] += duration
 
-        if category in PRODUCTIVE_CATEGORIES:
+        if activity.productivity_type == "PRODUCTIVE":
             productive_time += duration
-        else:
+        elif activity.productivity_type == "NON_PRODUCTIVE":
             non_productive_time += duration
-
-    # -------------------------
-    # Inactivity Calculation
-    # -------------------------
+        else:
+            neutral_time += duration
 
     inactivity_logs = UserInactivity.objects.filter(user=user)
 
@@ -625,6 +578,7 @@ def calculate_user_analytics(user):
     return {
         "productive_time": str(productive_time),
         "non_productive_time": str(non_productive_time),
+        "neutral_time": str(neutral_time),
         "idle_time": str(idle_time),
         "total_websites_visited": len(websites),
         "total_tab_switches": tab_switches,
@@ -634,6 +588,7 @@ def calculate_user_analytics(user):
         },
         "website_summary": website_report,
     }
+
 class UserAnalyticsView(APIView):
     permission_classes = [IsAuthenticated]
 

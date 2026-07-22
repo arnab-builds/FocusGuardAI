@@ -7,10 +7,21 @@ from ..exceptions import LLMConnectionError
 
 class GeminiProvider(BaseLLMProvider):
 
-    def __init__(self):
-        self.client = genai.Client(
-            api_key=settings.GEMINI_API_KEY
-        )
+    def __init__(self, api_type="recommendation"):
+
+        if api_type == "recommendation":
+            api_key = settings.GEMINI_RECOMMENDATION_API_KEY
+
+        elif api_type == "category":
+            api_key = settings.GEMINI_CATEGORY_API_KEY
+
+        elif api_type == "chat":
+            api_key = settings.GEMINI_CHAT_API_KEY
+
+        else:
+            raise ValueError(f"Invalid api_type: {api_type}")
+
+        self.client = genai.Client(api_key=api_key)
 
     def generate(self, system_prompt: str, user_prompt: str):
 

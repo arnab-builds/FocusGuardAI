@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     "notifications",
     "recommendations",
     "corsheaders",
+     "website_categories",
+    "settings",
 ]
 
 # ------------------------------------------------------------------------------
@@ -195,6 +197,9 @@ GEMINI_MODEL = config("GEMINI_MODEL", default="gemini-3.5-flash")
 GROQ_API_KEY = config("GROQ_API_KEY")
 GROQ_MODEL = config("GROQ_MODEL")
 
+GEMINI_RECOMMENDATION_API_KEY = config("GEMINI_RECOMMENDATION_API_KEY")
+GEMINI_CATEGORY_API_KEY = config("GEMINI_CATEGORY_API_KEY")
+GEMINI_CHAT_API_KEY = config("GEMINI_CHAT_API_KEY")
 # ------------------------------------------------------------------------------
 # CELERY CONFIGURATION
 # ------------------------------------------------------------------------------

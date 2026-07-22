@@ -4,16 +4,10 @@ from django.db import models
 
 class Notification(models.Model):
 
-    NOTIFICATION_TYPES = [
-        ("BREAK", "Break Reminder"),
-        ("OVERWORK", "Overwork Alert"),
-        ("PRODUCTIVITY", "Productivity Alert"),
-
-        # New notification types
-        ("IDLE", "Idle Too Long"),
-        ("NON_PRODUCTIVE", "Non Productive Limit"),
-        ("PRODUCTIVE_SESSION", "Productive Work Session"),
-    ]
+    class NotificationType(models.TextChoices):
+        IDLE = "IDLE", "Idle Too Long"
+        NON_PRODUCTIVE = "NON_PRODUCTIVE", "Non Productive Limit"
+        PRODUCTIVE_SESSION = "PRODUCTIVE_SESSION", "Productive Work Session"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -23,7 +17,7 @@ class Notification(models.Model):
 
     notification_type = models.CharField(
         max_length=30,
-        choices=NOTIFICATION_TYPES,
+        choices=NotificationType.choices,
     )
 
     title = models.CharField(
@@ -36,7 +30,6 @@ class Notification(models.Model):
         default=False,
     )
 
-    # NEW: Prevent duplicate notifications
     last_triggered_at = models.DateTimeField(
         null=True,
         blank=True,
@@ -46,5 +39,11 @@ class Notification(models.Model):
         auto_now_add=True,
     )
 
+    class Meta:
+        ordering = ["-created_at"]
+
     def __str__(self):
-        return f"{self.user.username} - {self.notification_type}"
+        return (
+            f"{self.user.username} - "
+            f"{self.get_notification_type_display()}"
+        )
