@@ -1,7 +1,7 @@
 import uuid
 from collections import defaultdict
 from datetime import timedelta
-
+from datetime import datetime
 from django.conf import settings
 from django.core.mail import send_mail
 from django.utils import timezone
@@ -381,14 +381,38 @@ class ActivityStartView(APIView):
         )
 
 
+from datetime import datetime
+
 class ActivityHistoryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        date = request.query_params.get("date")
 
         activities = ActivityLog.objects.filter(
             user=request.user
-        ).order_by("-start_time")
+        )
+
+        if date:
+            try:
+                selected_date = datetime.strptime(
+                    date,
+                    "%Y-%m-%d"
+                ).date()
+
+                activities = activities.filter(
+                    start_time__date=selected_date
+                )
+
+            except ValueError:
+                return Response(
+                    {
+                        "error": "Invalid date format. Use YYYY-MM-DD."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        activities = activities.order_by("-start_time")
 
         paginator = ActivityPagination()
 
@@ -504,11 +528,16 @@ class AdminActivityView(APIView):
         })
 
 
-def calculate_user_analytics(user):
+def calculate_user_analytics(user, selected_date=None):
 
-    activities = ActivityLog.objects.filter(
-        user=user
-    ).order_by("start_time")
+    activities = ActivityLog.objects.filter(user=user)
+
+    if selected_date:
+     activities = activities.filter(
+        start_time__date=selected_date
+    )
+
+    activities = activities.order_by("start_time")
 
     productive_time = timedelta()
     non_productive_time = timedelta()
@@ -556,6 +585,11 @@ def calculate_user_analytics(user):
 
     inactivity_logs = UserInactivity.objects.filter(user=user)
 
+    if selected_date:
+     inactivity_logs = inactivity_logs.filter(
+        inactive_from__date=selected_date
+    )
+
     for inactivity in inactivity_logs:
 
         if inactivity.duration:
@@ -589,23 +623,41 @@ def calculate_user_analytics(user):
         "website_summary": website_report,
     }
 
+from datetime import datetime
+
 class UserAnalyticsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        date = request.query_params.get("date")
 
-        analytics = calculate_user_analytics(request.user)
+        selected_date = None
 
-        return Response(
-    {
-        "user": {
-            "id": request.user.id,
-            "username": request.user.username,
-            "email": request.user.email,
-        },
-        **analytics,
-    }
-)
+        if date:
+            try:
+                selected_date = datetime.strptime(
+                    date,
+                    "%Y-%m-%d"
+                ).date()
+            except ValueError:
+                return Response(
+                    {"error": "Invalid date format. Use YYYY-MM-DD."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        analytics = calculate_user_analytics(
+            request.user,
+            selected_date
+        )
+
+        return Response({
+            "user": {
+                "id": request.user.id,
+                "username": request.user.username,
+                "email": request.user.email,
+            },
+            **analytics,
+        })
 class OrganizationAnalyticsView(APIView):
     permission_classes = [IsAuthenticated, IsOrganizationAdmin]
 
@@ -1069,3 +1121,46 @@ class ActivityStopView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+from datetime import datetime, timedelta
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+from users.models import ActivityLog
+from users.serializers import ActivityLogSerializer
+
+
+class DashboardTrendAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        selected_date = request.GET.get("date")
+
+        if selected_date:
+            end_date = datetime.strptime(
+                selected_date,
+                "%Y-%m-%d",
+            ).date()
+        else:
+            end_date = datetime.today().date()
+
+        start_date = end_date - timedelta(days=6)
+
+        activities = (
+            ActivityLog.objects.filter(
+                user=request.user,
+                start_time__date__range=(
+                    start_date,
+                    end_date,
+                ),
+            )
+            .order_by("start_time")
+        )
+
+        serializer = ActivityLogSerializer(
+            activities,
+            many=True,
+        )
+
+        return Response(serializer.data)

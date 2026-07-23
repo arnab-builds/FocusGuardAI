@@ -42,7 +42,6 @@ INSTALLED_APPS = [
 
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
-    "django_celery_beat",
 
     "users",
     "reports",
@@ -200,28 +199,6 @@ GROQ_MODEL = config("GROQ_MODEL")
 GEMINI_RECOMMENDATION_API_KEY = config("GEMINI_RECOMMENDATION_API_KEY")
 GEMINI_CATEGORY_API_KEY = config("GEMINI_CATEGORY_API_KEY")
 GEMINI_CHAT_API_KEY = config("GEMINI_CHAT_API_KEY")
-# ------------------------------------------------------------------------------
-# CELERY CONFIGURATION
-# ------------------------------------------------------------------------------
-
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
-
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
-
-CELERY_ACCEPT_CONTENT = ["json"]
-
-CELERY_TASK_SERIALIZER = "json"
-
-CELERY_RESULT_SERIALIZER = "json"
-
-CELERY_TIMEZONE = "Asia/Kolkata"
-
-CELERY_BEAT_SCHEDULE = {
-    "generate-user-analytics": {
-        "task": "users.tasks.generate_user_analytics",
-        "schedule": 60.0,
-    },
-}
 # ------------------------------------------------------------------------------
 # NOTIFICATION SETTINGS
 # ------------------------------------------------------------------------------

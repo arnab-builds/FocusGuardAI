@@ -1,11 +1,9 @@
 import api from "../api/axios";
 
-export const getAnalytics = async () => {
-  try {
-    const response = await api.get("/api/analytics/");
-    return response.data;
-  } catch (error) {
-    console.error("Analytics API Error:", error);
-    throw error;
-  }
+export const getAnalytics = async (date = null) => {
+  const response = await api.get("/api/analytics/", {
+    params: date ? { date } : {},
+  });
+
+  return response.data;
 };

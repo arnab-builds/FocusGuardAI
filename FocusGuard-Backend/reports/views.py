@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,13 +14,30 @@ class DailyReportAPIView(APIView):
 
     def get(self, request):
 
+        date = request.query_params.get("date")
+        selected_date = None
+
+        if date:
+            try:
+                selected_date = datetime.strptime(
+                    date,
+                    "%Y-%m-%d"
+                ).date()
+            except ValueError:
+                return Response(
+                    {
+                        "error": "Invalid date format. Use YYYY-MM-DD."
+                    },
+                    status=400,
+                )
+
         report = generate_report(
             request.user,
-            days=1
+            days=1,
+            selected_date=selected_date,
         )
 
         if not report:
-
             return Response(
                 {
                     "message": "No analytics found."
@@ -37,13 +56,30 @@ class WeeklyReportAPIView(APIView):
 
     def get(self, request):
 
+        date = request.query_params.get("date")
+        selected_date = None
+
+        if date:
+            try:
+                selected_date = datetime.strptime(
+                    date,
+                    "%Y-%m-%d"
+                ).date()
+            except ValueError:
+                return Response(
+                    {
+                        "error": "Invalid date format. Use YYYY-MM-DD."
+                    },
+                    status=400,
+                )
+
         report = generate_report(
             request.user,
-            days=7
+            days=7,
+            selected_date=selected_date,
         )
 
         if not report:
-
             return Response(
                 {
                     "message": "No analytics found."
@@ -62,13 +98,30 @@ class MonthlyReportAPIView(APIView):
 
     def get(self, request):
 
+        date = request.query_params.get("date")
+        selected_date = None
+
+        if date:
+            try:
+                selected_date = datetime.strptime(
+                    date,
+                    "%Y-%m-%d"
+                ).date()
+            except ValueError:
+                return Response(
+                    {
+                        "error": "Invalid date format. Use YYYY-MM-DD."
+                    },
+                    status=400,
+                )
+
         report = generate_report(
             request.user,
-            days=30
+            days=30,
+            selected_date=selected_date,
         )
 
         if not report:
-
             return Response(
                 {
                     "message": "No analytics found."

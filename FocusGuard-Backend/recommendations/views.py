@@ -11,7 +11,6 @@ from .models import Recommendation
 from .serializers import RecommendationSerializer
 from .analyze import AnalyzeRecommendationSerializer
 from .services import generate_ai_recommendation
-from users.models import UserAnalytics
 
 
 class RecommendationListAPIView(generics.ListAPIView):

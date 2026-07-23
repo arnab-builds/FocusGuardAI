@@ -1,146 +1,66 @@
 import { useEffect, useState } from "react";
-import {
-  getUserSettings,
-  updateUserSettings,
-} from "../../services/settingsService";
-import "./Settings.css";
-import { useNavigate } from "react-router-dom";
 
-const Settings = () => {
-  const navigate = useNavigate();
+import ProfileCard from "../../components/settings/ProfileCard";
+import AppearanceCard from "../../components/settings/AppearanceCard";
+import ExtensionCard from "../../components/settings/ExtensionCard";
+import AboutCard from "../../components/settings/AboutCard";
+import DeactivationCard from "../../components/settings/DeactivationCard";
 
-  const [settings, setSettings] = useState({
-    productive_threshold: 60,
-    non_productive_threshold: 10,
-    idle_threshold: 5,
-    browser_notifications: true,
-  });
+import { getProfile } from "../../services/profileService";
 
+export default function Settings() {
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetchSettings();
+    fetchProfile();
   }, []);
 
-  const fetchSettings = async () => {
+  const fetchProfile = async () => {
     try {
-      const data = await getUserSettings();
-      setSettings(data);
+      const data = await getProfile();
+      setProfile(data);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to load profile:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    setSettings((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : Number(value),
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    console.log("Saving settings:", settings)
-
-    try {
-      await updateUserSettings(settings);
-      
-      setMessage("✅ Settings updated successfully.");
-
-      setTimeout(() => {
-        setMessage("");
-      }, 3000);
-    } catch (error) {
-      setMessage("❌ Failed to update settings.");
-    }
-  };
-
   if (loading) {
-    return <h2>Loading Settings...</h2>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <h2 className="text-xl font-semibold">Loading Settings...</h2>
+      </div>
+    );
   }
 
   return (
-  <div className="settings-container">
-    <div className="settings-card">
+    <div className="min-h-screen bg-gray-50 p-8">
 
-      <button
-        onClick={() => navigate("/dashboard")}
-        className="mb-5 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-      >
-        ← Back to Dashboard
-      </button>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Settings</h1>
+        <p className="text-gray-500 mt-2">
+          Manage your account and application preferences.
+        </p>
+      </div>
 
-      <h1>⚙ Settings</h1>
+      <div className="grid lg:grid-cols-2 gap-6">
 
-        <form onSubmit={handleSubmit}>
+        <ProfileCard profile={profile} />
 
-          <label>
-            Productive Threshold (minutes)
-          </label>
+        <AppearanceCard />
 
-          <input
-            type="number"
-            name="productive_threshold"
-            value={settings.productive_threshold}
-            onChange={handleChange}
-          />
+        <ExtensionCard />
 
-          <label>
-            Non Productive Threshold (minutes)
-          </label>
+       
 
-          <input
-            type="number"
-            name="non_productive_threshold"
-            value={settings.non_productive_threshold}
-            onChange={handleChange}
-          />
+        <AboutCard />
 
-          <label>
-            Idle Threshold (minutes)
-          </label>
-
-          <input
-            type="number"
-            name="idle_threshold"
-            value={settings.idle_threshold}
-            onChange={handleChange}
-          />
-
-          <div className="checkbox">
-
-            <input
-              type="checkbox"
-              name="browser_notifications"
-              checked={settings.browser_notifications}
-              onChange={handleChange}
-            />
-
-            <span>Browser Notifications</span>
-
-          </div>
-
-          <button type="submit">
-            Save Settings
-          </button>
-
-        </form>
-
-        {message && (
-          <p className="message">
-            {message}
-          </p>
-        )}
+        <DeactivationCard />
 
       </div>
+
     </div>
   );
-};
-
-export default Settings;
+}

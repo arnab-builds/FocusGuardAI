@@ -6,6 +6,7 @@ from .views import (
     ActivityStopView,
     AdminActivityView,
     ApproveOrganizationDeactivationRequestView,
+    DashboardTrendAPIView,
     EmployeeDeactivationRequestView,
     InactivityStopView,
     OrganizationActivityView,
@@ -28,6 +29,7 @@ from .views import (
     UserAnalyticsView,
     EmployeeDeactivationRequestListView,
     ApproveEmployeeDeactivationRequestView,
+  
 )
 
 urlpatterns = [
@@ -164,4 +166,8 @@ path(
     ActivityStopView.as_view(),
     name="activity-stop",
 ),
+path(
+        "dashboard/trend/",
+        DashboardTrendAPIView.as_view(),
+    ),
 ]
