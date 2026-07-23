@@ -1,7 +1,9 @@
 import { Outlet } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import TopNavbar from "./TopNavbar";
+import { getProfile } from "../services/profileService";
+import { getAnalytics } from "../services/analyticsService";
 
 const getTodayInputValue = () => {
   const today = new Date();
@@ -20,6 +22,26 @@ export default function DashboardLayout() {
     profile: null,
     analytics: null,
   });
+
+  useEffect(() => {
+    const loadHeader = async () => {
+      try {
+        const [profile, analytics] = await Promise.all([
+          getProfile(),
+          getAnalytics(selectedDate),
+        ]);
+
+        setDashboardHeader({
+          profile,
+          analytics,
+        });
+      } catch (error) {
+        console.error("Header Error:", error);
+      }
+    };
+
+    loadHeader();
+  }, [selectedDate]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100">

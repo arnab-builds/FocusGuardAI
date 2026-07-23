@@ -9,6 +9,7 @@ import Reports from "../pages/Reports/Reports";
 import AICoach from "../pages/AICoach/AICoach";
 import Analytics from "../pages/Analytics/Analytics";
 import ActivityLog from "../pages/ActivityLog/ActivityLog";
+import Notifications from "../pages/Notifications/Notifications";
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -25,6 +26,7 @@ function AppRoutes() {
           <Route path="/ai-coach" element={<AICoach />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/activity" element={<ActivityLog />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Route>
       </Routes>
     </BrowserRouter>

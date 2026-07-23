@@ -6,7 +6,7 @@ import {
   FiClock,
 } from "react-icons/fi";
 import { getNotifications } from "../services/notificationService";
-
+import { useNavigate } from "react-router-dom";
 const getGreeting = () => {
   const hour = new Date().getHours();
 
@@ -85,7 +85,7 @@ export default function TopNavbar({
 
   const [showNotifications, setShowNotifications] =
     useState(false);
-
+const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   useEffect(() => {
   const loadNotifications = async () => {
@@ -161,9 +161,9 @@ export default function TopNavbar({
                   </h3>
                 </div>
 
-                <div className="max-h-72 overflow-y-auto">
+                <div>
 
-                  {notifications.map((item) => (
+                  {notifications.slice(0, 3).map((item) => (
                     <div
                       key={item.id}
                       className="flex gap-3 border-b border-slate-100 p-4 hover:bg-slate-50"
@@ -209,9 +209,15 @@ export default function TopNavbar({
 
                 </div>
 
-                <button className="w-full border-t border-slate-200 p-3 text-sm font-medium text-indigo-600 transition hover:bg-slate-50">
-                  View All Notifications
-                </button>
+                <button
+  onClick={() => {
+    setShowNotifications(false);
+    navigate("/notifications");
+  }}
+  className="w-full border-t border-slate-200 p-3 text-sm font-medium text-indigo-600 transition hover:bg-slate-50"
+>
+  View All Notifications
+</button>
 
               </div>
             )}

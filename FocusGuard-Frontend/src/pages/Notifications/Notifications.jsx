@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { FiTrash2 } from "react-icons/fi";
 import {
   getNotifications,
   markNotificationRead,
+  deleteNotification,
 } from "../../services/notificationService";
 
 function Notifications() {
@@ -44,6 +46,26 @@ function Notifications() {
     }
   };
 
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      "Delete this notification?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteNotification(id);
+
+      setNotifications((prev) =>
+        prev.filter(
+          (notification) => notification.id !== id
+        )
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -54,7 +76,6 @@ function Notifications() {
 
   return (
     <div className="min-h-screen bg-slate-100 p-10">
-
       <h1 className="text-4xl font-bold mb-8">
         🔔 Notifications
       </h1>
@@ -73,10 +94,8 @@ function Notifications() {
                 : "border-blue-600"
             }`}
           >
-            <div className="flex justify-between items-start">
-
+            <div className="flex justify-between items-start gap-4">
               <div>
-
                 <h2 className="text-xl font-bold">
                   {notification.title}
                 </h2>
@@ -86,33 +105,44 @@ function Notifications() {
                 </p>
 
                 <div className="mt-4 flex gap-3">
-
                   <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
                     {notification.notification_type}
                   </span>
 
                   <span className="text-gray-500 text-sm">
-                    {new Date(notification.created_at).toLocaleString()}
+                    {new Date(
+                      notification.created_at
+                    ).toLocaleString()}
                   </span>
-
                 </div>
-
               </div>
 
-              {!notification.is_read && (
-                <button
-                  onClick={() => handleRead(notification.id)}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                >
-                  Mark Read
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                {!notification.is_read && (
+                  <button
+                    onClick={() =>
+                      handleRead(notification.id)
+                    }
+                    className="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700"
+                  >
+                    Mark Read
+                  </button>
+                )}
 
+                <button
+                  onClick={() =>
+                    handleDelete(notification.id)
+                  }
+                  className="p-2 rounded-full text-red-600 hover:bg-red-100 transition"
+                  title="Delete Notification"
+                >
+                  <FiTrash2 size={18} />
+                </button>
+              </div>
             </div>
           </div>
         ))
       )}
-
     </div>
   );
 }

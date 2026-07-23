@@ -4,6 +4,7 @@ from .views import (
     GenerateNotificationAPIView,
     NotificationListAPIView,
     MarkNotificationReadAPIView,
+     DeleteNotificationAPIView,
 )
 
 
@@ -19,6 +20,12 @@ urlpatterns = [
         "<int:pk>/read/",
         MarkNotificationReadAPIView.as_view(),
         name="notification-read",
+    ),
+
+    path(
+        "<int:pk>/",
+        DeleteNotificationAPIView.as_view(),
+        name="notification-delete",
     ),
 
     path(

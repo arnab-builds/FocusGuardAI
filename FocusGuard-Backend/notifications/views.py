@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from .models import Notification
 from .serializers import NotificationSerializer
 from .services import generate_notification
-
+from rest_framework.generics import DestroyAPIView
 
 class NotificationListAPIView(ListAPIView):
 
@@ -88,4 +88,32 @@ class GenerateNotificationAPIView(APIView):
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED,
+        )
+class DeleteNotificationAPIView(DestroyAPIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk):
+
+        try:
+            notification = Notification.objects.get(
+                pk=pk,
+                user=request.user,
+            )
+
+        except Notification.DoesNotExist:
+            return Response(
+                {
+                    "message": "Notification not found."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        notification.delete()
+
+        return Response(
+            {
+                "message": "Notification deleted successfully."
+            },
+            status=status.HTTP_204_NO_CONTENT,
         )
