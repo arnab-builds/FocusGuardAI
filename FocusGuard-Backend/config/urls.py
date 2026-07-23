@@ -34,4 +34,8 @@ path(
     include("website_categories.urls"),
 ),
 path("api/settings/", include("settings.urls")),
+path(
+    "api/chatbot/",
+    include("chatbot.urls"),
+),
 ]

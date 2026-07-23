@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "corsheaders",
      "website_categories",
     "settings",
+    "chatbot",
 ]
 
 # ------------------------------------------------------------------------------
