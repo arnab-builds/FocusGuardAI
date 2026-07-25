@@ -10,6 +10,8 @@ import {
   getDailyReport,
   getWeeklyReport,
   getMonthlyReport,
+  downloadPDFReport,
+  downloadCSVReport,
 } from "../../services/reportService";
 
 export default function Reports() {
@@ -40,6 +42,30 @@ export default function Reports() {
       alert("Failed to generate report.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePDFDownload = async () => {
+    try {
+      await downloadPDFReport(
+        reportType,
+        selectedDate
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Unable to download PDF report.");
+    }
+  };
+
+  const handleCSVDownload = async () => {
+    try {
+      await downloadCSVReport(
+        reportType,
+        selectedDate
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Unable to download CSV report.");
     }
   };
 
@@ -74,12 +100,15 @@ export default function Reports() {
       </div>
 
       <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
+
         <h2 className="mb-5 text-xl font-semibold">
           Export Report
         </h2>
 
         <div className="flex flex-wrap gap-4">
+
           <button
+            onClick={handlePDFDownload}
             disabled={!report}
             className={`flex items-center gap-2 rounded-lg px-5 py-3 text-white transition ${
               report
@@ -92,6 +121,7 @@ export default function Reports() {
           </button>
 
           <button
+            onClick={handleCSVDownload}
             disabled={!report}
             className={`flex items-center gap-2 rounded-lg px-5 py-3 text-white transition ${
               report
@@ -102,13 +132,16 @@ export default function Reports() {
             <FiDownload />
             Download CSV
           </button>
+
         </div>
 
         {report && (
-          <p className="mt-4 text-sm text-gray-500 capitalize">
-            Current Report: <strong>{reportType}</strong>
+          <p className="mt-4 text-sm capitalize text-gray-500">
+            Current Report:{" "}
+            <strong>{reportType}</strong>
           </p>
         )}
+
       </div>
     </div>
   );

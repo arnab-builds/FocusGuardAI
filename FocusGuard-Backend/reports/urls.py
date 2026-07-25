@@ -4,6 +4,8 @@ from .views import (
     DailyReportAPIView,
     WeeklyReportAPIView,
     MonthlyReportAPIView,
+    DownloadPDFReportAPIView,
+    DownloadCSVReportAPIView,
 )
 
 
@@ -25,6 +27,18 @@ urlpatterns = [
         "monthly/",
         MonthlyReportAPIView.as_view(),
         name="monthly-report",
+    ),
+
+    path(
+        "download/pdf/",
+        DownloadPDFReportAPIView.as_view(),
+        name="download-pdf-report",
+    ),
+
+    path(
+        "download/csv/",
+        DownloadCSVReportAPIView.as_view(),
+        name="download-csv-report",
     ),
 
 ]
