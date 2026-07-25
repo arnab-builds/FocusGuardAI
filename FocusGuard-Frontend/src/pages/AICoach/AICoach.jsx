@@ -17,7 +17,9 @@ import { sendChatMessage } from "../../services/chatbotService";
 
 const suggestions = [
   "How productive was I today?",
-  "How can I improve my focus?",
+  "Which focus goal should I prioritize today?",
+  "Why is my progress low?",
+  "How can I complete my goals before the deadline?",
   "Summarize today's activity",
   "Which websites distracted me today?",
 ];

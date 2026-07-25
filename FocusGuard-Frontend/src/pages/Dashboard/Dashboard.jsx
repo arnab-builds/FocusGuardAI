@@ -20,10 +20,7 @@ const getTodayInputValue = () => {
 };
 
 function Dashboard() {
-const {
-  selectedDate,
-  setDashboardHeader,
-} = useOutletContext();
+const { selectedDate } = useOutletContext();
   const [profile, setProfile] = useState(null);
   const [analytics, setAnalytics] = useState(null);
 const [trendActivities, setTrendActivities] = useState([]);
@@ -90,9 +87,10 @@ setTrendActivities(trendData);
 const recentData = await getActivityHistory(1, selectedDate);
 setRecentActivities(recentData.results || []);
     } catch (err) {
-      console.error("Activity API Error:", err);
-      setActivities([]);
-    }
+  console.error("Activity API Error:", err);
+  setTrendActivities([]);
+  setRecentActivities([]);
+}
 
     try {
       const latestRecommendation = await getAIRecommendations();
@@ -107,14 +105,7 @@ setRecentActivities(recentData.results || []);
     fetchData();
   }, [selectedDate]);
 
-  useEffect(() => {
-    setDashboardHeader({
-    profile,
-    analytics,
-});
-  }, [analytics, profile, selectedDate, setDashboardHeader]);
 
- 
 
   if (!profile || !analytics) {
     return (

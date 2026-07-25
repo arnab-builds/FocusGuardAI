@@ -10,6 +10,9 @@ import AICoach from "../pages/AICoach/AICoach";
 import Analytics from "../pages/Analytics/Analytics";
 import ActivityLog from "../pages/ActivityLog/ActivityLog";
 import Notifications from "../pages/Notifications/Notifications";
+import FocusGoals from "../pages/focus/FocusGoals";
+
+
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -17,7 +20,7 @@ function AppRoutes() {
         {/* Login */}
         <Route path="/" element={<Login />} />
 
-        {/* Protected Layout */}
+        {/* Dashboard Layout */}
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reminders" element={<Reminders />} />
@@ -27,6 +30,10 @@ function AppRoutes() {
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/activity" element={<ActivityLog />} />
           <Route path="/notifications" element={<Notifications />} />
+
+          {/* Focus */}
+          <Route path="/focus-goals" element={<FocusGoals />} />
+
         </Route>
       </Routes>
     </BrowserRouter>

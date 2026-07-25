@@ -7,6 +7,7 @@ import {
   FiCalendar,
   FiSettings,
   FiLogOut,
+  FiTarget,
 } from "react-icons/fi";
 import { NavLink, useNavigate } from "react-router-dom";
 import { logoutUser } from "../services/authService";
@@ -22,6 +23,11 @@ const menuItems = [
     icon: <FiBarChart2 size={20} />,
     path: "/analytics",
   },
+  {
+  title: "Focus Goals",
+  icon: <FiTarget size={20} />,
+  path: "/focus-goals",
+},
   {
     title: "Reports",
     icon: <FiFileText size={20} />,
@@ -61,7 +67,7 @@ export default function Sidebar() {
 
     await logoutUser();
 
-    navigate("/login", { replace: true });
+    navigate("/", { replace: true });
   };
 
   return (

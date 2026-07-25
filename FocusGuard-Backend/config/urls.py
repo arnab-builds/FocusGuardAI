@@ -38,4 +38,8 @@ path(
     "api/chatbot/",
     include("chatbot.urls"),
 ),
+path(
+    "api/focus/",
+    include("focus.urls"),
+),
 ]

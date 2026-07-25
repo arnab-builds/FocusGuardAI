@@ -51,6 +51,8 @@ INSTALLED_APPS = [
      "website_categories",
     "settings",
     "chatbot",
+    "focus",
+
 ]
 
 # ------------------------------------------------------------------------------
@@ -197,9 +199,17 @@ GEMINI_MODEL = config("GEMINI_MODEL", default="gemini-3.5-flash")
 GROQ_API_KEY = config("GROQ_API_KEY")
 GROQ_MODEL = config("GROQ_MODEL")
 
+# Existing APIs
 GEMINI_RECOMMENDATION_API_KEY = config("GEMINI_RECOMMENDATION_API_KEY")
 GEMINI_CATEGORY_API_KEY = config("GEMINI_CATEGORY_API_KEY")
-GEMINI_CHAT_API_KEY = config("GEMINI_CHAT_API_KEY")
+
+# AI Coach
+CHATBOT_GEMINI_API_KEY = config("CHATBOT_GEMINI_API_KEY")
+CHATBOT_GROQ_API_KEY = config("CHATBOT_GROQ_API_KEY")
+
+# Focus Planner
+FOCUS_PLAN_GEMINI_API_KEY = config("FOCUS_PLAN_GEMINI_API_KEY")
+FOCUS_PLAN_GROQ_API_KEY = config("FOCUS_PLAN_GROQ_API_KEY")
 # ------------------------------------------------------------------------------
 # NOTIFICATION SETTINGS
 # ------------------------------------------------------------------------------
