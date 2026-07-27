@@ -72,12 +72,27 @@ class LoginSerializer(TokenObtainPairSerializer):
         return token
     
 class OrganizationSerializer(serializers.ModelSerializer):
+
+    admin_email = serializers.EmailField(
+        write_only=True,
+        required=False,
+    )
+
     class Meta:
         model = Organization
         fields = [
             "id",
             "name",
+            "email",
             "address",
+            "contact_number",
+            "max_employees",
+            "admin_email",
+            "created_at",
+            "is_active",
+        ]
+
+        read_only_fields = [
             "created_at",
             "is_active",
         ]
@@ -98,6 +113,7 @@ class InvitationSerializer(serializers.ModelSerializer):
             "organization",
             "invited_by",
             "token",
+            "invite_code",
             "is_accepted",
             "created_at",
         ]
@@ -105,6 +121,7 @@ class InvitationSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "invited_by",
             "token",
+            "invite_code",
             "is_accepted",
             "created_at",
         ]
@@ -127,10 +144,43 @@ class InvitationSerializer(serializers.ModelSerializer):
             attrs["organization"] = request.user.organization
 
         return attrs
-class AcceptInvitationSerializer(serializers.Serializer):
-    token = serializers.CharField()
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+from rest_framework import serializers
+
+
+class RegisterWithInviteCodeSerializer(serializers.Serializer):
+
+    username = serializers.CharField(
+        max_length=150
+    )
+
+    password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+    )
+
+    confirm_password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+    )
+
+    invite_code = serializers.CharField(
+        max_length=15,
+    )
+
+    def validate(self, attrs):
+
+        if (
+            attrs["password"]
+            != attrs["confirm_password"]
+        ):
+            raise serializers.ValidationError(
+                {
+                    "confirm_password":
+                    "Passwords do not match."
+                }
+            )
+
+        return attrs
 
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -213,15 +263,32 @@ class EmployeeDeactivationRequestSerializer(serializers.ModelSerializer):
         )
 class OrganizationDeactivationRequestSerializer(serializers.ModelSerializer):
 
+    organization = serializers.CharField(
+        source="organization.name",
+        read_only=True,
+    )
+
+    admin = serializers.EmailField(
+        source="requested_by.email",
+        read_only=True,
+    )
+
     class Meta:
         model = OrganizationDeactivationRequest
-        fields = "__all__"
-
-        read_only_fields = (
+        fields = [
+            "id",
             "organization",
-            "requested_by",
+            "admin",
+            "reason",
             "status",
             "requested_at",
             "reviewed_at",
-            "reviewed_by",
-        )
+        ]
+
+        read_only_fields = [
+            "organization",
+            "admin",
+            "status",
+            "requested_at",
+            "reviewed_at",
+        ]

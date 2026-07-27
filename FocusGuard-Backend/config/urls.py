@@ -42,4 +42,8 @@ path(
     "api/focus/",
     include("focus.urls"),
 ),
+path(
+    "api/admin-notifications/",
+    include("admin_notifications.urls"),
+),
 ]

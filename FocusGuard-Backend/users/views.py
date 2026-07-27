@@ -4,8 +4,7 @@ from datetime import timedelta
 from datetime import datetime
 from django.conf import settings
 from django.core.mail import send_mail
-from django.utils import timezone
-
+from django.utils import duration, timezone
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
@@ -13,11 +12,12 @@ from rest_framework.views import APIView
 
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView
+from admin_notifications.utils import create_admin_notification
 
 from .models import ActivityLog, EmployeeDeactivationRequest, Invitation, Organization, OrganizationDeactivationRequest, User, UserInactivity
 from .pagination import ActivityPagination
 from .serializers import (
-    AcceptInvitationSerializer,
+    RegisterWithInviteCodeSerializer,
     ActivityLogSerializer,
     AdminActivitySerializer,
     EmployeeDeactivationRequestSerializer,
@@ -30,7 +30,7 @@ from .serializers import (
     UserInactivitySerializer,
     UserListSerializer,
 )
-
+from .serializers import RegisterWithInviteCodeSerializer
 
 DEFAULT_CATEGORY = "Others"
 
@@ -80,10 +80,38 @@ class CustomLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = LoginRequestSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+
+        serializer = LoginRequestSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
 
         user = serializer.validated_data["user"]
+
+        # User account deactivated
+        if not user.is_active:
+            return Response(
+                {
+                    "error": "Your account has been deactivated."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Organization deactivated
+        if (
+            user.organization and
+            not user.organization.is_active
+        ):
+            return Response(
+                {
+                    "error": "Your organization has been deactivated. Please contact the Super Administrator."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         refresh = RefreshToken.for_user(user)
 
         return Response(
@@ -93,13 +121,13 @@ class CustomLoginView(APIView):
                     "id": user.id,
                     "username": user.username,
                     "email": user.email,
+                    "role": user.role,
                 },
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
             },
             status=status.HTTP_200_OK,
         )
-
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -153,10 +181,81 @@ class OrganizationCreateView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        serializer = OrganizationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer = OrganizationSerializer(
+            data=request.data
+        )
 
-        organization = serializer.save(owner=request.user)
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        admin_email = serializer.validated_data.pop(
+            "admin_email",
+            None,
+        )
+
+        organization = serializer.save(
+            owner=request.user,
+        )
+
+        # Notification : Organization Created
+        create_admin_notification(
+            title="New Organization Created",
+            message=(
+                f"{organization.name} has been created by "
+                f"{request.user.username}."
+            ),
+            notification_type="organization",
+        )
+
+        if admin_email:
+
+            invitation = Invitation.objects.create(
+                email=admin_email,
+                organization=organization,
+                invited_by=request.user,
+                role="SUB_ADMIN",
+                token=str(uuid.uuid4()),
+            )
+
+            
+
+            send_mail(
+    subject="FocusGuard Organization Invitation",
+    message=f"""
+Hello,
+
+You have been invited as the Organization Administrator.
+
+Organization:
+{organization.name}
+
+Invitation Code:
+{invitation.invite_code}
+
+Please open the registration page and enter the above invitation code.
+
+Registration Page:
+http://localhost:3000/register
+
+Regards,
+FocusGuard Team
+""",
+    from_email=settings.DEFAULT_FROM_EMAIL,
+    recipient_list=[admin_email],
+    fail_silently=False,
+)
+
+            # Notification : Invitation Sent
+            create_admin_notification(
+                title="Invitation Sent",
+                message=(
+                    f"Invitation sent to "
+                    f"{admin_email} for "
+                    f"{organization.name}."
+                ),
+                notification_type="invitation",
+            )
 
         return Response(
             {
@@ -167,7 +266,6 @@ class OrganizationCreateView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
-
 class InvitationCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -228,14 +326,17 @@ class InvitationCreateView(APIView):
         )
 
         send_mail(
-            subject="FocusGuard Invitation",
-            message=f"""
+    subject="FocusGuard Invitation",
+    message=f"""
 Hello,
 
 You have been invited to FocusGuard.
 
 Role:
 {invitation.role}
+
+Invitation Code:
+{invitation.invite_code}
 
 Click the link below to accept your invitation:
 
@@ -244,34 +345,58 @@ Click the link below to accept your invitation:
 Regards,
 FocusGuard Team
 """,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[invitation.email],
-            fail_silently=False,
-        )
+    from_email=settings.DEFAULT_FROM_EMAIL,
+    recipient_list=[invitation.email],
+    fail_silently=False,
+)
+from admin_notifications.utils import create_admin_notification
 
-        return Response(
-            {
-                "message": "Invitation created successfully.",
-                "invitation": InvitationSerializer(invitation).data,
-            },
-            status=status.HTTP_201_CREATED,
-        )
-class AcceptInvitationView(APIView):
+
+class RegisterWithInviteCodeView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
 
-        serializer = AcceptInvitationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer = RegisterWithInviteCodeSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
 
         invitation = Invitation.objects.filter(
-            token=serializer.validated_data["token"],
+            invite_code=serializer.validated_data["invite_code"],
             is_accepted=False,
         ).first()
 
         if not invitation:
             return Response(
-                {"error": "Invalid invitation token."},
+                {
+                    "error": "Invalid invitation code."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if User.objects.filter(
+            username=serializer.validated_data["username"]
+        ).exists():
+
+            return Response(
+                {
+                    "error": "Username already exists."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if User.objects.filter(
+            email=invitation.email
+        ).exists():
+
+            return Response(
+                {
+                    "error": "An account with this email already exists."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -286,11 +411,21 @@ class AcceptInvitationView(APIView):
         invitation.is_accepted = True
         invitation.save()
 
+        create_admin_notification(
+            title="Invitation Accepted",
+            message=(
+                f"{user.username} has joined "
+                f"{invitation.organization.name}."
+            ),
+            notification_type="invitation",
+        )
+
         refresh = RefreshToken.for_user(user)
 
         return Response(
             {
-                "message": "Invitation accepted successfully.",
+                "message": "Registration successful.",
+
                 "user": {
                     "id": user.id,
                     "username": user.username,
@@ -298,13 +433,17 @@ class AcceptInvitationView(APIView):
                     "organization": user.organization.name,
                     "role": user.role,
                 },
-                "access": str(refresh.access_token),
-                "refresh": str(refresh),
+
+                "access": str(
+                    refresh.access_token
+                ),
+
+                "refresh": str(
+                    refresh
+                ),
             },
             status=status.HTTP_201_CREATED,
         )
-
-
 class OrganizationMembersView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -979,6 +1118,16 @@ class OrganizationDeactivationRequestView(APIView):
             reason=serializer.validated_data["reason"]
         )
 
+        create_admin_notification(
+            title="Organization Deactivation Request",
+            message=(
+                f"{request.user.organization.name} has requested "
+                f"deactivation.\n\n"
+                f"Requested by: {request.user.username}"
+            ),
+            notification_type="request",
+        )
+
         return Response(
             {
                 "message": "Organization deactivation request submitted successfully.",
@@ -1006,6 +1155,9 @@ class OrganizationDeactivationRequestListView(APIView):
             "count": requests.count(),
             "results": serializer.data
         })
+from admin_notifications.utils import create_admin_notification
+
+
 class ApproveOrganizationDeactivationRequestView(APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
@@ -1041,14 +1193,25 @@ class ApproveOrganizationDeactivationRequestView(APIView):
 
         organization = organization_request.organization
 
-        # Deactivate the organization
         organization.is_active = False
-        organization.save()
+        organization.save(update_fields=["is_active"])
 
-        # Deactivate all users in the organization
         users_deactivated = User.objects.filter(
-            organization=organization
-        ).update(is_active=False)
+            organization=organization,
+        ).exclude(
+            role="SUPER_ADMIN"
+        ).update(
+            is_active=False
+        )
+
+        create_admin_notification(
+            title="Organization Deactivated",
+            message=(
+                f"{organization.name} has been deactivated by "
+                f"{request.user.username}."
+            ),
+            notification_type="request",
+        )
 
         return Response({
             "message": "Organization deactivated successfully.",
@@ -1087,6 +1250,16 @@ class RejectOrganizationDeactivationRequestView(APIView):
         organization_request.reviewed_by = request.user
         organization_request.reviewed_at = timezone.now()
         organization_request.save()
+
+        create_admin_notification(
+            title="Deactivation Request Rejected",
+            message=(
+                f"The deactivation request for "
+                f"{organization_request.organization.name} "
+                f"was rejected by {request.user.username}."
+            ),
+            notification_type="request",
+        )
 
         return Response({
             "message": "Organization deactivation request rejected successfully."
@@ -1164,3 +1337,721 @@ class DashboardTrendAPIView(APIView):
         )
 
         return Response(serializer.data)
+from django.db.models import Count
+
+from django.db.models import Count
+
+class SuperAdminDashboardView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    def get(self, request):
+
+        organizations = Organization.objects.all()
+        employees = User.objects.filter(role="USER")
+        organization_admins = User.objects.filter(role="SUB_ADMIN")
+
+        recent_organizations = organizations.order_by("-created_at")[:5]
+
+        pending_requests = OrganizationDeactivationRequest.objects.filter(
+            status="PENDING"
+        )
+
+        pending_invitations = Invitation.objects.filter(
+    role="SUB_ADMIN",
+    is_accepted=False,
+).select_related(
+    "organization"
+).order_by("-created_at")[:5]
+
+        organization_growth = []
+
+        for organization in organizations:
+            organization_growth.append({
+                "name": organization.name,
+                "employees": User.objects.filter(
+                    organization=organization,
+                    role="USER"
+                ).count()
+            })
+
+        employee_distribution = {
+            "active": employees.filter(
+                is_active=True
+            ).count(),
+            "inactive": employees.filter(
+                is_active=False
+            ).count(),
+        }
+
+        return Response({
+
+            "stats": {
+                "organizations": organizations.count(),
+                "organization_admins": organization_admins.count(),
+                "employees": employees.count(),
+                "pending_requests": pending_requests.count(),
+            },
+
+            "organization_growth": organization_growth,
+
+            "employee_distribution": employee_distribution,
+
+            "recent_organizations": [
+                {
+                    "id": org.id,
+                    "name": org.name,
+                    "created_at": org.created_at,
+                    "status": org.is_active,
+                }
+                for org in recent_organizations
+            ],
+
+            "pending_invitations": [
+    {
+        "id": invite.id,
+        "email": invite.email,
+        "organization": invite.organization.name,
+        "role": "Organization Admin",
+        "status": "Pending",
+        "created_at": invite.created_at,
+    }
+    for invite in pending_invitations
+],
+        })
+class SuperAdminOrganizationListView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    def get(self, request):
+
+        def duration_to_seconds(duration):
+            if not duration:
+                return 0
+
+            hours, minutes, seconds = duration.split(":")
+
+            return (
+                int(hours) * 3600 +
+                int(minutes) * 60 +
+                float(seconds)
+            )
+
+        organizations = Organization.objects.all().order_by("name")
+
+        data = []
+
+        for organization in organizations:
+
+            admin = User.objects.filter(
+                organization=organization,
+                role="SUB_ADMIN"
+            ).first()
+
+            employees = User.objects.filter(
+                organization=organization,
+                role="USER"
+            )
+
+            total = employees.count()
+
+            analytics = []
+
+            for employee in employees:
+                analytics.append(
+                    calculate_user_analytics(employee)
+                )
+
+            productive = 0
+            non_productive = 0
+
+            for report in analytics:
+
+                p = report["productive_time"]
+                np = report["non_productive_time"]
+
+                productive += duration_to_seconds(p)
+                non_productive += duration_to_seconds(np)
+
+            percent = 0
+
+            if productive + non_productive > 0:
+                percent = round(
+                    productive * 100 /
+                    (productive + non_productive)
+                )
+
+            data.append({
+                "id": organization.id,
+                "name": organization.name,
+                "admin": admin.email if admin else "",
+                "employees": total,
+                "productive": percent,
+                "status": (
+                    "Active"
+                    if organization.is_active
+                    else "Inactive"
+                ),
+            })
+
+        return Response(data)
+class SuperAdminOrganizationDetailView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    def duration_to_seconds(self, duration):
+        if not duration:
+            return 0
+
+        try:
+            hours, minutes, seconds = duration.split(":")
+            return (
+                int(hours) * 3600
+                + int(minutes) * 60
+                + float(seconds)
+            )
+        except Exception:
+            return 0
+
+    def get(self, request, organization_id):
+
+        try:
+            organization = Organization.objects.get(
+                id=organization_id
+            )
+        except Organization.DoesNotExist:
+            return Response(
+                {"error": "Organization not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        employees = User.objects.filter(
+            organization=organization,
+            role="USER",
+        )
+
+        active = employees.filter(is_active=True).count()
+        inactive = employees.filter(is_active=False).count()
+
+        employee_data = []
+
+        productive_total = 0
+        non_productive_total = 0
+
+        for employee in employees:
+
+            analytics = calculate_user_analytics(employee)
+
+            productive = analytics["productive_time"]
+            non_productive = analytics["non_productive_time"]
+
+            p = self.duration_to_seconds(productive)
+            np = self.duration_to_seconds(non_productive)
+
+            productive_total += p
+            non_productive_total += np
+
+            percent = 0
+
+            if p + np > 0:
+                percent = round(
+                    p * 100 / (p + np)
+                )
+
+            employee_data.append({
+                "id": employee.id,
+                "name": employee.username,
+                "email": employee.email,
+                "department": "N/A",
+                "productive": percent,
+                "unproductive": 100 - percent,
+                "status": (
+                    "Active"
+                    if employee.is_active
+                    else "Inactive"
+                ),
+            })
+
+        overall = 0
+
+        if productive_total + non_productive_total > 0:
+            overall = round(
+                productive_total * 100 /
+                (productive_total + non_productive_total)
+            )
+
+        return Response({
+            "organization": {
+                "id": organization.id,
+                "name": organization.name,
+                "address": organization.address,
+            },
+            "summary": {
+                "employees": employees.count(),
+                "active": active,
+                "inactive": inactive,
+                "productive": overall,
+                "unproductive": 100 - overall,
+            },
+            "employees_data": employee_data,
+        })
+class SuperAdminOrganizationUpdateDeleteView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    def put(self, request, organization_id):
+
+        try:
+            organization = Organization.objects.get(
+                id=organization_id
+            )
+
+        except Organization.DoesNotExist:
+
+            return Response(
+                {
+                    "error": "Organization not found."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = OrganizationSerializer(
+            organization,
+            data=request.data,
+            partial=True,
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save()
+
+        return Response(
+            {
+                "message": "Organization updated successfully.",
+                "organization": serializer.data,
+            }
+        )
+
+    def delete(self, request, organization_id):
+
+        try:
+            organization = Organization.objects.get(
+                id=organization_id
+            )
+
+        except Organization.DoesNotExist:
+
+            return Response(
+                {
+                    "error": "Organization not found."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        organization.delete()
+
+        return Response(
+            {
+                "message": "Organization deleted successfully."
+            },
+            status=status.HTTP_204_NO_CONTENT,
+        )
+# views.py
+
+class SuperAdminEmployeesSummaryView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    def get(self, request, organization_id):
+
+        try:
+            organization = Organization.objects.get(id=organization_id)
+        except Organization.DoesNotExist:
+            return Response(
+                {"error": "Organization not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        employees = User.objects.filter(
+            organization=organization,
+            role="USER"
+        ).order_by("username")
+
+        data = []
+
+        for employee in employees:
+
+            analytics = calculate_user_analytics(employee)
+
+            p = analytics["productive_time"]
+            np = analytics["non_productive_time"]
+
+            productive = (
+                sum(map(int, p.split(":")))
+                if p != "0:00:00"
+                else 0
+            )
+
+            non_productive = (
+                sum(map(int, np.split(":")))
+                if np != "0:00:00"
+                else 0
+            )
+
+            percentage = 0
+
+            if productive + non_productive:
+                percentage = round(
+                    productive * 100 /
+                    (productive + non_productive)
+                )
+
+            data.append({
+                "id": employee.id,
+                "username": employee.username,
+                "email": employee.email,
+                "department": "N/A",
+                "productive": percentage,
+                "unproductive": 100 - percentage,
+                "status": employee.is_active,
+            })
+
+        return Response(data)
+# views.py
+
+class SuperAdminAnalyticsAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    def get(self, request):
+
+        organizations = Organization.objects.filter(
+            is_active=True
+        ).order_by("name")
+
+        overall_productive = 0
+        overall_non_productive = 0
+        overall_neutral = 0
+        overall_idle = 0
+
+        total_employees = 0
+
+        organizations_data = []
+
+        def seconds(value):
+            parts = value.split(":")
+
+            h = int(parts[0])
+            m = int(parts[1])
+            s = float(parts[2])
+
+            return int(
+                h * 3600 +
+                m * 60 +
+                s
+            )
+
+        for organization in organizations:
+
+            employees = User.objects.filter(
+                organization=organization,
+                role="USER",
+                is_active=True,
+            )
+
+            total_employees += employees.count()
+
+            productive = 0
+            non_productive = 0
+            neutral = 0
+            idle = 0
+
+            for employee in employees:
+
+                analytics = calculate_user_analytics(employee)
+
+                productive += seconds(
+                    analytics["productive_time"]
+                )
+
+                non_productive += seconds(
+                    analytics["non_productive_time"]
+                )
+
+                neutral += seconds(
+                    analytics["neutral_time"]
+                )
+
+                idle += seconds(
+                    analytics["idle_time"]
+                )
+
+            total = (
+                productive +
+                non_productive +
+                neutral
+            )
+
+            productive_percent = 0
+            non_productive_percent = 0
+            neutral_percent = 0
+
+            if total:
+
+                productive_percent = round(
+                    productive * 100 / total,
+                    2,
+                )
+
+                non_productive_percent = round(
+                    non_productive * 100 / total,
+                    2,
+                )
+
+                neutral_percent = round(
+                    neutral * 100 / total,
+                    2,
+                )
+
+            overall_productive += productive
+            overall_non_productive += non_productive
+            overall_neutral += neutral
+            overall_idle += idle
+
+            organizations_data.append(
+                {
+                    "organization_id": organization.id,
+                    "organization": organization.name,
+                    "employees": employees.count(),
+                    "productive": productive_percent,
+                    "non_productive": non_productive_percent,
+                    "neutral": neutral_percent,
+                    "idle_seconds": idle,
+                }
+            )
+
+        overall_total = (
+            overall_productive +
+            overall_non_productive +
+            overall_neutral
+        )
+
+        if overall_total:
+
+            productive_percentage = round(
+                overall_productive * 100 / overall_total,
+                2,
+            )
+
+            non_productive_percentage = round(
+                overall_non_productive * 100 / overall_total,
+                2,
+            )
+
+            neutral_percentage = round(
+                overall_neutral * 100 / overall_total,
+                2,
+            )
+
+        else:
+
+            productive_percentage = 0
+            non_productive_percentage = 0
+            neutral_percentage = 0
+
+        return Response(
+            {
+                "summary": {
+                    "organizations": organizations.count(),
+                    "employees": total_employees,
+                    "productive": productive_percentage,
+                    "non_productive": non_productive_percentage,
+                    "neutral": neutral_percentage,
+                    "idle_seconds": overall_idle,
+                },
+                "organizations_data": organizations_data,
+            }
+        )
+class SuperAdminInvitationListView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    def get(self, request):
+
+        invitations = Invitation.objects.filter(
+            role="SUB_ADMIN"
+        ).select_related(
+            "organization"
+        ).order_by("-created_at")
+
+        data = []
+
+        for invitation in invitations:
+            data.append({
+                "id": invitation.id,
+                "email": invitation.email,
+                "organization": invitation.organization.name,
+                "invite_code": invitation.invite_code,
+                "role": "Organization Admin",
+                "status": "Accepted" if invitation.is_accepted else "Pending",
+                "created_at": invitation.created_at,
+            })
+
+        return Response(data)
+# views.py
+
+class SuperAdminInvitationDeleteView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    def delete(self, request, invitation_id):
+
+        try:
+            invitation = Invitation.objects.get(
+                id=invitation_id
+            )
+        except Invitation.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invitation not found."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        invitation.delete()
+
+        return Response(
+            {
+                "message": "Invitation deleted successfully."
+            }
+        )
+# views.py
+
+from django.contrib.auth.password_validation import validate_password
+from rest_framework import status
+
+class SuperAdminSettingsView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    def get(self, request):
+
+        user = request.user
+
+        return Response({
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+        })
+
+    def put(self, request):
+
+        user = request.user
+
+        username = request.data.get("username", "").strip()
+        email = request.data.get("email", "").strip()
+        first_name = request.data.get("first_name", "").strip()
+        last_name = request.data.get("last_name", "").strip()
+
+        current_password = request.data.get("current_password")
+        new_password = request.data.get("new_password")
+        confirm_password = request.data.get("confirm_password")
+
+        if (
+            User.objects.exclude(id=user.id)
+            .filter(username=username)
+            .exists()
+        ):
+            return Response(
+                {
+                    "error": "Username already exists."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if (
+            User.objects.exclude(id=user.id)
+            .filter(email=email)
+            .exists()
+        ):
+            return Response(
+                {
+                    "error": "Email already exists."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.username = username
+        user.email = email
+        user.first_name = first_name
+        user.last_name = last_name
+
+        if new_password:
+
+            if not current_password:
+                return Response(
+                    {
+                        "error": "Current password is required."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if not user.check_password(current_password):
+                return Response(
+                    {
+                        "error": "Current password is incorrect."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if new_password != confirm_password:
+                return Response(
+                    {
+                        "error": "Passwords do not match."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            try:
+                validate_password(new_password)
+            except Exception as e:
+                return Response(
+                    {
+                        "error": e.messages[0]
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            user.set_password(new_password)
+
+        user.save()
+
+        return Response({
+            "message": "Profile updated successfully."
+        })
+class SuperAdminLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+
+        serializer = LoginRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.validated_data["user"]
+
+        if user.role != "SUPER_ADMIN":
+            return Response(
+                {
+                    "error": "Only Super Admin can login."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "message": "Login successful.",
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "role": user.role,
+                },
+            },
+            status=status.HTTP_200_OK,
+        )

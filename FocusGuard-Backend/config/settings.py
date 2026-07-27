@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "settings",
     "chatbot",
     "focus",
+    "admin_notifications",
 
 ]
 
@@ -61,9 +62,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -155,18 +155,28 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ------------------------------------------------------------------------------
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'users.authentication.FocusGuardJWTAuthentication',
+),
 }
 
 # ------------------------------------------------------------------------------
 # SIMPLE JWT
 # ------------------------------------------------------------------------------
 
+from datetime import timedelta
+
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=24),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 # ------------------------------------------------------------------------------
@@ -218,6 +228,10 @@ BREAK_REMINDER_HOURS = 3
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
 ]
+
 CORS_ALLOW_CREDENTIALS = True
 

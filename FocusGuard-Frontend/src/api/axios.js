@@ -10,22 +10,6 @@ const api = axios.create({
 // ==========================
 // Attach Access Token
 // ==========================
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("access");
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// ==========================
-// Auto Refresh Access Token
-// ==========================
 api.interceptors.response.use(
   (response) => response,
 
@@ -37,6 +21,32 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // ==========================
+    // Organization/User Deactivated
+    // ==========================
+    if (
+      error.response.status === 401 &&
+      (
+        error.response.data?.detail?.includes("deactivated") ||
+        error.response.data?.detail?.includes("Organization") ||
+        error.response.data?.detail?.includes("organization")
+      )
+    ) {
+      alert(
+        "Your organization has been deactivated.\nPlease contact your Super Administrator."
+      );
+
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+
+      window.location.href = "/";
+
+      return Promise.reject(error);
+    }
+
+    // ==========================
+    // Access Token Expired
+    // ==========================
     if (
       error.response.status === 401 &&
       !originalRequest._retry &&
@@ -44,18 +54,14 @@ api.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
-      console.log("⚠️ Access token expired.");
-      console.log("🔄 Trying to refresh...");
-
       const refresh = localStorage.getItem("refresh");
 
       if (!refresh) {
-        console.log("❌ No refresh token found.");
-
         localStorage.removeItem("access");
         localStorage.removeItem("refresh");
 
         window.location.href = "/";
+
         return Promise.reject(error);
       }
 
@@ -67,29 +73,22 @@ api.interceptors.response.use(
           }
         );
 
-        console.log("✅ Token refreshed successfully.");
-        console.log(response.data);
-
         const newAccess = response.data.access;
 
-        // Save new access token
         localStorage.setItem("access", newAccess);
 
-        // Save new refresh token if your backend rotates it
         if (response.data.refresh) {
-          localStorage.setItem("refresh", response.data.refresh);
+          localStorage.setItem(
+            "refresh",
+            response.data.refresh
+          );
         }
 
-        // Retry original request
-        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
-
-        console.log("🔁 Retrying:", originalRequest.url);
+        originalRequest.headers.Authorization =
+          `Bearer ${newAccess}`;
 
         return api(originalRequest);
       } catch (refreshError) {
-        console.error("❌ Refresh Token Expired");
-        console.error(refreshError.response?.data);
-
         localStorage.removeItem("access");
         localStorage.removeItem("refresh");
 
@@ -102,5 +101,4 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 export default api;

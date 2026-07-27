@@ -2,12 +2,32 @@ from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+import random
+import string
 
 
 class Organization(models.Model):
     name = models.CharField(max_length=255)
-    address = models.TextField(blank=True, null=True)
+
+    email = models.EmailField(
+        blank=True,
+        null=True,
+    )
+
+    address = models.TextField(
+        blank=True,
+        null=True,
+    )
+
+    contact_number = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+    )
+
+    max_employees = models.PositiveIntegerField(
+        default=50,
+    )
 
     owner = models.ForeignKey(
         "User",
@@ -18,11 +38,11 @@ class Organization(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
-
 
 class User(AbstractUser):
 
@@ -51,6 +71,9 @@ class User(AbstractUser):
         return self.username
 
 
+import random
+import string
+
 class Invitation(models.Model):
     email = models.EmailField(unique=True)
 
@@ -74,14 +97,38 @@ class Invitation(models.Model):
         unique=True,
     )
 
+    invite_code = models.CharField(
+        max_length=15,
+        unique=True,
+        editable=False,
+    )
+
     is_accepted = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def generate_invite_code(self):
+        while True:
+            code = "FGA-" + "".join(
+                random.choices(
+                    string.ascii_uppercase + string.digits,
+                    k=8,
+                )
+            )
+
+            if not Invitation.objects.filter(
+                invite_code=code
+            ).exists():
+                return code
+
+    def save(self, *args, **kwargs):
+        if not self.invite_code:
+            self.invite_code = self.generate_invite_code()
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.email
-
-
 class ActivityLog(models.Model):
     user = models.ForeignKey(
         "User",
