@@ -13,8 +13,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView
 from admin_notifications.utils import create_admin_notification
+from notifications.services import create_user_notification
 
-from .models import ActivityLog, EmployeeDeactivationRequest, Invitation, Organization, OrganizationDeactivationRequest, User, UserInactivity
+from .models import ActivityLog, EmployeeDeactivationRequest, Invitation, Organization, OrganizationDeactivationRequest, User, UserAnalytics, UserInactivity
 from .pagination import ActivityPagination
 from .serializers import (
     RegisterWithInviteCodeSerializer,
@@ -133,18 +134,25 @@ class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+
         user = request.user
 
         return Response(
             {
                 "id": user.id,
                 "username": user.username,
+                "full_name": user.get_full_name(),
                 "email": user.email,
-                "organization": user.organization.name if user.organization else None,
+                "role": user.role,
+                "date_joined": user.date_joined,
+
+                "organization": {
+                    "id": user.organization.id,
+                    "name": user.organization.name,
+                } if user.organization else None,
             },
             status=status.HTTP_200_OK,
         )
-
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
@@ -221,27 +229,29 @@ class OrganizationCreateView(APIView):
             
 
             send_mail(
-    subject="FocusGuard Organization Invitation",
+    subject="Welcome to FocusGuardAI - Organization Administrator Invitation",
     message=f"""
 Hello,
 
-You have been invited as the Organization Administrator.
+You have been invited to join FocusGuardAI as an Organization Administrator.
 
 Organization:
 {organization.name}
 
+Role:
+Organization Administrator
+
 Invitation Code:
 {invitation.invite_code}
 
-Please open the registration page and enter the above invitation code.
+To complete your registration, please click the link below:
 
-Registration Page:
-http://localhost:3000/register
+http://localhost:3001/organization-register
 
 Regards,
-FocusGuard Team
+FocusGuardAI Team
 """,
-    from_email=settings.DEFAULT_FROM_EMAIL,
+    from_email=f"FocusGuardAI <{settings.DEFAULT_FROM_EMAIL}>",
     recipient_list=[admin_email],
     fail_silently=False,
 )
@@ -321,39 +331,75 @@ class InvitationCreateView(APIView):
             token=str(uuid.uuid4()),
         )
 
-        accept_url = (
-            f"http://localhost:3000/accept-invitation/{invitation.token}"
-        )
-
-        send_mail(
-    subject="FocusGuard Invitation",
-    message=f"""
+        if role == "SUB_ADMIN":
+            subject = (
+                "Welcome to FocusGuardAI - "
+                "Organization Administrator Invitation"
+            )
+            message = f"""
 Hello,
 
-You have been invited to FocusGuard.
+You have been invited to join FocusGuardAI as an Organization Administrator.
+
+Organization:
+{organization.name}
 
 Role:
-{invitation.role}
+Organization Administrator
 
 Invitation Code:
 {invitation.invite_code}
 
-Click the link below to accept your invitation:
+To complete your registration, please click the link below:
 
-{accept_url}
+http://localhost:3001/organization-register
 
 Regards,
-FocusGuard Team
-""",
-    from_email=settings.DEFAULT_FROM_EMAIL,
-    recipient_list=[invitation.email],
-    fail_silently=False,
-)
+FocusGuardAI Team
+"""
+
+        else:
+            subject = "Welcome to FocusGuardAI - Employee Invitation"
+            message = f"""
+Hello,
+
+You have been invited to join FocusGuardAI.
+
+Role:
+{invitation.get_role_display()}
+
+Invitation Code:
+{invitation.invite_code}
+
+To complete your registration, please click the link below:
+
+http://localhost:3000/employee-register
+
+Regards,
+FocusGuardAI Team
+"""
+
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=f"FocusGuardAI <{settings.DEFAULT_FROM_EMAIL}>",
+            recipient_list=[invitation.email],
+            fail_silently=False,
+        )
+
+        return Response(
+            {
+                "message": "Invitation sent successfully.",
+                "invitation": InvitationSerializer(invitation).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 from admin_notifications.utils import create_admin_notification
 
 
-class RegisterWithInviteCodeView(APIView):
+class InvitationRegistrationBaseView(APIView):
     permission_classes = [AllowAny]
+    required_role = None
 
     def post(self, request):
 
@@ -367,13 +413,41 @@ class RegisterWithInviteCodeView(APIView):
 
         invitation = Invitation.objects.filter(
             invite_code=serializer.validated_data["invite_code"],
-            is_accepted=False,
         ).first()
 
         if not invitation:
             return Response(
                 {
                     "error": "Invalid invitation code."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if (
+            self.required_role
+            and invitation.role != self.required_role
+        ):
+            return Response(
+                {
+                    "error": "Invalid invitation code."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if invitation.is_accepted:
+            return Response(
+                {
+                    "error": "This invitation has already been used."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        expires_at = getattr(invitation, "expires_at", None)
+
+        if expires_at and expires_at < timezone.now():
+            return Response(
+                {
+                    "error": "This invitation has expired."
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -420,6 +494,22 @@ class RegisterWithInviteCodeView(APIView):
             notification_type="invitation",
         )
 
+        if user.role == "USER":
+            for organization_admin in User.objects.filter(
+                organization=invitation.organization,
+                role="SUB_ADMIN",
+                is_active=True,
+            ):
+                create_user_notification(
+                    user=organization_admin,
+                    title="Employee Joined",
+                    message=(
+                        f"{user.username} accepted the invitation "
+                        f"and joined {invitation.organization.name}."
+                    ),
+                    notification_type="INVITATION",
+                )
+
         refresh = RefreshToken.for_user(user)
 
         return Response(
@@ -444,32 +534,55 @@ class RegisterWithInviteCodeView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class OrganizationAdminRegisterWithInviteCodeView(
+    InvitationRegistrationBaseView
+):
+    required_role = "SUB_ADMIN"
+
+
+class EmployeeRegisterWithInviteCodeView(
+    InvitationRegistrationBaseView
+):
+    required_role = "USER"
 class OrganizationMembersView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
 
-        if request.user.organization is None:
-            return Response(
-                {
-                    "error": "You are not assigned to any organization."
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        print("=" * 60)
+        print("Logged User :", request.user.username)
+        print("Role :", request.user.role)
+        print("Organization :", request.user.organization)
+        print("=" * 60)
 
         users = User.objects.filter(
-            organization=request.user.organization
+    organization=request.user.organization,
+    role="USER",
+)
+
+        print("Members Returned:")
+
+        for user in users:
+            calculate_user_analytics(user)
+            print(
+                user.username,
+                user.role,
+                user.organization
+            )
+
+        serializer = UserListSerializer(
+            users,
+            many=True,
         )
 
-        serializer = UserListSerializer(users, many=True)
-
-        return Response(
-            {
-                "organization": request.user.organization.name,
-                "members": serializer.data,
-            },
-            status=status.HTTP_200_OK,
-        )
+        return Response({
+    "organization": request.user.organization.name,
+    "total_employees": users.count(),
+    "members": serializer.data,
+    "users": serializer.data,
+})
 class ActivityStartView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -510,6 +623,8 @@ class ActivityStartView(APIView):
             start_time=timezone.now(),
             is_active=True,
         )
+
+        calculate_user_analytics(request.user)
 
         return Response(
             {
@@ -577,46 +692,120 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 class OrganizationActivityView(APIView):
-    permission_classes = [IsAuthenticated, IsOrganizationAdmin]
+    permission_classes = [
+        IsAuthenticated,
+        IsOrganizationAdmin,
+    ]
+
+    def serialize_activity_row(self, activity):
+        if activity.duration:
+            activity_duration = activity.duration
+        elif activity.is_active:
+            activity_duration = timezone.now() - activity.start_time
+        else:
+            activity_duration = timedelta()
+
+        return {
+            "id": activity.id,
+            "user": activity.user.id,
+            "username": activity.user.username,
+            "employee": activity.user.username,
+            "website": activity.website_name,
+            "website_name": activity.website_name,
+            "website_url": activity.website_url,
+            "tab_title": activity.tab_title,
+            "category": activity.category or DEFAULT_CATEGORY,
+            "duration": str(activity_duration),
+            "start_time": activity.start_time,
+            "end_time": activity.end_time,
+            "productivity_type": activity.productivity_type,
+            "is_active": activity.is_active,
+        }
 
     def get(self, request):
 
         organization = request.user.organization
+        employee_id = request.query_params.get("employee_id")
+        selected_date = request.query_params.get("date")
+        wants_history = any(
+            [
+                employee_id,
+                selected_date,
+                request.query_params.get("page"),
+                request.query_params.get("page_size"),
+            ]
+        )
 
-        users = User.objects.filter(
-            organization=organization
-        ).order_by("id")
+        activities = ActivityLog.objects.filter(
+            user__organization=organization,
+            user__role="USER",
+        ).select_related("user")
 
-        grouped_users = []
+        if employee_id:
+            activities = activities.filter(user_id=employee_id)
 
-        for user in users:
+        if selected_date:
+            try:
+                parsed_date = datetime.strptime(
+                    selected_date,
+                    "%Y-%m-%d",
+                ).date()
+            except ValueError:
+                return Response(
+                    {
+                        "error": "Invalid date format. Use YYYY-MM-DD."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-            activities = ActivityLog.objects.filter(
-                user=user
-            ).order_by("-start_time")
+            activities = activities.filter(start_time__date=parsed_date)
 
-            serializer = ActivityLogSerializer(
-                activities,
-                many=True
+        activities = activities.order_by("-start_time")
+
+        if wants_history:
+            paginator = ActivityPagination()
+            page = paginator.paginate_queryset(activities, request)
+            rows = [
+                self.serialize_activity_row(activity)
+                for activity in page
+            ]
+
+            return Response(
+                {
+                    "organization": {
+                        "id": organization.id,
+                        "name": organization.name,
+                    },
+                    "count": paginator.page.paginator.count,
+                    "next": paginator.get_next_link(),
+                    "previous": paginator.get_previous_link(),
+                    "results": rows,
+                },
+                status=status.HTTP_200_OK,
             )
 
-            grouped_users.append({
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "role": user.role,
-                "total_activities": activities.count(),
-                "activities": serializer.data
-            })
+        recent_activities = [
+            self.serialize_activity_row(activity)
+            for activity in activities[:20]
+        ]
 
-        return Response({
-            "organization": {
-                "id": organization.id,
-                "name": organization.name,
+        serializer = ActivityLogSerializer(
+            activities[:20],
+            many=True,
+        )
+
+        return Response(
+            {
+                "organization": {
+                    "id": organization.id,
+                    "name": organization.name,
+                },
+                "total_activities": activities.count(),
+                "activities": serializer.data,
+                "users": recent_activities,
             },
-            "total_users": users.count(),
-            "users": grouped_users
-        })
+            status=status.HTTP_200_OK,
+        )
 class AdminActivityView(APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
@@ -667,14 +856,24 @@ class AdminActivityView(APIView):
         })
 
 
+from collections import defaultdict
+from datetime import timedelta
+
+from django.utils import timezone
+
+from .models import ActivityLog, UserInactivity
+
+DEFAULT_CATEGORY = "Uncategorized"
+
+
 def calculate_user_analytics(user, selected_date=None):
 
     activities = ActivityLog.objects.filter(user=user)
 
     if selected_date:
-     activities = activities.filter(
-        start_time__date=selected_date
-    )
+        activities = activities.filter(
+            start_time__date=selected_date
+        )
 
     activities = activities.order_by("start_time")
 
@@ -687,6 +886,7 @@ def calculate_user_analytics(user, selected_date=None):
     website_summary = defaultdict(timedelta)
     website_visits = defaultdict(int)
     website_urls = {}
+    website_categories = {}
 
     websites = set()
 
@@ -699,10 +899,15 @@ def calculate_user_analytics(user, selected_date=None):
         category = activity.category or DEFAULT_CATEGORY
 
         if activity.duration:
+
             duration = activity.duration
+
         elif activity.is_active:
+
             duration = timezone.now() - activity.start_time
+
         else:
+
             continue
 
         websites.add(url or website)
@@ -712,91 +917,253 @@ def calculate_user_analytics(user, selected_date=None):
         if website not in website_urls:
             website_urls[website] = url
 
+        if website not in website_categories and category:
+            website_categories[website] = category
+
         category_summary[category] += duration
         website_summary[website] += duration
 
         if activity.productivity_type == "PRODUCTIVE":
+
             productive_time += duration
+
         elif activity.productivity_type == "NON_PRODUCTIVE":
+
             non_productive_time += duration
+
         else:
+
             neutral_time += duration
 
-    inactivity_logs = UserInactivity.objects.filter(user=user)
+    inactivity_logs = UserInactivity.objects.filter(
+        user=user
+    )
 
     if selected_date:
-     inactivity_logs = inactivity_logs.filter(
-        inactive_from__date=selected_date
-    )
+        inactivity_logs = inactivity_logs.filter(
+            inactive_from__date=selected_date
+        )
 
     for inactivity in inactivity_logs:
 
         if inactivity.duration:
+
             idle_time += inactivity.duration
 
         elif inactivity.is_active:
+
             idle_time += (
-                timezone.now() - inactivity.inactive_from
+                timezone.now() -
+                inactivity.inactive_from
             )
+
+    total_time = (
+        productive_time +
+        non_productive_time +
+        neutral_time
+    )
+
+    total_seconds = total_time.total_seconds()
+
+    if total_seconds > 0:
+
+        productive_percentage = round(
+            productive_time.total_seconds()
+            * 100
+            / total_seconds,
+            2,
+        )
+
+        non_productive_percentage = round(
+            non_productive_time.total_seconds()
+            * 100
+            / total_seconds,
+            2,
+        )
+
+        neutral_percentage = round(
+            neutral_time.total_seconds()
+            * 100
+            / total_seconds,
+            2,
+        )
+
+    else:
+
+        productive_percentage = 0
+        non_productive_percentage = 0
+        neutral_percentage = 0
 
     website_report = {}
 
     for website in website_summary:
+
         website_report[website] = {
-            "url": website_urls.get(website, ""),
-            "time_spent": str(website_summary[website]),
+            "url": website_urls.get(
+                website,
+                "",
+            ),
+            "time_spent": str(
+                website_summary[website]
+            ),
             "visits": website_visits[website],
         }
 
-    return {
-        "productive_time": str(productive_time),
-        "non_productive_time": str(non_productive_time),
-        "neutral_time": str(neutral_time),
-        "idle_time": str(idle_time),
-        "total_websites_visited": len(websites),
-        "total_tab_switches": tab_switches,
-        "category_summary": {
-            key: str(value)
-            for key, value in category_summary.items()
-        },
-        "website_summary": website_report,
-    }
+    top_websites = sorted(
+        website_summary.items(),
+        key=lambda item: item[1],
+        reverse=True,
+    )[:5]
 
+    top_websites_report = []
+
+    for website, duration in top_websites:
+
+        top_websites_report.append(
+            {
+                "website_name": website,
+                "website_url": website_urls.get(
+                    website,
+                    "",
+                ),
+                "category": website_categories.get(
+                    website,
+                    "Unknown",
+                ),
+                "duration": str(duration),
+                "duration_seconds": round(duration.total_seconds(), 2),
+                "visits": website_visits[website],
+            }
+        )
+
+    if selected_date is None:
+        analytics = UserAnalytics.objects.filter(
+            user=user
+        ).order_by("id").first()
+
+        if analytics is None:
+            analytics = UserAnalytics(user=user)
+
+        analytics.productive_time = productive_time
+        analytics.non_productive_time = non_productive_time
+        analytics.neutral_time = neutral_time
+        analytics.idle_time = idle_time
+        analytics.websites_visited = len(websites)
+        analytics.tab_switches = tab_switches
+        analytics.save()
+
+    return {
+
+        "productive_time": str(
+            productive_time
+        ),
+
+        "non_productive_time": str(
+            non_productive_time
+        ),
+
+        "neutral_time": str(
+            neutral_time
+        ),
+
+        "idle_time": str(
+            idle_time
+        ),
+
+        "total_time": str(
+            total_time
+        ),
+
+        "productive_percentage":
+            productive_percentage,
+
+        "productivity_percentage":
+            productive_percentage,
+
+        "non_productive_percentage":
+            non_productive_percentage,
+
+        "neutral_percentage":
+            neutral_percentage,
+
+        "total_websites_visited":
+            len(websites),
+
+        "total_tab_switches":
+            tab_switches,
+
+        "category_summary": {
+
+            category: str(duration)
+
+            for category, duration
+            in category_summary.items()
+
+        },
+
+        "website_summary":
+            website_report,
+
+        "top_websites":
+            top_websites_report,
+
+    }
 from datetime import datetime
 
 class UserAnalyticsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+
         date = request.query_params.get("date")
 
         selected_date = None
 
         if date:
+
             try:
+
                 selected_date = datetime.strptime(
                     date,
-                    "%Y-%m-%d"
+                    "%Y-%m-%d",
                 ).date()
+
             except ValueError:
+
                 return Response(
-                    {"error": "Invalid date format. Use YYYY-MM-DD."},
+                    {
+                        "error": "Invalid date format. Use YYYY-MM-DD."
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
         analytics = calculate_user_analytics(
             request.user,
-            selected_date
+            selected_date,
         )
 
-        return Response({
-            "user": {
-                "id": request.user.id,
-                "username": request.user.username,
-                "email": request.user.email,
+        return Response(
+            {
+
+                "user": {
+
+                    "id": request.user.id,
+
+                    "username": request.user.username,
+
+                    "full_name": request.user.get_full_name(),
+
+                    "email": request.user.email,
+
+                    "role": request.user.role,
+
+                },
+
+                **analytics,
+
             },
-            **analytics,
-        })
+            status=status.HTTP_200_OK,
+        )
 class OrganizationAnalyticsView(APIView):
     permission_classes = [IsAuthenticated, IsOrganizationAdmin]
 
@@ -805,32 +1172,111 @@ class OrganizationAnalyticsView(APIView):
         organization = request.user.organization
 
         users = User.objects.filter(
-            organization=organization
-        ).order_by("id")
+    organization=organization,
+    role="USER",
+).order_by("id")
 
-        grouped_users = []
+        total_employees = users.count()
+        active_employees = users.filter(is_active=True).count()
+        inactive_employees = total_employees - active_employees
+
+        members = []
+        productivity_sum = 0
+        non_productivity_sum = 0
+        website_totals = {}
 
         for user in users:
 
             analytics = calculate_user_analytics(user)
 
-            grouped_users.append({
+            productivity = analytics.get(
+                "productive_percentage",
+                0
+            )
+
+            productivity_sum += productivity
+            non_productivity_sum += analytics.get(
+                "non_productive_percentage",
+                0,
+            )
+
+            for website in analytics.get("top_websites", []):
+                website_name = website.get("website_name") or "Unknown"
+
+                if website_name not in website_totals:
+                    website_totals[website_name] = {
+                        "website_name": website_name,
+                        "website_url": website.get("website_url", ""),
+                        "category": website.get("category", "Unknown"),
+                        "duration_seconds": 0,
+                        "visits": 0,
+                    }
+
+                website_totals[website_name]["duration_seconds"] += (
+                    website.get("duration_seconds", 0)
+                )
+                website_totals[website_name]["visits"] += website.get(
+                    "visits",
+                    0,
+                )
+
+            members.append({
                 "id": user.id,
                 "username": user.username,
                 "email": user.email,
                 "role": user.role,
-                "analytics": analytics
+                **analytics,
             })
 
+        average_productivity = (
+            productivity_sum / total_employees
+            if total_employees else 0
+        )
+        average_non_productivity = (
+            non_productivity_sum / total_employees
+            if total_employees else 0
+        )
+
+        top_websites = sorted(
+            website_totals.values(),
+            key=lambda website: website["duration_seconds"],
+            reverse=True,
+        )[:5]
+
+        for website in top_websites:
+            website["duration"] = str(
+                timedelta(seconds=website["duration_seconds"])
+            )
+
         return Response({
+
             "organization": {
                 "id": organization.id,
                 "name": organization.name,
             },
-            "total_users": users.count(),
-            "users": grouped_users
-        })
 
+            "total_employees": total_employees,
+
+            "active_employees": active_employees,
+
+            "inactive_employees": inactive_employees,
+
+            "productive_percentage": round(
+                average_productivity,
+                2,
+            ),
+
+            "unproductive_percentage": round(
+                average_non_productivity,
+                2,
+            ),
+
+            "top_websites": top_websites,
+
+            "members": members,
+            "users": members,
+
+        })
 
 class InactivityStartView(APIView):
     permission_classes = [IsAuthenticated]
@@ -858,6 +1304,8 @@ class InactivityStartView(APIView):
     inactive_from=timezone.now(),
     is_active=True,
 )
+
+        calculate_user_analytics(request.user)
 
         return Response(
             {
@@ -937,6 +1385,8 @@ class InactivityStopView(APIView):
 
         inactivity.save()
 
+        calculate_user_analytics(request.user)
+
         return Response(
             {
                 "message": "User is active again.",
@@ -983,6 +1433,21 @@ class EmployeeDeactivationRequestView(APIView):
             reason=serializer.validated_data["reason"]
         )
 
+        for organization_admin in User.objects.filter(
+            organization=request.user.organization,
+            role="SUB_ADMIN",
+            is_active=True,
+        ):
+            create_user_notification(
+                user=organization_admin,
+                title="Employee Deactivation Request",
+                message=(
+                    f"{request.user.get_full_name() or request.user.username} "
+                    f"requested account deactivation."
+                ),
+                notification_type="REQUEST",
+            )
+
         return Response(
             {
                 "message": "Deactivation request submitted successfully.",
@@ -993,32 +1458,60 @@ class EmployeeDeactivationRequestView(APIView):
             status=status.HTTP_201_CREATED,
         )
 class EmployeeDeactivationRequestListView(APIView):
-    permission_classes = [IsAuthenticated, IsOrganizationAdmin]
+    permission_classes = [
+        IsAuthenticated,
+        IsOrganizationAdmin,
+    ]
 
     def get(self, request):
 
-        requests = EmployeeDeactivationRequest.objects.filter(
-            organization=request.user.organization
-        ).order_by("-requested_at")
+        requests = (
+            EmployeeDeactivationRequest.objects
+            .filter(
+                organization=request.user.organization
+            )
+            .select_related("employee")
+            .order_by("-requested_at")
+        )
 
         serializer = EmployeeDeactivationRequestSerializer(
             requests,
-            many=True
+            many=True,
         )
 
-        return Response({
-            "count": requests.count(),
-            "results": serializer.data
-        })
-class ApproveEmployeeDeactivationRequestView(APIView):
-    permission_classes = [IsAuthenticated, IsOrganizationAdmin]
+        return Response(
+            {
+                "organization": {
+                    "id": request.user.organization.id,
+                    "name": request.user.organization.name,
+                },
 
+                "count": requests.count(),
+
+                "results": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+from django.db import transaction
+
+class ApproveEmployeeDeactivationRequestView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        IsOrganizationAdmin,
+    ]
+
+    @transaction.atomic
     def post(self, request, request_id):
 
         try:
-            deactivation_request = EmployeeDeactivationRequest.objects.get(
-                id=request_id,
-                organization=request.user.organization
+
+            deactivation_request = (
+                EmployeeDeactivationRequest.objects
+                .select_related("employee")
+                .get(
+                    id=request_id,
+                    organization=request.user.organization,
+                )
             )
 
         except EmployeeDeactivationRequest.DoesNotExist:
@@ -1027,7 +1520,7 @@ class ApproveEmployeeDeactivationRequestView(APIView):
                 {
                     "error": "Request not found."
                 },
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_404_NOT_FOUND,
             )
 
         if deactivation_request.status != "PENDING":
@@ -1036,7 +1529,7 @@ class ApproveEmployeeDeactivationRequestView(APIView):
                 {
                     "error": "This request has already been processed."
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         deactivation_request.status = "APPROVED"
@@ -1046,20 +1539,50 @@ class ApproveEmployeeDeactivationRequestView(APIView):
 
         employee = deactivation_request.employee
         employee.is_active = False
-        employee.save()
+        employee.save(update_fields=["is_active"])
 
-        return Response({
-            "message": "Employee deactivated successfully."
-        })
+        return Response(
+            {
+                "message": "Employee deactivated successfully.",
+
+                "request": {
+
+                    "id": deactivation_request.id,
+
+                    "status": deactivation_request.status,
+
+                    "employee": employee.get_full_name()
+                    or employee.username,
+
+                    "reviewed_by": request.user.username,
+
+                    "reviewed_at": deactivation_request.reviewed_at,
+
+                }
+
+            },
+            status=status.HTTP_200_OK,
+        )
+from django.db import transaction
+
 class RejectEmployeeDeactivationRequestView(APIView):
-    permission_classes = [IsAuthenticated, IsOrganizationAdmin]
+    permission_classes = [
+        IsAuthenticated,
+        IsOrganizationAdmin,
+    ]
 
+    @transaction.atomic
     def post(self, request, request_id):
 
         try:
-            deactivation_request = EmployeeDeactivationRequest.objects.get(
-                id=request_id,
-                organization=request.user.organization
+
+            deactivation_request = (
+                EmployeeDeactivationRequest.objects
+                .select_related("employee")
+                .get(
+                    id=request_id,
+                    organization=request.user.organization,
+                )
             )
 
         except EmployeeDeactivationRequest.DoesNotExist:
@@ -1068,7 +1591,7 @@ class RejectEmployeeDeactivationRequestView(APIView):
                 {
                     "error": "Request not found."
                 },
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_404_NOT_FOUND,
             )
 
         if deactivation_request.status != "PENDING":
@@ -1077,7 +1600,7 @@ class RejectEmployeeDeactivationRequestView(APIView):
                 {
                     "error": "This request has already been processed."
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         deactivation_request.status = "REJECTED"
@@ -1085,10 +1608,30 @@ class RejectEmployeeDeactivationRequestView(APIView):
         deactivation_request.reviewed_at = timezone.now()
         deactivation_request.save()
 
-        return Response({
-            "message": "Request rejected successfully."
-        })
-    
+        return Response(
+            {
+                "message": "Request rejected successfully.",
+
+                "request": {
+
+                    "id": deactivation_request.id,
+
+                    "status": deactivation_request.status,
+
+                    "employee": (
+                        deactivation_request.employee.get_full_name()
+                        or deactivation_request.employee.username
+                    ),
+
+                    "reviewed_by": request.user.username,
+
+                    "reviewed_at": deactivation_request.reviewed_at,
+
+                }
+
+            },
+            status=status.HTTP_200_OK,
+        )
 class OrganizationDeactivationRequestView(APIView):
     permission_classes = [IsAuthenticated, IsOrganizationAdmin]
 
@@ -1261,6 +1804,18 @@ class RejectOrganizationDeactivationRequestView(APIView):
             notification_type="request",
         )
 
+        if organization_request.requested_by.is_active:
+            create_user_notification(
+                user=organization_request.requested_by,
+                title="Deactivation Request Rejected",
+                message=(
+                    f"Your deactivation request for "
+                    f"{organization_request.organization.name} "
+                    f"was rejected by {request.user.username}."
+                ),
+                notification_type="REQUEST",
+            )
+
         return Response({
             "message": "Organization deactivation request rejected successfully."
         })
@@ -1287,6 +1842,8 @@ class ActivityStopView(APIView):
         activity.is_active = False
         activity.save()
 
+        calculate_user_analytics(request.user)
+
         return Response(
             {
                 "message": "Activity stopped successfully.",
@@ -1304,39 +1861,110 @@ from users.models import ActivityLog
 from users.serializers import ActivityLogSerializer
 
 
+from collections import defaultdict
+from datetime import datetime, timedelta
+
+from collections import defaultdict
+from datetime import datetime, timedelta
+
 class DashboardTrendAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+
         selected_date = request.GET.get("date")
 
         if selected_date:
+
             end_date = datetime.strptime(
                 selected_date,
                 "%Y-%m-%d",
             ).date()
+
         else:
+
             end_date = datetime.today().date()
 
         start_date = end_date - timedelta(days=6)
 
-        activities = (
-            ActivityLog.objects.filter(
-                user=request.user,
-                start_time__date__range=(
-                    start_date,
-                    end_date,
-                ),
+        activities = ActivityLog.objects.filter(
+            start_time__date__range=(
+                start_date,
+                end_date,
+            ),
+        )
+
+        if request.user.role == "SUB_ADMIN":
+            activities = activities.filter(
+                user__organization=request.user.organization,
+                user__role="USER",
             )
-            .order_by("start_time")
+        else:
+            activities = activities.filter(
+                user=request.user,
+            )
+
+        trend = defaultdict(
+            lambda: {
+                "productive": 0,
+                "unproductive": 0,
+            }
         )
 
-        serializer = ActivityLogSerializer(
-            activities,
-            many=True,
-        )
+        for activity in activities:
 
-        return Response(serializer.data)
+            if activity.duration:
+
+                hours = activity.duration.total_seconds() / 3600
+
+            elif activity.is_active:
+
+                hours = (
+                    timezone.now() -
+                    activity.start_time
+                ).total_seconds() / 3600
+
+            else:
+
+                hours = 0
+
+            day = activity.start_time.strftime("%a")
+
+            if activity.productivity_type == "PRODUCTIVE":
+
+                trend[day]["productive"] += hours
+
+            elif activity.productivity_type == "NON_PRODUCTIVE":
+
+                trend[day]["unproductive"] += hours
+
+        response = []
+
+        for i in range(7):
+
+            current = start_date + timedelta(days=i)
+
+            day = current.strftime("%a")
+
+            response.append({
+                "name": day,
+                "day": day,
+                "productive": round(
+                    trend[day]["productive"],
+                    2,
+                ),
+                "unproductive": round(
+                    trend[day]["unproductive"],
+                    2,
+                ),
+                "hours": round(
+                    trend[day]["productive"] +
+                    trend[day]["unproductive"],
+                    2,
+                ),
+            })
+
+        return Response(response)
 from django.db.models import Count
 
 from django.db.models import Count
@@ -1462,21 +2090,25 @@ class SuperAdminOrganizationListView(APIView):
 
             productive = 0
             non_productive = 0
+            neutral = 0
 
             for report in analytics:
 
                 p = report["productive_time"]
                 np = report["non_productive_time"]
+                n = report["neutral_time"]
 
                 productive += duration_to_seconds(p)
                 non_productive += duration_to_seconds(np)
+                neutral += duration_to_seconds(n)
 
             percent = 0
 
-            if productive + non_productive > 0:
+            if productive + non_productive + neutral > 0:
                 percent = round(
                     productive * 100 /
-                    (productive + non_productive)
+                    (productive + non_productive + neutral),
+                    2,
                 )
 
             data.append({
@@ -1534,26 +2166,30 @@ class SuperAdminOrganizationDetailView(APIView):
 
         productive_total = 0
         non_productive_total = 0
+        neutral_total = 0
 
         for employee in employees:
 
             analytics = calculate_user_analytics(employee)
 
-            productive = analytics["productive_time"]
-            non_productive = analytics["non_productive_time"]
-
-            p = self.duration_to_seconds(productive)
-            np = self.duration_to_seconds(non_productive)
+            p = self.duration_to_seconds(
+                analytics["productive_time"]
+            )
+            np = self.duration_to_seconds(
+                analytics["non_productive_time"]
+            )
+            neutral = self.duration_to_seconds(
+                analytics["neutral_time"]
+            )
 
             productive_total += p
             non_productive_total += np
+            neutral_total += neutral
 
-            percent = 0
-
-            if p + np > 0:
-                percent = round(
-                    p * 100 / (p + np)
-                )
+            percent = analytics.get(
+                "productivity_percentage",
+                0,
+            )
 
             employee_data.append({
                 "id": employee.id,
@@ -1561,7 +2197,10 @@ class SuperAdminOrganizationDetailView(APIView):
                 "email": employee.email,
                 "department": "N/A",
                 "productive": percent,
-                "unproductive": 100 - percent,
+                "unproductive": analytics.get(
+                    "non_productive_percentage",
+                    0,
+                ),
                 "status": (
                     "Active"
                     if employee.is_active
@@ -1571,10 +2210,15 @@ class SuperAdminOrganizationDetailView(APIView):
 
         overall = 0
 
-        if productive_total + non_productive_total > 0:
+        if productive_total + non_productive_total + neutral_total > 0:
             overall = round(
                 productive_total * 100 /
-                (productive_total + non_productive_total)
+                (
+                    productive_total +
+                    non_productive_total +
+                    neutral_total
+                ),
+                2,
             )
 
         return Response({
@@ -1588,7 +2232,19 @@ class SuperAdminOrganizationDetailView(APIView):
                 "active": active,
                 "inactive": inactive,
                 "productive": overall,
-                "unproductive": 100 - overall,
+                "unproductive": round(
+                    non_productive_total * 100 /
+                    (
+                        productive_total +
+                        non_productive_total +
+                        neutral_total
+                    ),
+                    2,
+                ) if (
+                    productive_total +
+                    non_productive_total +
+                    neutral_total
+                ) > 0 else 0,
             },
             "employees_data": employee_data,
         })
@@ -1678,28 +2334,10 @@ class SuperAdminEmployeesSummaryView(APIView):
 
             analytics = calculate_user_analytics(employee)
 
-            p = analytics["productive_time"]
-            np = analytics["non_productive_time"]
-
-            productive = (
-                sum(map(int, p.split(":")))
-                if p != "0:00:00"
-                else 0
+            percentage = analytics.get(
+                "productivity_percentage",
+                0,
             )
-
-            non_productive = (
-                sum(map(int, np.split(":")))
-                if np != "0:00:00"
-                else 0
-            )
-
-            percentage = 0
-
-            if productive + non_productive:
-                percentage = round(
-                    productive * 100 /
-                    (productive + non_productive)
-                )
 
             data.append({
                 "id": employee.id,
@@ -1707,7 +2345,10 @@ class SuperAdminEmployeesSummaryView(APIView):
                 "email": employee.email,
                 "department": "N/A",
                 "productive": percentage,
-                "unproductive": 100 - percentage,
+                "unproductive": analytics.get(
+                    "non_productive_percentage",
+                    0,
+                ),
                 "status": employee.is_active,
             })
 

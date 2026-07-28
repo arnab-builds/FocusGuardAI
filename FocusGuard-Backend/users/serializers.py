@@ -98,6 +98,14 @@ class OrganizationSerializer(serializers.ModelSerializer):
         ]
 
 class InvitationSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        validators=[
+            UniqueValidator(
+                queryset=Invitation.objects.all(),
+                message="An invitation for this email already exists.",
+            )
+        ]
+    )
 
     organization = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.all(),
@@ -182,15 +190,112 @@ class RegisterWithInviteCodeSerializer(serializers.Serializer):
 
         return attrs
 
+from rest_framework import serializers
+
+from .models import (
+    User,
+    UserAnalytics,
+)
+
+
 class UserListSerializer(serializers.ModelSerializer):
+
+    full_name = serializers.SerializerMethodField()
+
+    productivity_percentage = serializers.SerializerMethodField()
+    productive_time = serializers.SerializerMethodField()
+    non_productive_time = serializers.SerializerMethodField()
+    unproductive_time = serializers.SerializerMethodField()
+
     class Meta:
+
         model = User
+
         fields = [
+
             "id",
+
             "username",
+
+            "full_name",
+
             "email",
+
             "role",
+
+            "is_active",
+
+            "productivity_percentage",
+
+            "productive_time",
+
+            "non_productive_time",
+
+            "unproductive_time",
+
         ]
+
+    def get_full_name(self, obj):
+
+        return obj.get_full_name() or obj.username
+
+    def get_productivity_percentage(self, obj):
+
+        analytics = UserAnalytics.objects.filter(
+            user=obj
+        ).first()
+
+        if analytics:
+
+            total = (
+                analytics.productive_time +
+                analytics.non_productive_time +
+                analytics.neutral_time
+            )
+
+            if total.total_seconds() > 0:
+
+                return round(
+
+                    analytics.productive_time.total_seconds()
+
+                    * 100
+
+                    / total.total_seconds(),
+
+                    2,
+
+                )
+
+        return 0
+
+    def get_productive_time(self, obj):
+
+        analytics = UserAnalytics.objects.filter(
+            user=obj
+        ).first()
+
+        if analytics:
+
+            return str(analytics.productive_time)
+
+        return "0:00:00"
+
+    def get_non_productive_time(self, obj):
+
+        analytics = UserAnalytics.objects.filter(
+            user=obj
+        ).first()
+
+        if analytics:
+
+            return str(analytics.non_productive_time)
+
+        return "0:00:00"
+
+    def get_unproductive_time(self, obj):
+
+        return self.get_non_productive_time(obj)
 class ActivityLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityLog
@@ -248,19 +353,46 @@ class UserInactivitySerializer(serializers.ModelSerializer):
             "created_at",
         )
 class EmployeeDeactivationRequestSerializer(serializers.ModelSerializer):
+    employee_name = serializers.SerializerMethodField()
+    employee_email = serializers.EmailField(
+        source="employee.email",
+        read_only=True,
+    )
+    employee_status = serializers.BooleanField(
+        source="employee.is_active",
+        read_only=True,
+    )
 
     class Meta:
         model = EmployeeDeactivationRequest
-        fields = "__all__"
+        fields = [
+            "id",
+            "employee",
+            "employee_name",
+            "employee_email",
+            "employee_status",
+            "organization",
+            "reason",
+            "status",
+            "requested_at",
+            "reviewed_at",
+            "reviewed_by",
+        ]
 
         read_only_fields = (
             "employee",
+            "employee_name",
+            "employee_email",
+            "employee_status",
             "organization",
             "status",
             "requested_at",
             "reviewed_at",
             "reviewed_by",
         )
+
+    def get_employee_name(self, obj):
+        return obj.employee.get_full_name() or obj.employee.username
 class OrganizationDeactivationRequestSerializer(serializers.ModelSerializer):
 
     organization = serializers.CharField(

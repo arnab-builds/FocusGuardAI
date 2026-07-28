@@ -10,7 +10,8 @@ from .views import (
     OrganizationMembersView,
 
     InvitationCreateView,
-    RegisterWithInviteCodeView,
+    OrganizationAdminRegisterWithInviteCodeView,
+    EmployeeRegisterWithInviteCodeView,
 
     ActivityStartView,
     ActivityStopView,
@@ -55,9 +56,15 @@ urlpatterns = [
     # ==========================
 
     path(
-        "register/",
-        RegisterWithInviteCodeView.as_view(),
-        name="register-with-invite-code",
+        "organization-register/",
+        OrganizationAdminRegisterWithInviteCodeView.as_view(),
+        name="organization-register-with-invite-code",
+    ),
+
+    path(
+        "employee-register/",
+        EmployeeRegisterWithInviteCodeView.as_view(),
+        name="employee-register-with-invite-code",
     ),
 
     path(

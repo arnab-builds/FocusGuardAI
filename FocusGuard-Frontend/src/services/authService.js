@@ -6,6 +6,12 @@ export const loginUser = async (credentials) => {
   return response.data;
 };
 
+export const registerEmployee = async (data) => {
+  const response = await api.post("/api/employee-register/", data);
+
+  return response.data;
+};
+
 export const logoutUser = async () => {
   try {
     const refresh = localStorage.getItem("refresh");

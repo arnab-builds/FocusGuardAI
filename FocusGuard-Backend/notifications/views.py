@@ -49,6 +49,43 @@ class MarkNotificationReadAPIView(UpdateAPIView):
         return Response(serializer.data)
 
 
+class MarkAllNotificationsReadAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        updated_count = Notification.objects.filter(
+            user=request.user,
+            is_read=False,
+        ).update(is_read=True)
+
+        return Response(
+            {
+                "message": "All notifications marked as read.",
+                "updated_count": updated_count,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class UnreadNotificationCountAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        return Response(
+            {
+                "count": Notification.objects.filter(
+                    user=request.user,
+                    is_read=False,
+                ).count()
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
 class GenerateNotificationAPIView(APIView):
 
     permission_classes = [IsAuthenticated]

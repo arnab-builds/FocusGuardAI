@@ -1,6 +1,9 @@
 from django.urls import path
 
-from .views import ChatbotAPIView
+from .views import (
+    ChatbotAPIView,
+    OrganizationAdminChatbotAPIView,
+)
 
 
 urlpatterns = [
@@ -8,5 +11,10 @@ urlpatterns = [
         "chat/",
         ChatbotAPIView.as_view(),
         name="chatbot",
+    ),
+    path(
+        "organization-admin/chat/",
+        OrganizationAdminChatbotAPIView.as_view(),
+        name="organization-admin-chatbot",
     ),
 ]

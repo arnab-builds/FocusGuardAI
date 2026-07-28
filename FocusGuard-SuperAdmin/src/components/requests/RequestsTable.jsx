@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Check,
+  Eye,
   X,
   Search,
 } from "lucide-react";
@@ -15,6 +16,7 @@ function RequestsTable() {
   const [requests, setRequests] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedRequest, setSelectedRequest] = useState(null);
 
   const loadRequests = async () => {
     try {
@@ -225,6 +227,16 @@ function RequestsTable() {
                       <>
                         <button
                           onClick={() =>
+                            setSelectedRequest(request)
+                          }
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+                        >
+                          <Eye size={18} />
+                          View
+                        </button>
+
+                        <button
+                          onClick={() =>
                             approve(request.id)
                           }
                           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 transition"
@@ -244,15 +256,39 @@ function RequestsTable() {
                         </button>
                       </>
                     ) : request.status === "APPROVED" ? (
-                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-100 text-green-700 font-semibold">
-                        <Check size={18} />
-                        Approved
-                      </span>
+                      <>
+                        <button
+                          onClick={() =>
+                            setSelectedRequest(request)
+                          }
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+                        >
+                          <Eye size={18} />
+                          View
+                        </button>
+
+                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-100 text-green-700 font-semibold">
+                          <Check size={18} />
+                          Approved
+                        </span>
+                      </>
                     ) : (
-                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-100 text-red-700 font-semibold">
-                        <X size={18} />
-                        Rejected
-                      </span>
+                      <>
+                        <button
+                          onClick={() =>
+                            setSelectedRequest(request)
+                          }
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+                        >
+                          <Eye size={18} />
+                          View
+                        </button>
+
+                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-100 text-red-700 font-semibold">
+                          <X size={18} />
+                          Rejected
+                        </span>
+                      </>
                     )}
                   </div>
                 </td>
@@ -269,6 +305,118 @@ function RequestsTable() {
           {requests.length} requests
         </p>
       </div>
+
+      {selectedRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b p-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Deactivation Request
+              </h2>
+
+              <button
+                onClick={() => setSelectedRequest(null)}
+                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-5 p-6">
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Organization
+                </p>
+
+                <p className="mt-1 font-semibold text-gray-900">
+                  {selectedRequest.organization}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Requested By
+                </p>
+
+                <p className="mt-1 text-gray-900">
+                  {selectedRequest.admin}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Reason
+                </p>
+
+                <p className="mt-1 whitespace-pre-wrap text-gray-900">
+                  {selectedRequest.reason}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Status
+                  </p>
+
+                  <p className="mt-1 text-gray-900">
+                    {selectedRequest.status}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Requested
+                  </p>
+
+                  <p className="mt-1 text-gray-900">
+                    {new Date(
+                      selectedRequest.requested_at
+                    ).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 border-t p-6">
+              {selectedRequest.status === "PENDING" && (
+                <>
+                  <button
+                    onClick={() => {
+                      const requestId = selectedRequest.id;
+                      setSelectedRequest(null);
+                      approve(requestId);
+                    }}
+                    className="flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+                  >
+                    <Check size={18} />
+                    Approve
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const requestId = selectedRequest.id;
+                      setSelectedRequest(null);
+                      reject(requestId);
+                    }}
+                    className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                  >
+                    <X size={18} />
+                    Reject
+                  </button>
+                </>
+              )}
+
+              <button
+                onClick={() => setSelectedRequest(null)}
+                className="rounded-xl border px-4 py-2 text-gray-700 hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

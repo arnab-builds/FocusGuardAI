@@ -8,6 +8,9 @@ class Notification(models.Model):
         IDLE = "IDLE", "Idle Too Long"
         NON_PRODUCTIVE = "NON_PRODUCTIVE", "Non Productive Limit"
         PRODUCTIVE_SESSION = "PRODUCTIVE_SESSION", "Productive Work Session"
+        INVITATION = "INVITATION", "Invitation"
+        REQUEST = "REQUEST", "Request"
+        SYSTEM = "SYSTEM", "System"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

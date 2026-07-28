@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "../pages/Login/Login";
+import EmployeeRegister from "../pages/Register/EmployeeRegister";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Reminders from "../pages/Reminders/Reminders";
 import Settings from "../pages/Settings/Settings";
@@ -19,6 +20,8 @@ function AppRoutes() {
       <Routes>
         {/* Login */}
         <Route path="/" element={<Login />} />
+
+        <Route path="/employee-register" element={<EmployeeRegister />} />
 
         {/* Dashboard Layout */}
         <Route element={<DashboardLayout />}>

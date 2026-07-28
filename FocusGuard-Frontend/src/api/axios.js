@@ -10,6 +10,20 @@ const api = axios.create({
 // ==========================
 // Attach Access Token
 // ==========================
+api.interceptors.request.use(
+  (config) => {
+    const access = localStorage.getItem("access");
+    const isLoginRequest = config.url === "/api/login/";
+
+    if (access && !isLoginRequest) {
+      config.headers.Authorization = `Bearer ${access}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 api.interceptors.response.use(
   (response) => response,
 

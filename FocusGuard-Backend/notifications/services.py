@@ -60,3 +60,12 @@ def generate_notification(user, event):
     print(f"🔥 Notification Created [{event}] for {user.username}")
 
     return notification
+
+
+def create_user_notification(user, title, message, notification_type="SYSTEM"):
+    return Notification.objects.create(
+        user=user,
+        notification_type=notification_type,
+        title=title,
+        message=message,
+    )

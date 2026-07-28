@@ -217,6 +217,23 @@ GEMINI_CATEGORY_API_KEY = config("GEMINI_CATEGORY_API_KEY")
 CHATBOT_GEMINI_API_KEY = config("CHATBOT_GEMINI_API_KEY")
 CHATBOT_GROQ_API_KEY = config("CHATBOT_GROQ_API_KEY")
 
+# Organization Admin AI Assistant
+GEMINI_ORGANIZATION_ADMIN_API_KEY = config(
+    "GEMINI_ORGANIZATION_ADMIN_API_KEY",
+    default=CHATBOT_GEMINI_API_KEY or GEMINI_API_KEY,
+)
+GEMINI_ORGANIZATION_ADMIN_MODEL = config(
+    "GEMINI_ORGANIZATION_ADMIN_MODEL",
+    default="gemini-3.5-flash",
+)
+GROK_ORGANIZATION_ADMIN_API_KEY = config(
+    "GROK_ORGANIZATION_ADMIN_API_KEY",
+    default=config(
+        "GROQ_ORGANIZATION_ADMIN_API_KEY",
+        default=CHATBOT_GROQ_API_KEY or GROQ_API_KEY,
+    ),
+)
+
 # Focus Planner
 FOCUS_PLAN_GEMINI_API_KEY = config("FOCUS_PLAN_GEMINI_API_KEY")
 FOCUS_PLAN_GROQ_API_KEY = config("FOCUS_PLAN_GROQ_API_KEY")
@@ -227,10 +244,15 @@ FOCUS_PLAN_GROQ_API_KEY = config("FOCUS_PLAN_GROQ_API_KEY")
 BREAK_REMINDER_HOURS = 3
 
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
+    "http://localhost:5175",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
