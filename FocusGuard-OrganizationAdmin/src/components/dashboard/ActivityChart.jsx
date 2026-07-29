@@ -1,7 +1,6 @@
 import {
     Card,
     CardContent,
-    Stack,
     Typography,
 } from "@mui/material";
 import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
@@ -17,17 +16,52 @@ import {
     YAxis,
 } from "recharts";
 
-const formatHours = (value) => `${Number(value || 0).toFixed(1)}h`;
+import { useLanguage } from "../../context/useLanguage";
+
+const formatHours = (value, t) =>
+    `${Number(value || 0).toFixed(1)}${t("hours_short", "h")}`;
+
+const toHours = (item, secondsKey, legacyKeys) => {
+    const seconds = Number(item?.[secondsKey]);
+
+    if (Number.isFinite(seconds)) {
+        return Math.max(0, seconds) / 3600;
+    }
+
+    for (const key of legacyKeys) {
+        const value = Number(item?.[key]);
+
+        if (Number.isFinite(value)) {
+            return Math.max(0, value);
+        }
+    }
+
+    return 0;
+};
+
+const formatDay = (item) => {
+    if (item.date) {
+        return new Intl.DateTimeFormat(undefined, {
+            weekday: "short",
+            day: "numeric",
+        }).format(new Date(`${item.date}T12:00:00`));
+    }
+
+    return item.day || item.name || "";
+};
 
 function ActivityChart({ data = [] }) {
+    const { t } = useLanguage();
+
     const chartData = data.map((item) => ({
-        day: item.day || item.name,
-        productive: Number(item.productive || 0),
-        unproductive: Number(
-            item.unproductive ??
-                item.non_productive ??
-                item.nonProductive ??
-                0
+        day: formatDay(item),
+        productive: toHours(item, "productive_seconds", [
+            "productive",
+        ]),
+        unproductive: toHours(
+            item,
+            "non_productive_seconds",
+            ["unproductive", "non_productive", "nonProductive"]
         ),
     }));
 
@@ -42,12 +76,7 @@ function ActivityChart({ data = [] }) {
             }}
         >
             <CardContent sx={{ p: 3.5 }}>
-                <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="flex-start"
-                    mb={4}
-                >
+                <div className="mb-8 flex items-start justify-between">
                     <div>
                         <Typography
                             sx={{
@@ -58,7 +87,10 @@ function ActivityChart({ data = [] }) {
                                 textTransform: "uppercase",
                             }}
                         >
-                            Productivity Trend
+                            {t(
+                                "productivity_trend",
+                                "Productivity Trend"
+                            )}
                         </Typography>
 
                         <Typography
@@ -67,14 +99,17 @@ function ActivityChart({ data = [] }) {
                             mt={0.5}
                             color="#0F172A"
                         >
-                            Weekly Trend
+                            {t(
+                                "weekly_trend",
+                                "Weekly Trend"
+                            )}
                         </Typography>
                     </div>
 
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                         <AnalyticsRoundedIcon fontSize="small" />
                     </div>
-                </Stack>
+                </div>
 
                 <div className="h-[330px]">
                     {chartData.length > 0 ? (
@@ -109,7 +144,12 @@ function ActivityChart({ data = [] }) {
                                 <YAxis
                                     axisLine={false}
                                     tickLine={false}
-                                    tickFormatter={formatHours}
+                                    tickFormatter={(value) =>
+                                        formatHours(
+                                            value,
+                                            t
+                                        )
+                                    }
                                     tick={{
                                         fill: "#64748B",
                                         fontSize: 12,
@@ -118,12 +158,27 @@ function ActivityChart({ data = [] }) {
                                 />
 
                                 <Tooltip
-                                    cursor={{ fill: "rgba(99,102,241,.08)" }}
-                                    formatter={(value, name) => [
-                                        formatHours(value),
-                                        name === "productive"
-                                            ? "Productive"
-                                            : "Unproductive",
+                                    cursor={{
+                                        fill: "rgba(99,102,241,.08)",
+                                    }}
+                                    formatter={(
+                                        value,
+                                        name
+                                    ) => [
+                                        formatHours(
+                                            value,
+                                            t
+                                        ),
+                                        name ===
+                                        "productive"
+                                            ? t(
+                                                  "productive",
+                                                  "Productive"
+                                              )
+                                            : t(
+                                                  "unproductive",
+                                                  "Unproductive"
+                                              ),
                                     ]}
                                     labelStyle={{
                                         color: "#0F172A",
@@ -144,30 +199,44 @@ function ActivityChart({ data = [] }) {
                                         fontSize: 13,
                                     }}
                                     formatter={(value) =>
-                                        value === "productive"
-                                            ? "Productive"
-                                            : "Unproductive"
+                                        value ===
+                                        "productive"
+                                            ? t(
+                                                  "productive",
+                                                  "Productive"
+                                              )
+                                            : t(
+                                                  "unproductive",
+                                                  "Unproductive"
+                                              )
                                     }
                                 />
 
                                 <Bar
                                     dataKey="productive"
                                     fill="#22C55E"
-                                    radius={[8, 8, 0, 0]}
+                                    radius={[
+                                        8, 8, 0, 0,
+                                    ]}
                                     maxBarSize={34}
                                 />
 
                                 <Bar
                                     dataKey="unproductive"
                                     fill="#EF4444"
-                                    radius={[8, 8, 0, 0]}
+                                    radius={[
+                                        8, 8, 0, 0,
+                                    ]}
                                     maxBarSize={34}
                                 />
                             </BarChart>
                         </ResponsiveContainer>
                     ) : (
                         <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-sm font-medium text-slate-500">
-                            No weekly trend data available.
+                            {t(
+                                "no_weekly_trend_data",
+                                "No weekly trend data available."
+                            )}
                         </div>
                     )}
                 </div>

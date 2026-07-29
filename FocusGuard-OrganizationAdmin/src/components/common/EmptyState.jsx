@@ -7,6 +7,8 @@ import {
     DialogTitle,
 } from "@mui/material";
 
+import { useLanguage } from "../../context/useLanguage";
+
 function ConfirmDialog({
     open,
     title,
@@ -14,6 +16,8 @@ function ConfirmDialog({
     onClose,
     onConfirm,
 }) {
+    const { t } = useLanguage();
+
     return (
         <Dialog
             open={open}
@@ -31,7 +35,7 @@ function ConfirmDialog({
 
             <DialogActions>
                 <Button onClick={onClose}>
-                    Cancel
+                    {t("cancel", "Cancel")}
                 </Button>
 
                 <Button
@@ -39,7 +43,7 @@ function ConfirmDialog({
                     color="error"
                     onClick={onConfirm}
                 >
-                    Confirm
+                    {t("confirm", "Confirm")}
                 </Button>
             </DialogActions>
         </Dialog>

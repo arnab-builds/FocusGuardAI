@@ -10,6 +10,8 @@ import EmployeeAnalyticsDialog from "../components/employees/EmployeeAnalyticsDi
 
 import { Users } from "lucide-react";
 
+import { useLanguage } from "../context/useLanguage";
+
 import {
     getEmployees,
 } from "../services/employeeService";
@@ -21,6 +23,7 @@ import {
 const PAGE_SIZE = 10;
 
 function Employees() {
+    const { t } = useLanguage();
 
     const [loading, setLoading] = useState(true);
 
@@ -37,64 +40,51 @@ function Employees() {
         useState(false);
 
     async function fetchEmployees() {
+        try {
+            const response = await getEmployees();
 
-    try {
+            setEmployees(
+                normalizeListResponse(
+                    response,
+                    ["members", "users", "results", "employees", "data"]
+                )
+            );
 
-        const response = await getEmployees();
+            setError("");
+        } catch (error) {
+            console.error(error);
 
-        setEmployees(
-            normalizeListResponse(
-                response,
-                ["members", "users", "results", "employees", "data"]
-            )
-        );
-        setError("");
+            setEmployees([]);
 
+            setError(
+                getApiErrorMessage(
+                    error,
+                    t(
+                        "employees_load_failed",
+                        "Employees could not be loaded."
+                    )
+                )
+            );
+        } finally {
+            setLoading(false);
+        }
     }
-
-    catch (error) {
-
-        console.error(error);
-
-        setEmployees([]);
-        setError(
-            getApiErrorMessage(
-                error,
-                "Employees could not be loaded."
-            )
-        );
-
-    }
-
-    finally {
-
-        setLoading(false);
-
-    }
-
-}
 
     useEffect(() => {
-
         const timeout = setTimeout(fetchEmployees, 0);
 
         return () => clearTimeout(timeout);
-
     }, []);
 
     const filteredEmployees =
-        employees.filter((employee) =>
-
-            employee.username
-                ?.toLowerCase()
-                .includes(search.toLowerCase())
-
-            ||
-
-            employee.email
-                ?.toLowerCase()
-                .includes(search.toLowerCase())
-
+        employees.filter(
+            (employee) =>
+                employee.username
+                    ?.toLowerCase()
+                    .includes(search.toLowerCase()) ||
+                employee.email
+                    ?.toLowerCase()
+                    .includes(search.toLowerCase())
         );
 
     const totalPages = Math.max(
@@ -108,52 +98,52 @@ function Employees() {
     );
 
     const handleView = (employee) => {
-
         setSelectedEmployee(employee);
 
         setOpenDialog(true);
-
     };
 
     if (loading) {
-
         return <LoadingSpinner />;
-
     }
 
     return (
-
         <DashboardLayout>
-
             <div className="space-y-8">
-
                 <PageHeader
-                    title="Employees"
-                    subtitle="Manage all employees in your organization"
+                    title={t(
+                        "employees",
+                        "Employees"
+                    )}
+                    subtitle={t(
+                        "manage_organization_employees",
+                        "Manage all employees in your organization"
+                    )}
                     action={
-                        <button
-                            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-white shadow hover:bg-indigo-700 transition"
-                        >
-
+                        <button className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-white shadow hover:bg-indigo-700 transition">
                             <Users size={18} />
 
-                            Total Employees : {employees.length}
-
+                            {t(
+                                "total_employees",
+                                "Total Employees"
+                            )}{" "}
+                            : {employees.length}
                         </button>
                     }
                 />
 
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-
                     <SearchBar
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
                             setPage(1);
                         }}
-                        placeholder="Search employee..."
+                        placeholder={t(
+                            "search_employee",
+                            "Search employee..."
+                        )}
                     />
-
                 </div>
 
                 {error && (
@@ -170,8 +160,18 @@ function Employees() {
 
                     <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm text-slate-600">
                         <span>
-                            Showing {visibleEmployees.length} of{" "}
-                            {filteredEmployees.length} employees
+                            {t(
+                                "showing_employees",
+                                "Showing {visible} of {total} employees"
+                            )
+                                .replace(
+                                    "{visible}",
+                                    visibleEmployees.length
+                                )
+                                .replace(
+                                    "{total}",
+                                    filteredEmployees.length
+                                )}
                         </span>
 
                         <div className="flex items-center gap-2">
@@ -185,11 +185,25 @@ function Employees() {
                                 }
                                 className="rounded-lg border px-3 py-2 disabled:opacity-50"
                             >
-                                Previous
+                                {t(
+                                    "previous",
+                                    "Previous"
+                                )}
                             </button>
 
                             <span>
-                                Page {page} of {totalPages}
+                                {t(
+                                    "page_of",
+                                    "Page {page} of {total}"
+                                )
+                                    .replace(
+                                        "{page}",
+                                        page
+                                    )
+                                    .replace(
+                                        "{total}",
+                                        totalPages
+                                    )}
                             </span>
 
                             <button
@@ -205,27 +219,29 @@ function Employees() {
                                 }
                                 className="rounded-lg border px-3 py-2 disabled:opacity-50"
                             >
-                                Next
+                                {t(
+                                    "next",
+                                    "Next"
+                                )}
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <EmployeeAnalyticsDialog
-                    key={selectedEmployee?.id || "employee-analytics"}
+                    key={
+                        selectedEmployee?.id ||
+                        "employee-analytics"
+                    }
                     open={openDialog}
                     onClose={() =>
                         setOpenDialog(false)
                     }
                     employee={selectedEmployee}
                 />
-
             </div>
-
         </DashboardLayout>
-
     );
-
 }
 
 export default Employees;

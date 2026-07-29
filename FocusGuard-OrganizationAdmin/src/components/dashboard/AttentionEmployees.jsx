@@ -1,5 +1,7 @@
 import { TriangleAlert } from "lucide-react";
 
+import { useLanguage } from "../../context/useLanguage";
+
 import {
     getEmployeeOnlineStatus,
     getProductivityScore,
@@ -9,6 +11,8 @@ import {
 const ATTENTION_THRESHOLD = 60;
 
 function AttentionEmployees({ employees = [] }) {
+    const { t } = useLanguage();
+
     const lowPerformers = [...employees]
         .filter(
             (employee) =>
@@ -28,11 +32,17 @@ function AttentionEmployees({ employees = [] }) {
             <div className="flex items-start justify-between border-b border-slate-100 px-6 py-5">
                 <div>
                     <p className="text-xs font-bold uppercase text-slate-500">
-                        Risk Signals
+                        {t(
+                            "risk_signals",
+                            "Risk Signals"
+                        )}
                     </p>
 
                     <h2 className="mt-1 text-xl font-bold text-slate-900">
-                        Needs Attention
+                        {t(
+                            "needs_attention",
+                            "Needs Attention"
+                        )}
                     </h2>
                 </div>
 
@@ -44,9 +54,15 @@ function AttentionEmployees({ employees = [] }) {
             <div className="divide-y divide-slate-100">
                 {lowPerformers.length > 0 ? (
                     lowPerformers.map((employee) => {
-                        const score = getProductivityScore(employee);
+                        const score =
+                            getProductivityScore(
+                                employee
+                            );
+
                         const status =
-                            getEmployeeOnlineStatus(employee);
+                            getEmployeeOnlineStatus(
+                                employee
+                            );
 
                         return (
                             <div
@@ -55,17 +71,28 @@ function AttentionEmployees({ employees = [] }) {
                             >
                                 <div className="flex min-w-0 items-center gap-4">
                                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
-                                        <TriangleAlert size={18} />
+                                        <TriangleAlert
+                                            size={18}
+                                        />
                                     </div>
 
                                     <div className="min-w-0">
                                         <p className="truncate font-semibold text-slate-900">
-                                            {employee.username}
+                                            {
+                                                employee.username
+                                            }
                                         </p>
 
                                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                                             <span>
-                                                Below {ATTENTION_THRESHOLD}%
+                                                {t(
+                                                    "below_threshold",
+                                                    "Below"
+                                                )}{" "}
+                                                {
+                                                    ATTENTION_THRESHOLD
+                                                }
+                                                %
                                             </span>
 
                                             {status && (
@@ -87,11 +114,17 @@ function AttentionEmployees({ employees = [] }) {
 
                                 <div className="text-right">
                                     <p className="text-lg font-extrabold text-rose-600">
-                                        {score.toFixed(1)}%
+                                        {score.toFixed(
+                                            1
+                                        )}
+                                        %
                                     </p>
 
                                     <p className="text-xs font-medium text-slate-500">
-                                        Productivity
+                                        {t(
+                                            "productivity",
+                                            "Productivity"
+                                        )}
                                     </p>
                                 </div>
                             </div>
@@ -100,15 +133,26 @@ function AttentionEmployees({ employees = [] }) {
                 ) : (
                     <div className="px-6 py-12 text-center">
                         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-                            <TriangleAlert size={20} />
+                            <TriangleAlert
+                                size={20}
+                            />
                         </div>
 
                         <p className="font-semibold text-slate-800">
-                            No employees need attention
+                            {t(
+                                "no_employees_need_attention",
+                                "No employees need attention"
+                            )}
                         </p>
 
                         <p className="mt-1 text-sm text-slate-500">
-                            Employees under {ATTENTION_THRESHOLD}% productivity will appear here.
+                            {t(
+                                "employees_below_threshold_message",
+                                "Employees under {threshold}% productivity will appear here."
+                            ).replace(
+                                "{threshold}",
+                                ATTENTION_THRESHOLD
+                            )}
                         </p>
                     </div>
                 )}

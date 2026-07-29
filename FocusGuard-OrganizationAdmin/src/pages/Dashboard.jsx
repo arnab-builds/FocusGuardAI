@@ -17,6 +17,7 @@ import {
     getOrganizationMembers,
 } from "../services/dashboardService";
 import { normalizeOrganizationActivities } from "../utils/activityUtils";
+import { useLanguage } from "../context/useLanguage";
 
 const initialAnalytics = {
     total_employees: 0,
@@ -27,6 +28,8 @@ const initialAnalytics = {
 };
 
 function Dashboard() {
+    const { t } = useLanguage();
+
     const [analytics, setAnalytics] = useState(initialAnalytics);
 
     const [trend, setTrend] = useState([]);
@@ -55,12 +58,20 @@ function Dashboard() {
                 getOrganizationMembers(),
             ]);
 
-            setAnalytics(analyticsResponse || initialAnalytics);
+            setAnalytics(
+                analyticsResponse || initialAnalytics
+            );
 
-            setTrend(Array.isArray(trendResponse) ? trendResponse : []);
+            setTrend(
+                Array.isArray(trendResponse)
+                    ? trendResponse
+                    : []
+            );
 
             setActivities(
-                normalizeOrganizationActivities(activityResponse)
+                normalizeOrganizationActivities(
+                    activityResponse
+                )
             );
 
             setEmployees(
@@ -73,18 +84,27 @@ function Dashboard() {
             );
 
             setLastSynced(new Date());
+
             setError("");
         } catch (loadError) {
             console.error(loadError);
 
-            setError("Dashboard data could not be refreshed.");
+            setError(
+                t(
+                    "dashboard_refresh_failed",
+                    "Dashboard data could not be refreshed."
+                )
+            );
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        const timeout = setTimeout(loadDashboard, 0);
+        const timeout = setTimeout(
+            loadDashboard,
+            0
+        );
 
         return () => clearTimeout(timeout);
     }, []);
@@ -94,18 +114,31 @@ function Dashboard() {
               hour: "numeric",
               minute: "2-digit",
           })
-        : "Not synced yet";
+        : t(
+              "not_synced_yet",
+              "Not synced yet"
+          );
 
     return (
         <DashboardLayout>
             <div className="mx-auto max-w-[1500px] space-y-7">
                 <PageHeader
-                    title="Dashboard"
-                    subtitle="Organization overview"
+                    title={t(
+                        "dashboard",
+                        "Dashboard"
+                    )}
+                    subtitle={t(
+                        "organization_overview",
+                        "Organization overview"
+                    )}
                     action={
                         <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-500 shadow-sm">
                             <span className="font-semibold text-slate-700">
-                                Last synced:
+                                {t(
+                                    "last_synced",
+                                    "Last synced"
+                                )}
+                                :
                             </span>{" "}
                             {syncedLabel}
                         </div>
@@ -120,15 +153,19 @@ function Dashboard() {
 
                 {loading ? (
                     <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
-                        {[1, 2, 3, 4].map((item) => (
-                            <div
-                                key={item}
-                                className="h-36 animate-pulse rounded-[18px] border border-slate-200 bg-white"
-                            />
-                        ))}
+                        {[1, 2, 3, 4].map(
+                            (item) => (
+                                <div
+                                    key={item}
+                                    className="h-36 animate-pulse rounded-[18px] border border-slate-200 bg-white"
+                                />
+                            )
+                        )}
                     </div>
                 ) : (
-                    <DashboardCards analytics={analytics} />
+                    <DashboardCards
+                        analytics={analytics}
+                    />
                 )}
 
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
@@ -139,8 +176,16 @@ function Dashboard() {
                         </>
                     ) : (
                         <>
-                            <TopPerformers employees={employees} />
-                            <AttentionEmployees employees={employees} />
+                            <TopPerformers
+                                employees={
+                                    employees
+                                }
+                            />
+                            <AttentionEmployees
+                                employees={
+                                    employees
+                                }
+                            />
                         </>
                     )}
                 </div>
@@ -153,8 +198,14 @@ function Dashboard() {
                         </>
                     ) : (
                         <>
-                            <ActivityChart data={trend} />
-                            <RecentActivities activities={activities} />
+                            <ActivityChart
+                                data={trend}
+                            />
+                            <RecentActivities
+                                activities={
+                                    activities
+                                }
+                            />
                         </>
                     )}
                 </div>

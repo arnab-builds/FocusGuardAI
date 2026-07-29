@@ -95,10 +95,17 @@ def generate_focus_plan(goal):
         selected_date=None,
     )
 
+    language = getattr(goal.user.preferred_language, "language_code", "en-IN")
+
     prompt = f"""
 {PLANNER_PROMPT}
 
 You are an expert Productivity Coach.
+
+The user's preferred language is {language}. Generate every heading, table
+cell, checklist item, tip, risk, and expected outcome in that language only.
+Do not translate names, brands, company names, or website names included in
+the goal or analytics context.
 
 Create a professional execution plan.
 

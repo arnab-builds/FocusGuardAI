@@ -64,6 +64,9 @@ export const rejectOrganizationDeactivation = (id) =>
 export const getSettings = () =>
   API.get("super-admin/settings/");
 
+export const getLanguages = () =>
+  API.get("languages/");
+
 export const updateSettings = (data) =>
   API.put(
     "super-admin/settings/",

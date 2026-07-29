@@ -1,7 +1,10 @@
 import { FiClock } from "react-icons/fi";
 import { formatDuration } from "../../utils/timeFormatter";
+import { useLanguage } from "../../context/useLanguage";
 
 export default function RecentActivity({ activities }) {
+  const { currentLanguageCode, t } = useLanguage();
+
   const recentItems = activities.slice(0, 5);
 
   return (
@@ -10,11 +13,11 @@ export default function RecentActivity({ activities }) {
       <div className="mb-4 flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Recent Activity
+            {t("recent_activity", "Recent Activity")}
           </p>
 
           <h2 className="mt-1 text-xl font-bold text-slate-900">
-            Latest Sessions
+            {t("latest_sessions", "Latest Sessions")}
           </h2>
         </div>
 
@@ -27,7 +30,10 @@ export default function RecentActivity({ activities }) {
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
         {recentItems.length === 0 ? (
           <p className="text-sm text-slate-500">
-            No recent activity available.
+            {t(
+              "no_recent_activity_available",
+              "No recent activity available."
+            )}
           </p>
         ) : (
           recentItems.map((activity) => (
@@ -35,8 +41,8 @@ export default function RecentActivity({ activities }) {
               key={activity.id}
               className="flex items-center justify-between rounded-xl bg-slate-50 p-3 transition hover:bg-slate-100"
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white flex-shrink-0">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white">
                   <FiClock size={16} />
                 </div>
 
@@ -44,23 +50,30 @@ export default function RecentActivity({ activities }) {
                   <p className="truncate font-semibold text-slate-900">
                     {activity.website_name ||
                       activity.website_url ||
-                      "Unknown"}
+                      t("unknown", "Unknown")}
                   </p>
 
                   <p className="text-xs text-slate-500">
-                    {new Date(activity.start_time).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {new Date(activity.start_time).toLocaleTimeString(
+                      currentLanguageCode || undefined,
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
                   </p>
                 </div>
               </div>
 
-              <div className="text-right flex-shrink-0">
+              <div className="flex-shrink-0 text-right">
                 <p className="text-sm font-semibold text-slate-900">
                   {activity.duration
-                    ? formatDuration(activity.duration)
-                    : "Active"}
+                    ? formatDuration(
+                        activity.duration,
+                        t,
+                        currentLanguageCode
+                      )
+                    : t("active", "Active")}
                 </p>
               </div>
             </div>

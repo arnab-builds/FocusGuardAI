@@ -6,6 +6,7 @@ from google import genai
 from groq import Groq
 
 from .prompts import SYSTEM_PROMPT
+from users.services.sarvam_service import translate_using_sarvam
 
 
 gemini_client = genai.Client(
@@ -22,9 +23,13 @@ def build_prompt(
     analytics,
     activity_logs,
     selected_date,
+    language="en-IN",
 ):
     return f"""
 {SYSTEM_PROMPT}
+
+The user's preferred language is {language}. Answer entirely in that language.
+Never translate usernames, people names, company names, brands, or website names.
 
 Selected Date:
 {selected_date}
@@ -80,14 +85,17 @@ def ask_chatbot(*args, **kwargs):
             analytics = kwargs["analytics"]
             activity_logs = kwargs["activity_logs"]
             selected_date = kwargs["selected_date"]
+            language = kwargs.get("language", "en-IN")
         else:
             question, analytics, activity_logs, selected_date = args
+            language = "en-IN"
 
         prompt = build_prompt(
             question,
             analytics,
             activity_logs,
             selected_date,
+            language,
         )
 
     try:
@@ -116,7 +124,7 @@ def ask_chatbot(*args, **kwargs):
             )
 
 
-def build_organization_admin_prompt(question, context):
+def build_organization_admin_prompt(question, context, language="en-IN"):
     context_json = json.dumps(
         context,
         cls=DjangoJSONEncoder,
@@ -134,6 +142,10 @@ missing and answer as far as the context allows.
 Use concise, practical language for an organization administrator. When useful,
 name the employee, website/category, duration, productivity percentage, and date
 range that support your answer.
+
+The user's preferred language is {language}. Answer entirely in that language,
+but preserve usernames, people names, organization names, brands, and website
+names exactly as provided.
 
 Organization Admin Context:
 {context_json}
@@ -193,12 +205,14 @@ def ask_organization_admin_grok(prompt):
     return content
 
 
-def ask_organization_admin_assistant(question, context):
-    prompt = build_organization_admin_prompt(question, context)
+def ask_organization_admin_assistant(question, context, language="en-IN"):
+    prompt = build_organization_admin_prompt(question, context, language)
 
     try:
         return {
-            "response": ask_organization_admin_gemini(prompt),
+            "response": translate_using_sarvam(
+                ask_organization_admin_gemini(prompt), language
+            ),
             "provider": "gemini",
         }
     except Exception as gemini_error:
@@ -206,7 +220,9 @@ def ask_organization_admin_assistant(question, context):
 
         try:
             return {
-                "response": ask_organization_admin_grok(prompt),
+                "response": translate_using_sarvam(
+                    ask_organization_admin_grok(prompt), language
+                ),
                 "provider": "grok",
             }
         except Exception as grok_error:

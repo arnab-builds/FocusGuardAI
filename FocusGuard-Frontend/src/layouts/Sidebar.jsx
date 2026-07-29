@@ -11,45 +11,54 @@ import {
 } from "react-icons/fi";
 import { NavLink, useNavigate } from "react-router-dom";
 import { logoutUser } from "../services/authService";
+import { useLanguage } from "../context/useLanguage";
 
 const menuItems = [
   {
-    title: "Dashboard",
+    labelKey: "dashboard",
+    fallback: "Dashboard",
     icon: <FiHome size={20} />,
     path: "/dashboard",
   },
   {
-    title: "Analytics",
+    labelKey: "analytics",
+    fallback: "Analytics",
     icon: <FiBarChart2 size={20} />,
     path: "/analytics",
   },
   {
-  title: "Focus Goals",
-  icon: <FiTarget size={20} />,
-  path: "/focus-goals",
-},
+    labelKey: "focus_goals",
+    fallback: "Focus Goals",
+    icon: <FiTarget size={20} />,
+    path: "/focus-goals",
+  },
   {
-    title: "Reports",
+    labelKey: "reports",
+    fallback: "Reports",
     icon: <FiFileText size={20} />,
     path: "/reports",
   },
   {
-    title: "Activity Log",
+    labelKey: "activity_log",
+    fallback: "Activity Log",
     icon: <FiClock size={20} />,
     path: "/activity",
   },
   {
-    title: "AI Coach",
+    labelKey: "ai_coach",
+    fallback: "AI Coach",
     icon: <FiCpu size={20} />,
     path: "/ai-coach",
   },
   {
-    title: "Reminders",
+    labelKey: "reminders",
+    fallback: "Reminders",
     icon: <FiCalendar size={20} />,
     path: "/reminders",
   },
   {
-    title: "Settings",
+    labelKey: "settings",
+    fallback: "Settings",
     icon: <FiSettings size={20} />,
     path: "/settings",
   },
@@ -57,10 +66,11 @@ const menuItems = [
 
 export default function Sidebar() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleLogout = async () => {
     const confirmed = window.confirm(
-      "Are you sure you want to logout?"
+      t("logout_confirmation", "Are you sure you want to logout?")
     );
 
     if (!confirmed) return;
@@ -80,7 +90,10 @@ export default function Sidebar() {
         </h1>
 
         <p className="mt-2 text-sm text-slate-400">
-          Employee Productivity Platform
+          {t(
+            "employee_productivity_platform",
+            "Employee Productivity Platform"
+          )}
         </p>
       </div>
 
@@ -88,7 +101,7 @@ export default function Sidebar() {
       <nav className="flex-1 overflow-y-auto px-4 py-4">
         {menuItems.map((item) => (
           <NavLink
-            key={item.title}
+            key={item.labelKey}
             to={item.path}
             className={({ isActive }) =>
               `mb-2 flex items-center gap-4 rounded-xl px-5 py-3 font-medium transition-all duration-200 ${
@@ -99,7 +112,7 @@ export default function Sidebar() {
             }
           >
             {item.icon}
-            <span>{item.title}</span>
+            <span>{t(item.labelKey, item.fallback)}</span>
           </NavLink>
         ))}
       </nav>
@@ -111,7 +124,7 @@ export default function Sidebar() {
           className="flex w-full items-center justify-center gap-3 rounded-xl bg-red-500 py-3 font-medium transition-all duration-200 hover:bg-red-600"
         >
           <FiLogOut size={18} />
-          Logout
+          {t("logout", "Logout")}
         </button>
       </div>
     </aside>

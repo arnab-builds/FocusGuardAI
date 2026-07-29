@@ -1,90 +1,94 @@
-const formatTime = (time) => {
-  if (!time) return "0m";
+import { useLanguage } from "../../context/useLanguage";
+
+const formatTime = (time, t) => {
+  if (!time) return `0${t("minutes_short", "m")}`;
 
   const [h, m] = time.split(":");
 
   if (Number(h) > 0)
-    return `${h}h ${m}m`;
+    return `${h}${t("hours_short", "h")} ${m}${t(
+      "minutes_short",
+      "m"
+    )}`;
 
-  return `${m}m`;
+  return `${m}${t("minutes_short", "m")}`;
 };
 
 export default function ReportPreview({ report }) {
+  const { t } = useLanguage();
+
   if (!report)
     return (
-      <div className="bg-white rounded-2xl shadow-sm p-10 text-center">
+      <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
         <h2 className="text-2xl font-bold">
-          No Report Selected
+          {t("no_report_selected", "No Report Selected")}
         </h2>
 
-        <p className="text-gray-500 mt-3">
-          Generate a report to preview it.
+        <p className="mt-3 text-gray-500">
+          {t(
+            "generate_report_to_preview",
+            "Generate a report to preview it."
+          )}
         </p>
       </div>
     );
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-8">
-
-      <h2 className="text-2xl font-bold mb-6">
-        Report Preview
+    <div className="rounded-2xl bg-white p-8 shadow-sm">
+      <h2 className="mb-6 text-2xl font-bold">
+        {t("report_preview", "Report Preview")}
       </h2>
 
-      <div className="grid md:grid-cols-2 gap-5">
-
+      <div className="grid gap-5 md:grid-cols-2">
         <Info
-          title="Productive Time"
-          value={formatTime(report.productive_time)}
+          title={t("productive_time", "Productive Time")}
+          value={formatTime(report.productive_time, t)}
         />
 
         <Info
-          title="Non Productive"
-          value={formatTime(report.non_productive_time)}
+          title={t("non_productive", "Non Productive")}
+          value={formatTime(report.non_productive_time, t)}
         />
 
         <Info
-          title="Neutral"
-          value={formatTime(report.neutral_time)}
+          title={t("neutral", "Neutral")}
+          value={formatTime(report.neutral_time, t)}
         />
 
         <Info
-          title="Idle"
-          value={formatTime(report.idle_time)}
+          title={t("idle", "Idle")}
+          value={formatTime(report.idle_time, t)}
         />
 
         <Info
-          title="Websites"
+          title={t("websites", "Websites")}
           value={report.websites_visited}
         />
 
         <Info
-          title="Tab Switches"
+          title={t("tab_switches", "Tab Switches")}
           value={report.tab_switches}
         />
 
         <Info
-          title="Focus Score"
+          title={t("focus_score", "Focus Score")}
           value={`${report.productivity_percentage}%`}
         />
-
       </div>
-
     </div>
   );
 }
 
 function Info({ title, value }) {
   return (
-    <div className="border rounded-xl p-4">
-
+    <div className="rounded-xl border p-4">
       <p className="text-gray-500">
         {title}
       </p>
 
-      <h3 className="text-xl font-bold mt-1">
+      <h3 className="mt-1 text-xl font-bold">
         {value}
       </h3>
-
     </div>
   );
 }

@@ -8,15 +8,24 @@ import {
     TableRow,
 } from "@mui/material";
 
+import { useLanguage } from "../../context/useLanguage";
+
 import EmptyState from "./EmptyState";
 
 function DataTable({
     columns,
     rows,
 }) {
+    const { t } = useLanguage();
+
     if (!rows.length) {
         return (
-            <EmptyState message="No records found." />
+            <EmptyState
+                message={t(
+                    "no_records_found",
+                    "No records found."
+                )}
+            />
         );
     }
 

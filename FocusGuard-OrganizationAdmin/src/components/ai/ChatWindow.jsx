@@ -1,37 +1,57 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Bot,
     Send,
     User,
-    Sparkles,
 } from "lucide-react";
+
+import { useLanguage } from "../../context/useLanguage";
 
 import { askOrganizationAssistant } from "../../services/aiService";
 import { getApiErrorMessage } from "../../utils/responseUtils";
 
-const suggestions = [
-    "Who was the top performer today?",
-    "Who used YouTube the most today?",
-    "Show employees below 50% productivity.",
-    "Generate today's summary.",
-    "Which websites were visited the most?",
-    "Who worked the longest today?",
-];
-
 function ChatWindow() {
+    const { currentLanguageCode, t } = useLanguage();
+
+    const welcomeMessage = useMemo(
+        () =>
+            t("focusguard_ai_greeting", "Hi! I'm FocusGuard AI.") +
+            "\n\n" +
+            t(
+                "focusguard_ai_description",
+                "I can answer questions about employees, productivity, website usage, analytics and organization reports."
+            ) +
+            "\n\n" +
+            t(
+                "focusguard_ai_prompt",
+                "Choose one of the suggestions below or ask your own question."
+            ),
+        [t]
+    );
+
     const [message, setMessage] = useState("");
 
     const [messages, setMessages] = useState([
         {
             sender: "ai",
-            text:
-                "Hi! I'm FocusGuard AI.\n\n" +
-                "I can answer questions about employees, productivity, website usage, analytics and organization reports.\n\n" +
-                "Choose one of the suggestions below or ask your own question.",
+            text: welcomeMessage,
         },
     ]);
 
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        setMessages((currentMessages) => {
+            if (
+                currentMessages.length !== 1 ||
+                currentMessages[0]?.sender !== "ai"
+            ) {
+                return currentMessages;
+            }
+
+            return [{ sender: "ai", text: welcomeMessage }];
+        });
+    }, [welcomeMessage]);
 
     const handleSend = async (text = message) => {
         const question = text.trim();
@@ -50,12 +70,18 @@ function ChatWindow() {
         setLoading(true);
 
         try {
-            const data = await askOrganizationAssistant(question);
+            const data = await askOrganizationAssistant(
+                question,
+                currentLanguageCode
+            );
             const answer = data?.response;
 
             if (!answer) {
                 throw new Error(
-                    "Organization Admin AI response was empty or malformed."
+                    t(
+                        "organization_ai_empty_response",
+                        "Organization Admin AI response was empty or malformed."
+                    )
                 );
             }
 
@@ -75,7 +101,10 @@ function ChatWindow() {
                     text: getApiErrorMessage(
                         error,
                         error?.message ||
-                            "The Organization Admin AI Assistant is currently unavailable."
+                            t(
+                                "organization_ai_unavailable",
+                                "The Organization Admin AI Assistant is currently unavailable."
+                            )
                     ),
                 },
             ]);
@@ -97,17 +126,25 @@ function ChatWindow() {
 
                     <div>
                         <h1 className="text-2xl font-bold text-white">
-                            FocusGuard AI
+                            {t(
+                                "focusguard_ai",
+                                "FocusGuard AI"
+                            )}
                         </h1>
 
                         <p className="text-indigo-100">
-                            Organization Assistant
+                            {t(
+                                "organization_assistant",
+                                "Organization Assistant"
+                            )}
                         </p>
                     </div>
                 </div>
 
                 <div className="rounded-full bg-white/20 px-4 py-2 text-sm text-white">
-                    {new Date().toLocaleDateString()}
+                    {new Date().toLocaleDateString(
+                        currentLanguageCode
+                    )}
                 </div>
             </div>
 
@@ -137,7 +174,11 @@ function ChatWindow() {
 
                                     {msg.provider && (
                                         <p className="mt-3 text-xs font-semibold uppercase text-slate-400">
-                                            Answered by {msg.provider}
+                                            {t(
+                                                "answered_by",
+                                                "Answered by"
+                                            )}{" "}
+                                            {msg.provider}
                                         </p>
                                     )}
                                 </div>
@@ -163,39 +204,15 @@ function ChatWindow() {
                             </div>
 
                             <div className="rounded-3xl bg-white border border-slate-200 shadow px-6 py-5 text-slate-500">
-                                Analyzing organization data...
+                                {t(
+                                    "analyzing_organization_data",
+                                    "Analyzing organization data..."
+                                )}
                             </div>
                         </div>
                     </div>
                 )}
             </div>
-
-            {messages.length === 1 && (
-                <div className="border-t bg-white px-8 py-5">
-                    <h3 className="font-semibold text-slate-700 mb-4">
-                        Suggested Questions
-                    </h3>
-
-                    <div className="flex flex-wrap justify-center gap-3">
-                        {suggestions.map((item) => (
-                            <button
-                                key={item}
-                                onClick={() => handleSend(item)}
-                                className="flex items-center gap-2 rounded-full border border-slate-300 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 px-5 py-3 transition"
-                            >
-                                <Sparkles
-                                    size={15}
-                                    className="text-indigo-600"
-                                />
-
-                                <span className="text-sm">
-                                    {item}
-                                </span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
 
             <div className="border-t bg-white px-8 py-6">
                 <div className="max-w-5xl mx-auto flex items-center gap-4">
@@ -209,7 +226,10 @@ function ChatWindow() {
                                 handleSend();
                             }
                         }}
-                        placeholder="Ask anything about your organization..."
+                        placeholder={t(
+                            "ask_anything_about_organization",
+                            "Ask anything about your organization..."
+                        )}
                         className="flex-1 rounded-2xl border border-slate-300 px-6 py-4 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                     />
 
@@ -220,7 +240,15 @@ function ChatWindow() {
                     >
                         <Send size={18} />
 
-                        {loading ? "Sending..." : "Send"}
+                        {loading
+                            ? t(
+                                  "sending",
+                                  "Sending..."
+                              )
+                            : t(
+                                  "send",
+                                  "Send"
+                              )}
                     </button>
                 </div>
             </div>

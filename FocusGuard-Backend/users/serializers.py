@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import EmployeeDeactivationRequest, OrganizationDeactivationRequest, User, Organization, Invitation, ActivityLog, UserInactivity
+from .models import EmployeeDeactivationRequest, OrganizationDeactivationRequest, User, Organization, Invitation, ActivityLog, UserInactivity, Language, Translation
 
 from .models import User, Organization, Invitation
 
@@ -17,19 +17,45 @@ class RegisterSerializer(serializers.ModelSerializer):
             )
         ]
     )
+    preferred_language = serializers.PrimaryKeyRelatedField(
+        queryset=Language.objects.filter(is_active=True),
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
         model = User
-        fields = ["username", "email", "password"]
+        fields = [
+            "username",
+            "email",
+            "password",
+            "preferred_language",
+        ]
         extra_kwargs = {
             "password": {"write_only": True}
         }
 
     def create(self, validated_data):
+        preferred_language = validated_data.get(
+            "preferred_language"
+        )
+
+        if preferred_language is None:
+            preferred_language = (
+                Language.objects.filter(
+                    language_code="en",
+                    is_active=True,
+                ).first()
+                or Language.objects.filter(
+                    is_active=True
+                ).order_by("language_name").first()
+            )
+
         user = User.objects.create_user(
             username=validated_data["username"],
             email=validated_data["email"],
-            password=validated_data["password"]
+            password=validated_data["password"],
+            preferred_language=preferred_language,
         )
 
         refresh = RefreshToken.for_user(user)
@@ -155,6 +181,43 @@ class InvitationSerializer(serializers.ModelSerializer):
 from rest_framework import serializers
 
 
+class LanguageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Language
+        fields = [
+            "id",
+            "language_name",
+            "native_name",
+            "language_code",
+            "is_active",
+        ]
+
+
+class TranslationSerializer(serializers.ModelSerializer):
+    language = LanguageSerializer(read_only=True)
+    language_id = serializers.PrimaryKeyRelatedField(
+        source="language",
+        queryset=Language.objects.filter(is_active=True),
+        write_only=True,
+    )
+
+    class Meta:
+        model = Translation
+        fields = [
+            "id",
+            "language",
+            "language_id",
+            "key",
+            "translated_text",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "created_at",
+            "updated_at",
+        ]
+
+
 class RegisterWithInviteCodeSerializer(serializers.Serializer):
 
     username = serializers.CharField(
@@ -173,6 +236,10 @@ class RegisterWithInviteCodeSerializer(serializers.Serializer):
 
     invite_code = serializers.CharField(
         max_length=15,
+    )
+
+    preferred_language = serializers.PrimaryKeyRelatedField(
+        queryset=Language.objects.filter(is_active=True),
     )
 
     def validate(self, attrs):

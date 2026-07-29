@@ -3,35 +3,74 @@ import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import PersonOffRoundedIcon from "@mui/icons-material/PersonOffRounded";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 
+import { useLanguage } from "../../context/useLanguage";
+
 function DashboardCards({ analytics }) {
+    const { t } = useLanguage();
+
     const cards = [
         {
-            title: "Total Employees",
+            title: t(
+                "total_employees",
+                "Total Employees"
+            ),
             value: analytics.total_employees || 0,
-            subtitle: "Organization users",
+            subtitle: t(
+                "organization_users",
+                "Organization users"
+            ),
             color: "bg-indigo-50 text-indigo-600",
-            icon: <GroupsRoundedIcon fontSize="small" />,
+            icon: (
+                <GroupsRoundedIcon fontSize="small" />
+            ),
         },
         {
-            title: "Active Employees",
+            title: t(
+                "active_employees",
+                "Active Employees"
+            ),
             value: analytics.active_employees || 0,
-            subtitle: "Active accounts",
+            subtitle: t(
+                "active_accounts",
+                "Active accounts"
+            ),
             color: "bg-emerald-50 text-emerald-600",
-            icon: <PersonRoundedIcon fontSize="small" />,
+            icon: (
+                <PersonRoundedIcon fontSize="small" />
+            ),
         },
         {
-            title: "Inactive Employees",
-            value: analytics.inactive_employees || 0,
-            subtitle: "Inactive accounts",
+            title: t(
+                "inactive_employees",
+                "Inactive Employees"
+            ),
+            value:
+                analytics.inactive_employees || 0,
+            subtitle: t(
+                "inactive_accounts",
+                "Inactive accounts"
+            ),
             color: "bg-rose-50 text-rose-600",
-            icon: <PersonOffRoundedIcon fontSize="small" />,
+            icon: (
+                <PersonOffRoundedIcon fontSize="small" />
+            ),
         },
         {
-            title: "Productivity",
-            value: `${analytics.productive_percentage || 0}%`,
-            subtitle: "Overall score",
+            title: t(
+                "productivity",
+                "Productivity"
+            ),
+            value: `${
+                analytics.productive_percentage || 0
+            }%`,
+            subtitle: t(
+                "overall_score",
+                "Overall score"
+            ),
             color: "bg-amber-50 text-amber-600",
-            icon: <TrendingUpRoundedIcon fontSize="small" />,
+            icon: (
+                <TrendingUpRoundedIcon fontSize="small" />
+            ),
         },
     ];
 

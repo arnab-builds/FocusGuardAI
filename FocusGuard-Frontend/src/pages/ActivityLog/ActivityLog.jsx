@@ -9,23 +9,43 @@ import {
 } from "react-icons/fi";
 
 import { getActivityHistory } from "../../services/activityService";
+import { useLanguage } from "../../context/useLanguage";
 
-const formatDuration = (duration) => {
+const formatDuration = (duration, t, locale) => {
   if (!duration) return "-";
 
   const [h, m, s] = duration.split(":");
+  const numberFormatter = new Intl.NumberFormat(locale || undefined);
 
-  if (Number(h) > 0) return `${h}h ${m}m`;
+  if (Number(h) > 0) {
+    return `${numberFormatter.format(Number(h))}${t(
+      "hours_short",
+      "h"
+    )} ${numberFormatter.format(Number(m))}${t(
+      "minutes_short",
+      "m"
+    )}`;
+  }
 
-  return `${m}m ${Math.floor(Number(s))}s`;
+  return `${numberFormatter.format(Number(m))}${t(
+    "minutes_short",
+    "m"
+  )} ${numberFormatter.format(Math.floor(Number(s)))}${t(
+    "seconds_short",
+    "s"
+  )}`;
 };
 
-const formatDate = (date) => {
-  return new Date(date).toLocaleString();
+const formatDate = (date, locale) => {
+  return new Date(date).toLocaleString(locale || undefined);
 };
 
 export default function ActivityLog() {
   const { selectedDate } = useOutletContext();
+  const { currentLanguageCode, t } = useLanguage();
+  const numberFormatter = new Intl.NumberFormat(
+    currentLanguageCode || undefined
+  );
 
   const [activities, setActivities] = useState([]);
   const [pagination, setPagination] = useState({});
@@ -65,11 +85,14 @@ export default function ActivityLog() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">
-          Activity History
+          {t("activity_history", "Activity History")}
         </h1>
 
         <p className="mt-2 text-gray-500">
-          Browse your website activity.
+          {t(
+            "browse_website_activity",
+            "Browse your website activity."
+          )}
         </p>
       </div>
 
@@ -78,7 +101,7 @@ export default function ActivityLog() {
 
         <input
           type="text"
-          placeholder="Search website..."
+          placeholder={t("search_website", "Search website...")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full rounded-xl border bg-white py-3 pl-11 pr-4 outline-none focus:ring-2 focus:ring-indigo-500"
@@ -87,16 +110,16 @@ export default function ActivityLog() {
 
       <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
         <div className="grid grid-cols-5 bg-gray-100 px-6 py-4 font-semibold">
-          <div>Website</div>
-          <div>Category</div>
-          <div>Duration</div>
-          <div>Status</div>
-          <div>Started</div>
+          <div>{t("website", "Website")}</div>
+          <div>{t("category", "Category")}</div>
+          <div>{t("duration", "Duration")}</div>
+          <div>{t("status", "Status")}</div>
+          <div>{t("started", "Started")}</div>
         </div>
 
         {loading ? (
           <div className="p-8 text-center">
-            Loading...
+            {t("loading", "Loading...")}
           </div>
         ) : (
           filtered.map((activity) => (
@@ -127,7 +150,11 @@ export default function ActivityLog() {
 
               <div className="flex items-center gap-2">
                 <FiClock />
-                {formatDuration(activity.duration)}
+                {formatDuration(
+                  activity.duration,
+                  t,
+                  currentLanguageCode
+                )}
               </div>
 
               <div>
@@ -135,18 +162,21 @@ export default function ActivityLog() {
                 "PRODUCTIVE" ? (
                   <span className="inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
                     <FiCheckCircle />
-                    Productive
+                    {t("productive", "Productive")}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
                     <FiXCircle />
-                    Non Productive
+                    {t("non_productive", "Non Productive")}
                   </span>
                 )}
               </div>
 
               <div className="text-sm text-gray-500">
-                {formatDate(activity.start_time)}
+                {formatDate(
+                  activity.start_time,
+                  currentLanguageCode
+                )}
               </div>
             </div>
           ))
@@ -159,11 +189,11 @@ export default function ActivityLog() {
           onClick={() => setPage((p) => p - 1)}
           className="rounded-lg bg-indigo-600 px-5 py-2 text-white disabled:bg-gray-300"
         >
-          Previous
+          {t("previous", "Previous")}
         </button>
 
         <span className="font-medium">
-          Page {page}
+          {t("page", "Page")} {numberFormatter.format(page)}
         </span>
 
         <button
@@ -171,7 +201,7 @@ export default function ActivityLog() {
           onClick={() => setPage((p) => p + 1)}
           className="rounded-lg bg-indigo-600 px-5 py-2 text-white disabled:bg-gray-300"
         >
-          Next
+          {t("next", "Next")}
         </button>
       </div>
     </div>

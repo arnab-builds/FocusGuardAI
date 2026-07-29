@@ -6,6 +6,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+import { useLanguage } from "../../context/useLanguage";
 
 const parseTime = (time) => {
   if (!time) return 0;
@@ -22,21 +23,23 @@ const COLORS = [
 ];
 
 export default function ProductivityPieChart({ analytics }) {
+  const { t } = useLanguage();
+
   const data = [
     {
-      name: "Productive",
+      name: t("productive", "Productive"),
       value: parseTime(analytics.productive_time),
     },
     {
-      name: "Non Productive",
+      name: t("non_productive", "Non Productive"),
       value: parseTime(analytics.non_productive_time),
     },
     {
-      name: "Idle",
+      name: t("idle", "Idle"),
       value: parseTime(analytics.idle_time),
     },
     {
-      name: "Neutral",
+      name: t("neutral", "Neutral"),
       value: parseTime(analytics.neutral_time),
     },
   ];
@@ -44,7 +47,7 @@ export default function ProductivityPieChart({ analytics }) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
       <h2 className="mb-5 text-xl font-semibold">
-        Productivity Breakdown
+        {t("productivity_breakdown", "Productivity Breakdown")}
       </h2>
 
       <div className="h-96">

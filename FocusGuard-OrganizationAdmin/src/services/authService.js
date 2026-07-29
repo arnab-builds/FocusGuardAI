@@ -51,6 +51,31 @@ export const registerOrganizationAdmin = async (data) => {
 
 };
 
+export const getActiveLanguages = async () => {
+
+    const response = await api.get(
+        "languages/"
+    );
+
+    return response.data;
+
+};
+
+export const getTranslations = async (languageCode) => {
+
+    const response = await api.get(
+        "translations/",
+        {
+            params: {
+                language: languageCode,
+            },
+        }
+    );
+
+    return response.data;
+
+};
+
 export const logout = async () => {
 
     try {

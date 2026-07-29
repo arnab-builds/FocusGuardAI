@@ -1,7 +1,11 @@
 import { Box, Button, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 
+import { useLanguage } from "../context/useLanguage";
+
 function NotFound() {
+    const { t } = useLanguage();
+
     return (
         <Box
             sx={{
@@ -18,7 +22,10 @@ function NotFound() {
             </Typography>
 
             <Typography variant="h5">
-                Page Not Found
+                {t(
+                    "page_not_found",
+                    "Page Not Found"
+                )}
             </Typography>
 
             <Button
@@ -26,7 +33,10 @@ function NotFound() {
                 to="/"
                 variant="contained"
             >
-                Go to Dashboard
+                {t(
+                    "go_to_dashboard",
+                    "Go to Dashboard"
+                )}
             </Button>
         </Box>
     );

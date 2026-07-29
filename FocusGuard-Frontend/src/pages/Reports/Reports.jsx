@@ -14,8 +14,11 @@ import {
   downloadCSVReport,
 } from "../../services/reportService";
 
+import { useLanguage } from "../../context/useLanguage";
+
 export default function Reports() {
   const { selectedDate } = useOutletContext();
+  const { t } = useLanguage();
 
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -39,7 +42,13 @@ export default function Reports() {
       setReportType(type);
     } catch (error) {
       console.error(error);
-      alert("Failed to generate report.");
+
+      alert(
+        t(
+          "failed_to_generate_report",
+          "Failed to generate report."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -53,7 +62,13 @@ export default function Reports() {
       );
     } catch (error) {
       console.error(error);
-      alert("Unable to download PDF report.");
+
+      alert(
+        t(
+          "unable_to_download_pdf_report",
+          "Unable to download PDF report."
+        )
+      );
     }
   };
 
@@ -65,7 +80,13 @@ export default function Reports() {
       );
     } catch (error) {
       console.error(error);
-      alert("Unable to download CSV report.");
+
+      alert(
+        t(
+          "unable_to_download_csv_report",
+          "Unable to download CSV report."
+        )
+      );
     }
   };
 
@@ -73,11 +94,14 @@ export default function Reports() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">
-          Reports
+          {t("reports", "Reports")}
         </h1>
 
         <p className="mt-2 text-gray-500">
-          Generate and review your productivity reports.
+          {t(
+            "generate_review_reports",
+            "Generate and review your productivity reports."
+          )}
         </p>
       </div>
 
@@ -85,7 +109,10 @@ export default function Reports() {
 
       {loading && (
         <div className="mt-8 rounded-xl bg-white p-6 text-center shadow-sm">
-          Generating report...
+          {t(
+            "generating_report",
+            "Generating report..."
+          )}
         </div>
       )}
 
@@ -100,13 +127,11 @@ export default function Reports() {
       </div>
 
       <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
-
         <h2 className="mb-5 text-xl font-semibold">
-          Export Report
+          {t("export_report", "Export Report")}
         </h2>
 
         <div className="flex flex-wrap gap-4">
-
           <button
             onClick={handlePDFDownload}
             disabled={!report}
@@ -117,7 +142,7 @@ export default function Reports() {
             }`}
           >
             <FiDownload />
-            Download PDF
+            {t("download_pdf", "Download PDF")}
           </button>
 
           <button
@@ -130,18 +155,16 @@ export default function Reports() {
             }`}
           >
             <FiDownload />
-            Download CSV
+            {t("download_csv", "Download CSV")}
           </button>
-
         </div>
 
         {report && (
           <p className="mt-4 text-sm capitalize text-gray-500">
-            Current Report:{" "}
+            {t("current_report", "Current Report")}:{" "}
             <strong>{reportType}</strong>
           </p>
         )}
-
       </div>
     </div>
   );

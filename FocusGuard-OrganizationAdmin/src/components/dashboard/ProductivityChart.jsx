@@ -12,6 +12,7 @@ import {
     Legend,
     ResponsiveContainer,
 } from "recharts";
+import { useLanguage } from "../../context/useLanguage";
 
 const COLORS = [
     "#22C55E",
@@ -21,6 +22,7 @@ const COLORS = [
 function ProductivityChart({
     data = [],
 }) {
+    const { t } = useLanguage();
 
     return (
 
@@ -33,7 +35,10 @@ function ProductivityChart({
                     fontWeight={700}
                     mb={3}
                 >
-                    Productivity Distribution
+                    {t(
+                        "productivity_breakdown",
+                        "Productivity Distribution"
+                    )}
                 </Typography>
 
                 {
@@ -42,7 +47,10 @@ function ProductivityChart({
 
                         <div className="h-[300px] flex items-center justify-center text-slate-500">
 
-                            No productivity data available
+                            {t(
+                                "no_productivity_data_for_period",
+                                "No productivity data available"
+                            )}
 
                         </div>
 

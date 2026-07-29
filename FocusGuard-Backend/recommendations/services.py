@@ -3,6 +3,7 @@ from datetime import timedelta
 import traceback
 
 from users.models import ActivityLog, UserInactivity
+from users.services.translation_service import translate_text
 
 from llm.manager import LLMManager
 from llm.prompts import SYSTEM_PROMPT
@@ -59,7 +60,7 @@ def calculate_analytics(user, start_date, end_date):
     }
 
 
-def generate_ai_recommendation(user, start_date, end_date):
+def generate_ai_recommendation(user, start_date, end_date, language="en-IN"):
     """
     Generate AI-powered productivity recommendation
     for the selected date range.
@@ -100,8 +101,11 @@ def generate_ai_recommendation(user, start_date, end_date):
      return Recommendation.objects.create(
         user=user,
         recommendation_type="PRODUCTIVITY",
-        title="No Activity Found",
-        message="No browsing activity was found for the selected date range.",
+        title=translate_text("No Activity Found", language),
+        message=translate_text(
+            "No browsing activity was found for the selected date range.",
+            language,
+        ),
     )
 
     category_summary = defaultdict(int)
@@ -147,6 +151,11 @@ def generate_ai_recommendation(user, start_date, end_date):
 
     prompt = f"""
 You are an expert AI productivity coach.
+
+The user's preferred language is {language}. Write the title and message in
+that language only. Keep the structural markers `Title:` and `Message:` in
+English so the application can parse them; all text after those markers must
+be in the preferred language.
 
 Analyze the user's browsing behaviour.
 
@@ -198,7 +207,7 @@ Message:
                 "LLM returned an empty response."
             )
 
-        title = "AI Recommendation"
+        title = translate_text("AI Recommendation", language)
         message = response.strip()
 
         if (

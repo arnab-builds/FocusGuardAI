@@ -7,14 +7,24 @@ import {
 } from "react-icons/fi";
 import { getNotifications } from "../services/notificationService";
 import { useNavigate } from "react-router-dom";
-const getGreeting = () => {
+import { useLanguage } from "../context/useLanguage";
+
+const getGreetingKey = () => {
   const hour = new Date().getHours();
 
-  if (hour >= 5 && hour < 12) return "Good Morning";
-  if (hour >= 12 && hour < 17) return "Good Afternoon";
-  if (hour >= 17 && hour < 21) return "Good Evening";
+  if (hour >= 5 && hour < 12) {
+    return ["good_morning", "Good Morning"];
+  }
 
-  return "Good Night";
+  if (hour >= 12 && hour < 17) {
+    return ["good_afternoon", "Good Afternoon"];
+  }
+
+  if (hour >= 17 && hour < 21) {
+    return ["good_evening", "Good Evening"];
+  }
+
+  return ["good_night", "Good Night"];
 };
 
 const parseDurationToSeconds = (time) => {
@@ -30,10 +40,10 @@ const parseDurationToSeconds = (time) => {
   );
 };
 
-const formatSelectedDate = (date) => {
+const formatSelectedDate = (date, locale) => {
   if (!date) return "";
 
-  return new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
+  return new Date(`${date}T00:00:00`).toLocaleDateString(locale, {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -72,13 +82,14 @@ export default function TopNavbar({
   selectedDate,
   onDateChange,
 }) {
+  const { currentLanguageCode, t } = useLanguage();
   const username = profile?.username || "";
 
-  const greeting = getGreeting();
-
-  const greetingText = username
-    ? `${greeting}, ${username}`
-    : greeting;
+  const [greetingKey, greetingFallback] = getGreetingKey();
+  const greeting = t(greetingKey, greetingFallback);
+  const numberFormatter = new Intl.NumberFormat(
+    currentLanguageCode || undefined
+  );
 
   const productivityScore =
     getProductivityScore(analytics);
@@ -106,11 +117,20 @@ const navigate = useNavigate();
         {/* Left */}
         <div>
           <h1 className="text-3xl font-bold text-slate-800">
-            {greetingText}
+            {greeting}
           </h1>
 
+          {username && (
+            <p className="mt-1 text-base font-medium text-slate-700">
+              {username}
+            </p>
+          )}
+
           <p className="mt-2 text-sm text-slate-500">
-            {formatSelectedDate(selectedDate)}
+            {formatSelectedDate(
+              selectedDate,
+              currentLanguageCode || undefined
+            )}
           </p>
         </div>
 
@@ -128,11 +148,13 @@ const navigate = useNavigate();
           {/* Productivity Score */}
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-2">
             <p className="text-xs font-medium text-emerald-700">
-              Productivity Score
+              {t("productivity_score", "Productivity Score")}
             </p>
 
             <p className="text-xl font-bold text-emerald-700">
-              {productivityScore ?? "--"}%
+              {productivityScore === null
+                ? "--"
+                : `${numberFormatter.format(productivityScore)}%`}
             </p>
           </div>
 
@@ -157,7 +179,7 @@ const navigate = useNavigate();
 
                 <div className="border-b border-slate-200 p-4">
                   <h3 className="font-semibold text-slate-900">
-                    Notifications
+                    {t("notifications", "Notifications")}
                   </h3>
                 </div>
 
@@ -199,7 +221,9 @@ const navigate = useNavigate();
 </p>
 
 <p className="mt-2 text-xs text-slate-500">
-  {new Date(item.created_at).toLocaleString()}
+  {new Date(item.created_at).toLocaleString(
+    currentLanguageCode || undefined
+  )}
 </p>
 
                       </div>
@@ -216,7 +240,7 @@ const navigate = useNavigate();
   }}
   className="w-full border-t border-slate-200 p-3 text-sm font-medium text-indigo-600 transition hover:bg-slate-50"
 >
-  View All Notifications
+  {t("view_all_notifications", "View All Notifications")}
 </button>
 
               </div>
@@ -238,7 +262,7 @@ const navigate = useNavigate();
               </p>
 
               <p className="text-xs text-slate-500">
-                Employee
+                {t("employee", "Employee")}
               </p>
 
             </div>

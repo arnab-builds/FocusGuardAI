@@ -1,4 +1,5 @@
 import { FiArrowRight } from "react-icons/fi";
+import { useLanguage } from "../../context/useLanguage";
 
 const parseDurationToSeconds = (time) => {
   if (!time) return 0;
@@ -10,11 +11,19 @@ const parseDurationToSeconds = (time) => {
 };
 
 export default function TopWebsites({ websiteSummary }) {
-  const websites = Object.entries(websiteSummary || {}).map(([name, data]) => ({
-    name,
-    duration: parseDurationToSeconds(data.time_spent),
-    visits: data.visits,
-  }));
+  const { currentLanguageCode, t } = useLanguage();
+
+  const numberFormatter = new Intl.NumberFormat(
+    currentLanguageCode || undefined
+  );
+
+  const websites = Object.entries(websiteSummary || {}).map(
+    ([name, data]) => ({
+      name,
+      duration: parseDurationToSeconds(data.time_spent),
+      visits: data.visits,
+    })
+  );
 
   const sorted = websites
     .sort((a, b) => b.duration - a.duration)
@@ -28,11 +37,11 @@ export default function TopWebsites({ websiteSummary }) {
       <div className="mb-4 flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Top Websites
+            {t("top_websites", "Top Websites")}
           </p>
 
           <h2 className="mt-1 text-xl font-bold text-slate-900">
-            Top 5 Domains
+            {t("top_5_domains", "Top 5 Domains")}
           </h2>
         </div>
 
@@ -45,7 +54,10 @@ export default function TopWebsites({ websiteSummary }) {
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
         {sorted.length === 0 ? (
           <p className="text-sm text-slate-500">
-            No website activity available.
+            {t(
+              "no_website_activity_available",
+              "No website activity available."
+            )}
           </p>
         ) : (
           sorted.map((website) => {
@@ -65,12 +77,16 @@ export default function TopWebsites({ websiteSummary }) {
                   </span>
 
                   <span className="text-sm text-slate-500">
-                    {website.visits} visits
+                    {numberFormatter.format(website.visits)}{" "}
+                    {t("visits", "visits")}
                   </span>
                 </div>
 
                 <div className="mt-1 text-xs text-slate-500">
-                  {Math.round(website.duration / 60)} min
+                  {numberFormatter.format(
+                    Math.round(website.duration / 60)
+                  )}{" "}
+                  {t("minutes_short", "min")}
                 </div>
 
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">

@@ -1,5 +1,15 @@
-export const formatDuration = (time) => {
-  if (!time) return "0 sec";
+const formatNumber = (value, locale) =>
+  new Intl.NumberFormat(locale || undefined).format(value);
+
+export const formatDuration = (time, t, locale) => {
+  const translate = t || ((_, fallback) => fallback);
+
+  if (!time) {
+    return `${formatNumber(0, locale)} ${translate(
+      "seconds_short",
+      "sec"
+    )}`;
+  }
 
   // Remove microseconds
   const cleanTime = time.split(".")[0];
@@ -8,17 +18,40 @@ export const formatDuration = (time) => {
 
   if (hours > 0) {
     if (minutes > 0) {
-      return `${hours} hr ${minutes} min`;
+      return `${formatNumber(hours, locale)} ${translate(
+        "hours_short",
+        "hr"
+      )} ${formatNumber(minutes, locale)} ${translate(
+        "minutes_short",
+        "min"
+      )}`;
     }
-    return `${hours} hr`;
+
+    return `${formatNumber(hours, locale)} ${translate(
+      "hours_short",
+      "hr"
+    )}`;
   }
 
   if (minutes > 0) {
     if (seconds > 0) {
-      return `${minutes} min ${seconds} sec`;
+      return `${formatNumber(minutes, locale)} ${translate(
+        "minutes_short",
+        "min"
+      )} ${formatNumber(seconds, locale)} ${translate(
+        "seconds_short",
+        "sec"
+      )}`;
     }
-    return `${minutes} min`;
+
+    return `${formatNumber(minutes, locale)} ${translate(
+      "minutes_short",
+      "min"
+    )}`;
   }
 
-  return `${seconds} sec`;
+  return `${formatNumber(seconds, locale)} ${translate(
+    "seconds_short",
+    "sec"
+  )}`;
 };

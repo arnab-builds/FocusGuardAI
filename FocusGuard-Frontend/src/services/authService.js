@@ -12,6 +12,22 @@ export const registerEmployee = async (data) => {
   return response.data;
 };
 
+export const getActiveLanguages = async () => {
+  const response = await api.get("/api/languages/");
+
+  return response.data;
+};
+
+export const getTranslations = async (languageCode) => {
+  const response = await api.get("/api/translations/", {
+    params: {
+      language: languageCode,
+    },
+  });
+
+  return response.data;
+};
+
 export const logoutUser = async () => {
   try {
     const refresh = localStorage.getItem("refresh");

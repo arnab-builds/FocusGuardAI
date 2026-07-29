@@ -1,3 +1,5 @@
+import { useLanguage } from "../../context/useLanguage";
+
 const parseTime = (time) => {
   if (!time) return 0;
 
@@ -5,18 +7,36 @@ const parseTime = (time) => {
   return Number(h) * 3600 + Number(m) * 60 + parseFloat(s);
 };
 
-const formatTime = (time) => {
+const formatTime = (time, t, locale) => {
   const total = parseTime(time);
+  const numberFormatter = new Intl.NumberFormat(locale || undefined);
 
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
 
-  if (h > 0) return `${h}h ${m}m`;
+  if (h > 0) {
+    return `${numberFormatter.format(h)}${t(
+      "hours_short",
+      "h"
+    )} ${numberFormatter.format(m)}${t(
+      "minutes_short",
+      "m"
+    )}`;
+  }
 
-  return `${m}m`;
+  return `${numberFormatter.format(m)}${t(
+    "minutes_short",
+    "m"
+  )}`;
 };
 
 export default function WebsiteTable({ analytics }) {
+  const { currentLanguageCode, t } = useLanguage();
+
+  const numberFormatter = new Intl.NumberFormat(
+    currentLanguageCode || undefined
+  );
+
   const websites = Object.entries(
     analytics.website_summary
   )
@@ -30,24 +50,23 @@ export default function WebsiteTable({ analytics }) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
       <h2 className="mb-5 text-xl font-semibold">
-        Top Websites
+        {t("top_websites", "Top Websites")}
       </h2>
 
       <div className="overflow-x-auto">
         <table className="w-full">
-
           <thead>
             <tr className="border-b">
               <th className="py-3 text-left">
-                Website
+                {t("website", "Website")}
               </th>
 
               <th className="text-center">
-                Visits
+                {t("visits", "Visits")}
               </th>
 
               <th className="text-center">
-                Time
+                {t("time", "Time")}
               </th>
             </tr>
           </thead>
@@ -63,16 +82,19 @@ export default function WebsiteTable({ analytics }) {
                 </td>
 
                 <td className="text-center">
-                  {site.visits}
+                  {numberFormatter.format(site.visits)}
                 </td>
 
                 <td className="text-center">
-                  {formatTime(site.time_spent)}
+                  {formatTime(
+                    site.time_spent,
+                    t,
+                    currentLanguageCode
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
-
         </table>
       </div>
     </div>

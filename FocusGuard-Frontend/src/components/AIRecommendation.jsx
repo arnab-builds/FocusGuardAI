@@ -1,97 +1,89 @@
 import { useState } from "react";
-import { analyzeRecommendation } from "../api/recommendation";
+import { analyzeRecommendation } from "../services/aiRecommendationService";
+import { useLanguage } from "../context/useLanguage";
 import "./AIRecommendation.css";
 
 export default function AIRecommendation() {
+    const { currentLanguageCode, t } = useLanguage();
 
     const [range, setRange] = useState("today");
-
     const [loading, setLoading] = useState(false);
-
     const [recommendation, setRecommendation] = useState(null);
 
     const analyze = async () => {
-
         try {
-
             setLoading(true);
 
             const data = await analyzeRecommendation({
                 range,
+                language: currentLanguageCode,
             });
 
-            setRecommendation(data);
+            setRecommendation({
+                ...data,
+                language: currentLanguageCode,
+            });
 
         } catch (err) {
-
             console.log(err);
 
-            alert("Failed to generate recommendation");
-
+            alert(
+                t(
+                    "failed_to_generate_recommendation",
+                    "Failed to generate recommendation"
+                )
+            );
         } finally {
-
             setLoading(false);
-
         }
-
     };
 
     return (
-
         <div className="ai-card">
-
-            <h2>AI Productivity Coach</h2>
+            <h2>
+                {t(
+                    "ai_productivity_coach",
+                    "AI Productivity Coach"
+                )}
+            </h2>
 
             <select
                 value={range}
                 onChange={(e) => setRange(e.target.value)}
             >
-
-                <option value="today">Today</option>
+                <option value="today">
+                    {t("today", "Today")}
+                </option>
 
                 <option value="yesterday">
-                    Yesterday
+                    {t("yesterday", "Yesterday")}
                 </option>
 
                 <option value="last_week">
-                    Last Week
+                    {t("last_week", "Last Week")}
                 </option>
 
                 <option value="last_month">
-                    Last Month
+                    {t("last_month", "Last Month")}
                 </option>
-
             </select>
 
             <button
                 onClick={analyze}
                 disabled={loading}
             >
-
                 {loading
-                    ? "Analyzing..."
-                    : "Analyze"}
-
+                    ? t("analyzing", "Analyzing...")
+                    : t("analyze", "Analyze")}
             </button>
 
-            {recommendation && (
-
+            {recommendation?.language === currentLanguageCode && (
                 <div className="recommendation-box">
+                    <h3>{recommendation.title}</h3>
 
-                    <h3>
-                        {recommendation.title}
-                    </h3>
-
-                    <p>
-                        {recommendation.message}
-                    </p>
-
+                    <p>{recommendation.message}</p>
                 </div>
-
             )}
-
         </div>
-
     );
-
 }

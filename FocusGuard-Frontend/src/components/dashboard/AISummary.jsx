@@ -1,21 +1,24 @@
 import { FiCpu, FiZap } from "react-icons/fi";
+import { useLanguage } from "../../context/useLanguage";
 
 export default function AISummary({
   onAnalyze,
   loading,
   recommendation,
 }) {
+  const { t } = useLanguage();
+
   return (
     <section className="flex min-h-[320px] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            AI Coach
+            {t("ai_coach", "AI Coach")}
           </p>
 
           <h2 className="mt-1 text-xl font-bold text-slate-900">
-            Recommendation
+            {t("recommendation", "Recommendation")}
           </h2>
         </div>
 
@@ -29,22 +32,26 @@ export default function AISummary({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Insight
+              {t("insight", "Insight")}
             </p>
 
             <p className="mt-1 truncate text-lg font-semibold text-slate-900">
-              {recommendation?.title || "No recommendation yet"}
+              {recommendation?.title ||
+                t("no_recommendation_yet", "No recommendation yet")}
             </p>
           </div>
 
           <span className="flex-shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-            {recommendation?.recommendation_type || "Idle"}
+            {recommendation?.recommendation_type || t("idle", "Idle")}
           </span>
         </div>
 
-        <p className="mt-3 text-sm leading-6 text-slate-600 break-words">
+        <p className="mt-3 break-words text-sm leading-6 text-slate-600">
           {recommendation?.message ||
-            "Click the button below to generate an AI recommendation based on today's activity."}
+            t(
+              "generate_ai_recommendation_hint",
+              "Click the button below to generate an AI recommendation based on today's activity."
+            )}
         </p>
 
         <button
@@ -58,7 +65,12 @@ export default function AISummary({
         >
           <FiZap size={16} />
 
-          {loading ? "Generating..." : "Generate Recommendation"}
+          {loading
+            ? t("generating", "Generating...")
+            : t(
+                "generate_recommendation",
+                "Generate Recommendation"
+              )}
         </button>
       </div>
     </section>

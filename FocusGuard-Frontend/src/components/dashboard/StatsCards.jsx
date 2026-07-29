@@ -6,6 +6,7 @@ import {
   FiRefreshCcw,
 } from "react-icons/fi";
 import { formatDuration } from "../../utils/timeFormatter";
+import { useLanguage } from "../../context/useLanguage";
 
 const parseDurationToSeconds = (time) => {
   if (!time) return 0;
@@ -17,68 +18,84 @@ const parseDurationToSeconds = (time) => {
 };
 
 export default function StatsCards({ analytics }) {
-  const productiveSeconds = parseDurationToSeconds(
-    analytics.productive_time
-  );
-  const nonProductiveSeconds = parseDurationToSeconds(
-    analytics.non_productive_time
-  );
-  const idleSeconds = parseDurationToSeconds(analytics.idle_time);
+  const { currentLanguageCode, t } = useLanguage();
 
-  const totalActivitySeconds =
-    productiveSeconds + nonProductiveSeconds + idleSeconds;
+  const numberFormatter = new Intl.NumberFormat(
+    currentLanguageCode || undefined
+  );
+
+  const idleSeconds = parseDurationToSeconds(
+    analytics.idle_time
+  );
 
   const productivePercentage =
-    totalActivitySeconds > 0
-      ? Math.round((productiveSeconds / totalActivitySeconds) * 100)
-      : 0;
+    Number(analytics.productivity_percentage) || 0;
 
   const cards = [
     {
-      title: "Productive",
-      value: formatDuration(analytics.productive_time),
+      title: t("productive", "Productive"),
+      value: formatDuration(
+        analytics.productive_time,
+        t,
+        currentLanguageCode
+      ),
       icon: FiTrendingUp,
       trend:
-        productiveSeconds >= nonProductiveSeconds
-          ? "Stable"
-          : "Needs Focus",
+        productivePercentage >= 50
+          ? t("stable", "Stable")
+          : t("needs_focus", "Needs Focus"),
       color: "from-emerald-400 to-teal-500",
     },
     {
-      title: "Non Productive",
-      value: formatDuration(analytics.non_productive_time),
+      title: t("non_productive", "Non Productive"),
+      value: formatDuration(
+        analytics.non_productive_time,
+        t,
+        currentLanguageCode
+      ),
       icon: FiSlash,
       trend:
-        nonProductiveSeconds > productiveSeconds
-          ? "Watch"
-          : "Contained",
+        productivePercentage < 50
+          ? t("watch", "Watch")
+          : t("contained", "Contained"),
       color: "from-rose-400 to-red-500",
     },
     {
-      title: "Idle",
-      value: formatDuration(analytics.idle_time),
+      title: t("idle", "Idle"),
+      value: formatDuration(
+        analytics.idle_time,
+        t,
+        currentLanguageCode
+      ),
       icon: FiZap,
-      trend: idleSeconds > 0 ? "Recorded" : "None",
+      trend:
+        idleSeconds > 0
+          ? t("recorded", "Recorded")
+          : t("none", "None"),
       color: "from-sky-400 to-indigo-500",
     },
     {
-      title: "Websites",
-      value: analytics.total_websites_visited ?? 0,
+      title: t("websites", "Websites"),
+      value: numberFormatter.format(
+        analytics.total_websites_visited ?? 0
+      ),
       icon: FiGlobe,
       trend:
         analytics.total_websites_visited > 0
-          ? "Active"
-          : "Empty",
+          ? t("active", "Active")
+          : t("empty", "Empty"),
       color: "from-violet-400 to-fuchsia-500",
     },
     {
-      title: "Tab Switches",
-      value: analytics.total_tab_switches ?? 0,
+      title: t("tab_switches", "Tab Switches"),
+      value: numberFormatter.format(
+        analytics.total_tab_switches ?? 0
+      ),
       icon: FiRefreshCcw,
       trend:
         analytics.total_tab_switches > 20
-          ? "Busy"
-          : "Smooth",
+          ? t("busy", "Busy")
+          : t("smooth", "Smooth"),
       color: "from-slate-400 to-slate-600",
     },
   ];
@@ -117,7 +134,7 @@ export default function StatsCards({ analytics }) {
               </span>
 
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                {productivePercentage}%
+                {numberFormatter.format(productivePercentage)}%
               </span>
             </div>
           </div>

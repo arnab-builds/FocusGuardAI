@@ -1,7 +1,10 @@
 import api from "../api/axios";
 
-export const getNotifications = async () => {
-  const response = await api.get("/api/notifications/");
+export const getNotifications = async (languageCode, signal) => {
+  const response = await api.get("/api/notifications/", {
+    params: languageCode ? { language: languageCode } : undefined,
+    signal,
+  });
   return response.data;
 };
 

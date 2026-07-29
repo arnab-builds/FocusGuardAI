@@ -6,6 +6,45 @@ import random
 import string
 
 
+class Language(models.Model):
+    language_name = models.CharField(max_length=100, unique=True)
+    native_name = models.CharField(max_length=100)
+    language_code = models.CharField(max_length=10, unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["language_name"]
+
+    def __str__(self):
+        return f"{self.language_name} ({self.language_code})"
+
+
+class Translation(models.Model):
+    language = models.ForeignKey(
+        Language,
+        on_delete=models.CASCADE,
+        related_name="translations",
+    )
+    key = models.CharField(max_length=255)
+    translated_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["key", "language__language_name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["language", "key"],
+                name="unique_translation_per_language",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.key} ({self.language.language_code})"
+
+
 class Organization(models.Model):
     name = models.CharField(max_length=255)
 
@@ -59,6 +98,14 @@ class User(AbstractUser):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
+    )
+
+    preferred_language = models.ForeignKey(
+        Language,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="users",
     )
 
     role = models.CharField(

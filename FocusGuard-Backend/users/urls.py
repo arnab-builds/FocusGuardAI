@@ -3,7 +3,10 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import (
     CustomLoginView,
+    LanguageListView,
     ProfileView,
+    PreferredLanguageView,
+    TranslationListView,
     LogoutView,
 
     OrganizationCreateView,
@@ -83,6 +86,24 @@ urlpatterns = [
         "profile/",
         ProfileView.as_view(),
         name="profile",
+    ),
+
+    path(
+        "languages/",
+        LanguageListView.as_view(),
+        name="languages",
+    ),
+
+    path(
+        "translations/",
+        TranslationListView.as_view(),
+        name="translations",
+    ),
+
+    path(
+        "preferred-language/",
+        PreferredLanguageView.as_view(),
+        name="preferred-language",
     ),
 
     path(

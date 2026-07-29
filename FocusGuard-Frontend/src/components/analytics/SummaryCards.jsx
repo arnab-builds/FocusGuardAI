@@ -6,74 +6,102 @@ import {
   FiRepeat,
   FiTarget,
 } from "react-icons/fi";
+import { useLanguage } from "../../context/useLanguage";
 
-const parseTimeToSeconds = (time) => {
-  if (!time) return 0;
+const formatTime = (time, t, locale) => {
+  const numberFormatter = new Intl.NumberFormat(locale || undefined);
 
-  const parts = time.split(":");
-  const hours = Number(parts[0]);
-  const minutes = Number(parts[1]);
-  const seconds = parseFloat(parts[2]);
+  if (!time) {
+    return `${numberFormatter.format(0)}${t(
+      "minutes_short",
+      "m"
+    )}`;
+  }
 
-  return hours * 3600 + minutes * 60 + seconds;
-};
-
-const formatTime = (time) => {
-  if (!time) return "0m";
-
-  const totalSeconds = parseTimeToSeconds(time);
+  const [hours = 0, minutes = 0, seconds = 0] = time
+    .split(".")[0]
+    .split(":")
+    .map(Number);
+  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
 
   const hrs = Math.floor(totalSeconds / 3600);
   const mins = Math.floor((totalSeconds % 3600) / 60);
 
-  if (hrs > 0) return `${hrs}h ${mins}m`;
-  return `${mins}m`;
+  if (hrs > 0) {
+    return `${numberFormatter.format(hrs)}${t(
+      "hours_short",
+      "h"
+    )} ${numberFormatter.format(mins)}${t(
+      "minutes_short",
+      "m"
+    )}`;
+  }
+
+  return `${numberFormatter.format(mins)}${t(
+    "minutes_short",
+    "m"
+  )}`;
 };
 
 export default function SummaryCards({ analytics }) {
-  const productive = parseTimeToSeconds(analytics.productive_time);
-  const nonProductive = parseTimeToSeconds(analytics.non_productive_time);
-  const idle = parseTimeToSeconds(analytics.idle_time);
+  const { currentLanguageCode, t } = useLanguage();
 
-  const total = productive + nonProductive + idle;
+  const numberFormatter = new Intl.NumberFormat(
+    currentLanguageCode || undefined
+  );
 
-  const focusScore =
-    total === 0 ? 0 : Math.round((productive / total) * 100);
+  const focusScore = Number(analytics.productivity_percentage) || 0;
 
   const cards = [
     {
-      title: "Productive",
-      value: formatTime(analytics.productive_time),
+      title: t("productive", "Productive"),
+      value: formatTime(
+        analytics.productive_time,
+        t,
+        currentLanguageCode
+      ),
       icon: <FiClock />,
       color: "bg-blue-500",
     },
     {
-      title: "Non Productive",
-      value: formatTime(analytics.non_productive_time),
+      title: t("non_productive", "Non Productive"),
+      value: formatTime(
+        analytics.non_productive_time,
+        t,
+        currentLanguageCode
+      ),
       icon: <FiTrendingDown />,
       color: "bg-red-500",
     },
     {
-      title: "Idle",
-      value: formatTime(analytics.idle_time),
+      title: t("idle", "Idle"),
+      value: formatTime(
+        analytics.idle_time,
+        t,
+        currentLanguageCode
+      ),
       icon: <FiMoon />,
       color: "bg-yellow-500",
     },
     {
-      title: "Websites",
-      value: analytics.total_websites_visited,
+      title: t("websites", "Websites"),
+      value: numberFormatter.format(
+        analytics.total_websites_visited
+      ),
       icon: <FiGlobe />,
       color: "bg-purple-500",
     },
     {
-      title: "Tab Switches",
-      value: analytics.total_tab_switches,
+      title: t("tab_switches", "Tab Switches"),
+      value: numberFormatter.format(
+        analytics.total_tab_switches
+      ),
       icon: <FiRepeat />,
       color: "bg-orange-500",
     },
     {
-      title: "Focus Score",
-      value: `${focusScore}%`,
+      title: t("focus_score", "Focus Score"),
+      value: `${numberFormatter.format(focusScore)}%`,
       icon: <FiTarget />,
       color: "bg-green-500",
     },
@@ -92,9 +120,13 @@ export default function SummaryCards({ analytics }) {
             {card.icon}
           </div>
 
-          <p className="mt-4 text-sm text-gray-500">{card.title}</p>
+          <p className="mt-4 text-sm text-gray-500">
+            {card.title}
+          </p>
 
-          <h2 className="mt-2 text-3xl font-bold">{card.value}</h2>
+          <h2 className="mt-2 text-3xl font-bold">
+            {card.value}
+          </h2>
         </div>
       ))}
     </div>

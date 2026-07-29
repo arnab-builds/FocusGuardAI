@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from users.services.response_translation import TranslatedResponseMixin
 
 from .models import FocusGoal
 from .serializers import (
@@ -16,7 +17,7 @@ from .services import (
 )
 
 
-class FocusGoalView(APIView):
+class FocusGoalView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -61,7 +62,7 @@ class FocusGoalView(APIView):
         )
 
 
-class FocusGoalDetailView(APIView):
+class FocusGoalDetailView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 

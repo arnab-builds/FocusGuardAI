@@ -19,6 +19,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from users.services.response_translation import TranslatedResponseMixin
+from users.services.translation_service import get_user_language, translate_text
+
 from .serializers import DailyReportSerializer
 from .services import generate_report
 
@@ -45,7 +48,12 @@ def get_report_data(request, days):
     )
 
 
-class DailyReportAPIView(APIView):
+def translate_report_label(request, text):
+    """Translate export labels only; report values remain raw data."""
+    return translate_text(text, get_user_language(request))
+
+
+class DailyReportAPIView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -69,7 +77,7 @@ class DailyReportAPIView(APIView):
         return Response(serializer.data)
 
 
-class WeeklyReportAPIView(APIView):
+class WeeklyReportAPIView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -93,7 +101,7 @@ class WeeklyReportAPIView(APIView):
         return Response(serializer.data)
 
 
-class MonthlyReportAPIView(APIView):
+class MonthlyReportAPIView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -115,7 +123,7 @@ class MonthlyReportAPIView(APIView):
         serializer = DailyReportSerializer(report)
 
         return Response(serializer.data)
-class DownloadPDFReportAPIView(APIView):
+class DownloadPDFReportAPIView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -155,7 +163,7 @@ class DownloadPDFReportAPIView(APIView):
 
         elements.append(
             Paragraph(
-                "<b>FocusGuard AI Productivity Report</b>",
+                f"<b>{translate_report_label(request, 'FocusGuard AI Productivity Report')}</b>",
                 styles["Title"],
             )
         )
@@ -163,33 +171,36 @@ class DownloadPDFReportAPIView(APIView):
         elements.append(Spacer(1, 20))
 
         table_data = [
-            ["Metric", "Value"],
             [
-                "Productive Time",
+                translate_report_label(request, "Metric"),
+                translate_report_label(request, "Value"),
+            ],
+            [
+                translate_report_label(request, "Productive Time"),
                 str(report["productive_time"]),
             ],
             [
-                "Non Productive Time",
+                translate_report_label(request, "Non Productive Time"),
                 str(report["non_productive_time"]),
             ],
             [
-                "Neutral Time",
+                translate_report_label(request, "Neutral Time"),
                 str(report["neutral_time"]),
             ],
             [
-                "Idle Time",
+                translate_report_label(request, "Idle Time"),
                 str(report["idle_time"]),
             ],
             [
-                "Websites Visited",
+                translate_report_label(request, "Websites Visited"),
                 str(report["websites_visited"]),
             ],
             [
-                "Tab Switches",
+                translate_report_label(request, "Tab Switches"),
                 str(report["tab_switches"]),
             ],
             [
-                "Productivity %",
+                translate_report_label(request, "Productivity %"),
                 f'{report["productivity_percentage"]}%',
             ],
         ]
@@ -221,7 +232,7 @@ class DownloadPDFReportAPIView(APIView):
         )
 
 
-class DownloadCSVReportAPIView(APIView):
+class DownloadCSVReportAPIView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -263,56 +274,56 @@ class DownloadCSVReportAPIView(APIView):
 
         writer.writerow(
             [
-                "Metric",
-                "Value",
+                translate_report_label(request, "Metric"),
+                translate_report_label(request, "Value"),
             ]
         )
 
         writer.writerow(
             [
-                "Productive Time",
+                translate_report_label(request, "Productive Time"),
                 report["productive_time"],
             ]
         )
 
         writer.writerow(
             [
-                "Non Productive Time",
+                translate_report_label(request, "Non Productive Time"),
                 report["non_productive_time"],
             ]
         )
 
         writer.writerow(
             [
-                "Neutral Time",
+                translate_report_label(request, "Neutral Time"),
                 report["neutral_time"],
             ]
         )
 
         writer.writerow(
             [
-                "Idle Time",
+                translate_report_label(request, "Idle Time"),
                 report["idle_time"],
             ]
         )
 
         writer.writerow(
             [
-                "Websites Visited",
+                translate_report_label(request, "Websites Visited"),
                 report["websites_visited"],
             ]
         )
 
         writer.writerow(
             [
-                "Tab Switches",
+                translate_report_label(request, "Tab Switches"),
                 report["tab_switches"],
             ]
         )
 
         writer.writerow(
             [
-                "Productivity %",
+                translate_report_label(request, "Productivity %"),
                 report["productivity_percentage"],
             ]
         )

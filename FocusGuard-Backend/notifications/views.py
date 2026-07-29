@@ -8,8 +8,9 @@ from .models import Notification
 from .serializers import NotificationSerializer
 from .services import generate_notification
 from rest_framework.generics import DestroyAPIView
+from users.services.response_translation import TranslatedResponseMixin
 
-class NotificationListAPIView(ListAPIView):
+class NotificationListAPIView(TranslatedResponseMixin, ListAPIView):
 
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
@@ -20,7 +21,7 @@ class NotificationListAPIView(ListAPIView):
         )
 
 
-class MarkNotificationReadAPIView(UpdateAPIView):
+class MarkNotificationReadAPIView(TranslatedResponseMixin, UpdateAPIView):
 
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
@@ -49,7 +50,7 @@ class MarkNotificationReadAPIView(UpdateAPIView):
         return Response(serializer.data)
 
 
-class MarkAllNotificationsReadAPIView(APIView):
+class MarkAllNotificationsReadAPIView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -69,7 +70,7 @@ class MarkAllNotificationsReadAPIView(APIView):
         )
 
 
-class UnreadNotificationCountAPIView(APIView):
+class UnreadNotificationCountAPIView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -86,7 +87,7 @@ class UnreadNotificationCountAPIView(APIView):
         )
 
 
-class GenerateNotificationAPIView(APIView):
+class GenerateNotificationAPIView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -126,7 +127,7 @@ class GenerateNotificationAPIView(APIView):
             serializer.data,
             status=status.HTTP_201_CREATED,
         )
-class DeleteNotificationAPIView(DestroyAPIView):
+class DeleteNotificationAPIView(TranslatedResponseMixin, DestroyAPIView):
 
     permission_classes = [IsAuthenticated]
 

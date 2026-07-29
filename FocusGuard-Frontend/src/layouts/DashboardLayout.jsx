@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Sidebar from "./Sidebar";
 import TopNavbar from "./TopNavbar";
 import { getProfile } from "../services/profileService";
@@ -43,6 +43,16 @@ export default function DashboardLayout() {
     loadHeader();
   }, [selectedDate]);
 
+  const outletContext = useMemo(
+    () => ({
+      selectedDate,
+      setSelectedDate,
+      dashboardHeader,
+      setDashboardHeader,
+    }),
+    [dashboardHeader, selectedDate]
+  );
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100">
       <Sidebar />
@@ -57,11 +67,7 @@ export default function DashboardLayout() {
 
         <main className="flex-1 overflow-y-auto px-6 py-5">
           <Outlet
-            context={{
-              selectedDate,
-              setSelectedDate,
-              setDashboardHeader,
-            }}
+            context={outletContext}
           />
         </main>
       </div>

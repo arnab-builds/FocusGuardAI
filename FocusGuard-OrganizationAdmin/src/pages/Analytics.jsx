@@ -8,6 +8,8 @@ import ProductivityChart from "../components/dashboard/ProductivityChart";
 import CategoryChart from "../components/analytics/CategoryChart";
 import TopWebsites from "../components/analytics/TopWebsites";
 
+import { useLanguage } from "../context/useLanguage";
+
 import {
     getOrganizationAnalytics,
 } from "../services/analyticsService";
@@ -51,6 +53,7 @@ const buildCategoryData = (analytics) => {
 };
 
 function Analytics() {
+    const { t } = useLanguage();
 
     const [analytics, setAnalytics] = useState({
         total_employees: 0,
@@ -64,50 +67,50 @@ function Analytics() {
     const [error, setError] = useState("");
 
     async function loadAnalytics() {
-
         try {
-
             const analyticsResponse =
                 await getOrganizationAnalytics();
 
             setAnalytics(analyticsResponse);
 
-            setCategoryData(buildCategoryData(analyticsResponse));
+            setCategoryData(
+                buildCategoryData(analyticsResponse)
+            );
+
             setError("");
-
-        }
-
-        catch (error) {
-
+        } catch (error) {
             console.error(error);
+
             setError(
                 getApiErrorMessage(
                     error,
-                    "Analytics could not be loaded."
+                    t(
+                        "analytics_load_failed",
+                        "Analytics could not be loaded."
+                    )
                 )
             );
-
         }
-
     }
 
     useEffect(() => {
-
         const timeout = setTimeout(loadAnalytics, 0);
 
         return () => clearTimeout(timeout);
-
     }, []);
 
     return (
-
         <DashboardLayout>
-
             <div className="space-y-8">
-
                 <PageHeader
-                    title="Analytics"
-                    subtitle="Organization productivity insights"
+                    title={t(
+                        "analytics",
+                        "Analytics"
+                    )}
+                    subtitle={t(
+                        "organization_productivity_insights",
+                        "Organization productivity insights"
+                    )}
                 />
 
                 <AnalyticsOverview
@@ -121,18 +124,25 @@ function Analytics() {
                 )}
 
                 <div className="grid lg:grid-cols-2 gap-6">
-
                     <ProductivityChart
                         data={[
                             {
-                                name: "Productive",
+                                name: t(
+                                    "productive",
+                                    "Productive"
+                                ),
                                 value:
-                                    analytics.productive_percentage || 0,
+                                    analytics.productive_percentage ||
+                                    0,
                             },
                             {
-                                name: "Unproductive",
+                                name: t(
+                                    "unproductive",
+                                    "Unproductive"
+                                ),
                                 value:
-                                    analytics.unproductive_percentage || 0,
+                                    analytics.unproductive_percentage ||
+                                    0,
                             },
                         ]}
                     />
@@ -140,17 +150,17 @@ function Analytics() {
                     <CategoryChart
                         data={categoryData}
                     />
-
                 </div>
 
-                <TopWebsites websites={analytics.top_websites || []} />
-
+                <TopWebsites
+                    websites={
+                        analytics.top_websites ||
+                        []
+                    }
+                />
             </div>
-
         </DashboardLayout>
-
     );
-
 }
 
 export default Analytics;

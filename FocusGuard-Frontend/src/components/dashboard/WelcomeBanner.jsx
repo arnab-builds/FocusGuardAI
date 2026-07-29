@@ -1,17 +1,32 @@
-export default function WelcomeBanner({ profile }) {
+import { useLanguage } from "../../context/useLanguage";
+
+const getGreetingKey = () => {
   const hour = new Date().getHours();
 
-  let greeting = "Good Evening";
+  if (hour < 12) {
+    return ["good_morning", "Good Morning"];
+  }
 
-  if (hour < 12) greeting = "Good Morning";
-  else if (hour < 17) greeting = "Good Afternoon";
+  if (hour < 17) {
+    return ["good_afternoon", "Good Afternoon"];
+  }
 
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  return ["good_evening", "Good Evening"];
+};
+
+export default function WelcomeBanner({ profile }) {
+  const { currentLanguageCode, t } = useLanguage();
+  const [greetingKey, greetingFallback] = getGreetingKey();
+
+  const today = new Date().toLocaleDateString(
+    currentLanguageCode || undefined,
+    {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }
+  );
 
   return (
     <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 p-6 text-white shadow-md transition-all duration-300">
@@ -24,11 +39,20 @@ export default function WelcomeBanner({ profile }) {
         </p>
 
         <h1 className="text-3xl font-semibold tracking-tight text-white">
-          {greeting}, {profile.username} 👋
+          {t(greetingKey, greetingFallback)}
         </h1>
 
+        {profile?.username && (
+          <p className="text-lg font-medium text-white">
+            {profile.username}
+          </p>
+        )}
+
         <p className="max-w-2xl text-sm leading-6 text-indigo-100/90">
-          Welcome to your FocusGuard dashboard. Here is your latest activity snapshot and insights.
+          {t(
+            "dashboard_welcome_summary",
+            "Welcome to your FocusGuard dashboard. Here is your latest activity snapshot and insights."
+          )}
         </p>
       </div>
     </div>

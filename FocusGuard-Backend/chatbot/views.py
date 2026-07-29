@@ -5,12 +5,14 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from users.services.response_translation import TranslatedResponseMixin
 
 from users.views import calculate_user_analytics
 from users.models import (
     ActivityLog,
     EmployeeDeactivationRequest,
     User,
+    Language,
 )
 from notifications.models import Notification
 
@@ -26,7 +28,7 @@ from .services import (
 )
 
 
-class ChatbotAPIView(APIView):
+class ChatbotAPIView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -93,6 +95,7 @@ class ChatbotAPIView(APIView):
             },
             activity_logs=activity_logs,
             selected_date=selected_date,
+            language=getattr(request.user.preferred_language, "language_code", "en-IN"),
         )
 
         return Response(
@@ -105,7 +108,7 @@ class ChatbotAPIView(APIView):
         )
 
 
-class OrganizationAdminChatbotAPIView(APIView):
+class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -131,6 +134,20 @@ class OrganizationAdminChatbotAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         question = serializer.validated_data["message"]
+        requested_language_code = request.data.get(
+            "preferred_language_code"
+        )
+        preferred_language_code = getattr(
+            request.user.preferred_language,
+            "language_code",
+            "en-IN",
+        )
+
+        if requested_language_code and Language.objects.filter(
+            language_code=requested_language_code,
+            is_active=True,
+        ).exists():
+            preferred_language_code = requested_language_code
         selected_date = request.data.get(
             "selected_date",
             date.today().isoformat(),
@@ -235,6 +252,7 @@ class OrganizationAdminChatbotAPIView(APIView):
             result = ask_organization_admin_assistant(
                 question,
                 context,
+                preferred_language_code,
             )
         except Exception as error:
             return Response(

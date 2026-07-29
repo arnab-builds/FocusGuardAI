@@ -1,4 +1,5 @@
 import { FiBarChart2 } from "react-icons/fi";
+import { useCallback, useMemo } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -7,13 +8,78 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import { useLanguage } from "../../context/useLanguage";
 
-export default function ProductivityChart({ activities }) {
-  const data = Array.isArray(activities) ? activities : [];
-  const hasTrendData = data.some(
-    (item) =>
-      Number(item.productive || 0) > 0 ||
-      Number(item.unproductive || 0) > 0
+const getWeekDates = (selectedDate) => {
+  const endDate = new Date(`${selectedDate}T12:00:00`);
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(endDate);
+    date.setDate(endDate.getDate() - 6 + index);
+    return date;
+  });
+};
+
+const durationToSeconds = (duration) => {
+  if (!duration) return 0;
+
+  const [hours = 0, minutes = 0, seconds = 0] = duration
+    .split(".")[0]
+    .split(":")
+    .map(Number);
+
+  return hours * 3600 + minutes * 60 + seconds;
+};
+
+export default function ProductivityChart({ activities, selectedDate }) {
+  const { currentLanguageCode, t } = useLanguage();
+
+  const numberFormatter = useMemo(
+    () => new Intl.NumberFormat(currentLanguageCode || undefined),
+    [currentLanguageCode]
+  );
+
+  const data = useMemo(
+    () =>
+      getWeekDates(selectedDate).map((date) => {
+        const dateKey = date.toISOString().slice(0, 10);
+        const item = Array.isArray(activities)
+          ? activities.find((activity) => activity.date === dateKey) || {}
+          : {};
+
+        return {
+          productive: Math.max(0, durationToSeconds(item.productive_time)) / 60,
+          nonProductive:
+            Math.max(0, durationToSeconds(item.non_productive_time)) / 60,
+          idle: Math.max(0, durationToSeconds(item.idle_time)) / 60,
+          name: new Intl.DateTimeFormat(currentLanguageCode || undefined, {
+            weekday: "short",
+            day: "numeric",
+          }).format(date),
+        };
+      }),
+    [activities, currentLanguageCode, selectedDate]
+  );
+
+  const hasTrendData = useMemo(
+    () =>
+      data.some(
+        (item) =>
+          item.productive > 0 || item.nonProductive > 0 || item.idle > 0
+      ),
+    [data]
+  );
+
+  const formatTooltip = useCallback(
+    (value, name) => [
+      `${numberFormatter.format(Number(value) || 0)} ${t("minutes_short", "min")}`,
+      name === "productive"
+        ? t("productive", "Productive")
+        : name === "nonProductive"
+          ? t("non_productive", "Non Productive")
+          : t("idle", "Idle"),
+    ],
+    [numberFormatter, t]
   );
 
   return (
@@ -21,11 +87,11 @@ export default function ProductivityChart({ activities }) {
       <div className="mb-5 flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Productivity Trend
+            {t("productivity_trend", "Productivity Trend")}
           </p>
 
           <h2 className="mt-1 text-xl font-bold text-slate-900">
-            Weekly Trend
+            {t("weekly_trend", "Weekly Trend")}
           </h2>
         </div>
 
@@ -40,7 +106,10 @@ export default function ProductivityChart({ activities }) {
       <div className="h-52">
         {!hasTrendData ? (
           <div className="flex h-full items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-500">
-            No productivity data available for this period.
+            {t(
+              "no_productivity_data_for_period",
+              "No productivity data available for this period."
+            )}
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
@@ -65,12 +134,7 @@ export default function ProductivityChart({ activities }) {
               />
 
               <Tooltip
-                formatter={(value, name) => [
-                  `${value} hr`,
-                  name === "productive"
-                    ? "Productive"
-                    : "Unproductive",
-                ]}
+                formatter={formatTooltip}
               />
 
               <Bar
@@ -81,8 +145,15 @@ export default function ProductivityChart({ activities }) {
               />
 
               <Bar
-                dataKey="unproductive"
+                dataKey="nonProductive"
                 fill="#EF4444"
+                radius={[8, 8, 0, 0]}
+                barSize={26}
+              />
+
+              <Bar
+                dataKey="idle"
+                fill="#0EA5E9"
                 radius={[8, 8, 0, 0]}
                 barSize={26}
               />

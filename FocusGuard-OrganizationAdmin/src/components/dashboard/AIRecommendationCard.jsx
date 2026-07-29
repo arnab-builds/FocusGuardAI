@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Brain, Sparkles } from "lucide-react";
 
 import { analyzeRecommendation } from "../../services/recommendationService";
+import { useLanguage } from "../../context/useLanguage";
 
 function AIRecommendationCard() {
+    const { t } = useLanguage();
 
     const [range, setRange] = useState("today");
 
@@ -32,7 +34,10 @@ function AIRecommendationCard() {
             console.error(error);
 
             alert(
-                "Failed to generate recommendation."
+                t(
+                    "failed_to_generate_recommendation",
+                    "Failed to generate recommendation."
+                )
             );
 
         }
@@ -55,13 +60,16 @@ function AIRecommendationCard() {
 
                     <h2 className="text-xl font-semibold text-slate-800">
 
-                        AI Productivity Coach
+                        {t("ai_productivity_coach", "AI Productivity Coach")}
 
                     </h2>
 
                     <p className="text-sm text-slate-500 mt-1">
 
-                        Get AI-powered productivity suggestions.
+                        {t(
+                            "ai_productivity_suggestions",
+                            "Get AI-powered productivity suggestions."
+                        )}
 
                     </p>
 
@@ -88,25 +96,25 @@ function AIRecommendationCard() {
 
                 <option value="today">
 
-                    Today
+                    {t("today", "Today")}
 
                 </option>
 
                 <option value="yesterday">
 
-                    Yesterday
+                    {t("yesterday", "Yesterday")}
 
                 </option>
 
                 <option value="last_week">
 
-                    Last Week
+                    {t("last_week", "Last Week")}
 
                 </option>
 
                 <option value="last_month">
 
-                    Last Month
+                    {t("last_month", "Last Month")}
 
                 </option>
 
@@ -124,9 +132,12 @@ function AIRecommendationCard() {
 
                     loading
 
-                        ? "Analyzing..."
+                        ? t("analyzing", "Analyzing...")
 
-                        : "Generate Recommendation"
+                        : t(
+                              "generate_recommendation",
+                              "Generate Recommendation"
+                          )
 
                 }
 

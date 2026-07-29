@@ -7,6 +7,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { useLanguage } from "../../context/useLanguage";
 
 const parseTime = (time) => {
   if (!time) return 0;
@@ -16,6 +17,8 @@ const parseTime = (time) => {
 };
 
 export default function CategoryBarChart({ analytics }) {
+  const { t } = useLanguage();
+
   const data = Object.entries(
     analytics.category_summary
   ).map(([category, time]) => ({
@@ -26,7 +29,7 @@ export default function CategoryBarChart({ analytics }) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
       <h2 className="mb-5 text-xl font-semibold">
-        Category Usage
+        {t("category_usage", "Category Usage")}
       </h2>
 
       <div className="h-96">
@@ -48,11 +51,11 @@ export default function CategoryBarChart({ analytics }) {
             <Tooltip />
 
             <Bar
-  dataKey="seconds"
-  fill="#10B981"
-  barSize={16}
-  radius={[0, 8, 8, 0]}
-/>
+              dataKey="seconds"
+              fill="#10B981"
+              barSize={16}
+              radius={[0, 8, 8, 0]}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>

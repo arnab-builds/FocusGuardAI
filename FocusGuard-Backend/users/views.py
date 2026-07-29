@@ -14,8 +14,13 @@ from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView
 from admin_notifications.utils import create_admin_notification
 from notifications.services import create_user_notification
+from users.services.response_translation import TranslatedResponseMixin
+from users.services.translation_service import (
+    get_user_language,
+    translate_text,
+)
 
-from .models import ActivityLog, EmployeeDeactivationRequest, Invitation, Organization, OrganizationDeactivationRequest, User, UserAnalytics, UserInactivity
+from .models import ActivityLog, EmployeeDeactivationRequest, Invitation, Language, Organization, OrganizationDeactivationRequest, Translation, User, UserAnalytics, UserInactivity
 from .pagination import ActivityPagination
 from .serializers import (
     RegisterWithInviteCodeSerializer,
@@ -23,6 +28,7 @@ from .serializers import (
     AdminActivitySerializer,
     EmployeeDeactivationRequestSerializer,
     InvitationSerializer,
+    LanguageSerializer,
     LoginRequestSerializer,
     LoginSerializer,
     OrganizationDeactivationRequestSerializer,
@@ -34,6 +40,27 @@ from .serializers import (
 from .serializers import RegisterWithInviteCodeSerializer
 
 DEFAULT_CATEGORY = "Others"
+
+
+def get_default_language():
+    return (
+        Language.objects.filter(
+            language_code="en",
+            is_active=True,
+        ).first()
+        or Language.objects.filter(
+            is_active=True
+        ).order_by("language_name").first()
+    )
+
+
+def serialize_user_language(user):
+    language = user.preferred_language or get_default_language()
+
+    if not language:
+        return None
+
+    return LanguageSerializer(language).data
 
 
 class IsOrganizationAdmin(BasePermission):
@@ -53,7 +80,7 @@ class IsSuperAdmin(BasePermission):
             and request.user.role == "SUPER_ADMIN"
         )
 
-class RegisterView(generics.CreateAPIView):
+class RegisterView(TranslatedResponseMixin, generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
 
@@ -62,10 +89,20 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         data = serializer.save()
+        self.translation_user = data["user"]
 
         return Response(
             {
                 "message": "User registered successfully.",
+                "user": {
+                    "id": data["user"].id,
+                    "username": data["user"].username,
+                    "email": data["user"].email,
+                    "role": data["user"].role,
+                    "preferred_language": serialize_user_language(
+                        data["user"]
+                    ),
+                },
                 "access": data["access"],
                 "refresh": data["refresh"],
             },
@@ -77,7 +114,7 @@ class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
 
 
-class CustomLoginView(APIView):
+class CustomLoginView(TranslatedResponseMixin, APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -91,6 +128,7 @@ class CustomLoginView(APIView):
         )
 
         user = serializer.validated_data["user"]
+        self.translation_user = user
 
         # User account deactivated
         if not user.is_active:
@@ -123,6 +161,7 @@ class CustomLoginView(APIView):
                     "username": user.username,
                     "email": user.email,
                     "role": user.role,
+                    "preferred_language": serialize_user_language(user),
                 },
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
@@ -130,7 +169,7 @@ class CustomLoginView(APIView):
             status=status.HTTP_200_OK,
         )
 
-class ProfileView(APIView):
+class ProfileView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -145,6 +184,7 @@ class ProfileView(APIView):
                 "email": user.email,
                 "role": user.role,
                 "date_joined": user.date_joined,
+                "preferred_language": serialize_user_language(user),
 
                 "organization": {
                     "id": user.organization.id,
@@ -154,7 +194,123 @@ class ProfileView(APIView):
             status=status.HTTP_200_OK,
         )
 
-class LogoutView(APIView):
+
+class LanguageListView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        languages = Language.objects.filter(
+            is_active=True
+        ).order_by("language_name")
+
+        return Response(
+            LanguageSerializer(
+                languages,
+                many=True,
+            ).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class TranslationListView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        language_code = request.query_params.get(
+            "language",
+            "en",
+        )
+
+        language = Language.objects.filter(
+            language_code=language_code,
+            is_active=True,
+        ).first()
+
+        if not language:
+            language = get_default_language()
+
+        if not language:
+            return Response(
+                {},
+                status=status.HTTP_200_OK,
+            )
+
+        translations = Translation.objects.filter(
+            language=language
+        ).values(
+            "key",
+            "translated_text",
+        )
+
+        return Response(
+            {
+                translation["key"]: translation["translated_text"]
+                for translation in translations
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class PreferredLanguageView(TranslatedResponseMixin, APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(
+            {
+                "preferred_language": serialize_user_language(
+                    request.user
+                )
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def patch(self, request):
+        language_id = request.data.get("preferred_language")
+
+        if language_id is None:
+            language_id = request.data.get("preferred_language_id")
+
+        if language_id in [None, ""]:
+            return Response(
+                {
+                    "error": "Preferred language is required."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            language = Language.objects.get(
+                id=language_id,
+                is_active=True,
+            )
+        except Language.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid preferred language."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        request.user.preferred_language = language
+        request.user.save(
+            update_fields=["preferred_language"]
+        )
+
+        return Response(
+            {
+                "message": "Preferred language updated successfully.",
+                "preferred_language": LanguageSerializer(
+                    language
+                ).data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def put(self, request):
+        return self.patch(request)
+
+
+class LogoutView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -176,7 +332,7 @@ class LogoutView(APIView):
             )
 
 
-class OrganizationCreateView(APIView):
+class OrganizationCreateView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -276,7 +432,7 @@ FocusGuardAI Team
             },
             status=status.HTTP_201_CREATED,
         )
-class InvitationCreateView(APIView):
+class InvitationCreateView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -397,7 +553,7 @@ FocusGuardAI Team
 from admin_notifications.utils import create_admin_notification
 
 
-class InvitationRegistrationBaseView(APIView):
+class InvitationRegistrationBaseView(TranslatedResponseMixin, APIView):
     permission_classes = [AllowAny]
     required_role = None
 
@@ -480,6 +636,9 @@ class InvitationRegistrationBaseView(APIView):
             password=serializer.validated_data["password"],
             organization=invitation.organization,
             role=invitation.role,
+            preferred_language=serializer.validated_data[
+                "preferred_language"
+            ],
         )
 
         invitation.is_accepted = True
@@ -493,6 +652,7 @@ class InvitationRegistrationBaseView(APIView):
             ),
             notification_type="invitation",
         )
+        self.translation_user = user
 
         if user.role == "USER":
             for organization_admin in User.objects.filter(
@@ -522,6 +682,7 @@ class InvitationRegistrationBaseView(APIView):
                     "email": user.email,
                     "organization": user.organization.name,
                     "role": user.role,
+                    "preferred_language": serialize_user_language(user),
                 },
 
                 "access": str(
@@ -546,7 +707,7 @@ class EmployeeRegisterWithInviteCodeView(
     InvitationRegistrationBaseView
 ):
     required_role = "USER"
-class OrganizationMembersView(APIView):
+class OrganizationMembersView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -637,7 +798,7 @@ class ActivityStartView(APIView):
 
 from datetime import datetime
 
-class ActivityHistoryView(APIView):
+class ActivityHistoryView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -691,7 +852,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-class OrganizationActivityView(APIView):
+class OrganizationActivityView(TranslatedResponseMixin, APIView):
     permission_classes = [
         IsAuthenticated,
         IsOrganizationAdmin,
@@ -1110,7 +1271,7 @@ def calculate_user_analytics(user, selected_date=None):
     }
 from datetime import datetime
 
-class UserAnalyticsView(APIView):
+class UserAnalyticsView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -1142,6 +1303,12 @@ class UserAnalyticsView(APIView):
             selected_date,
         )
 
+        category_summary = analytics.get("category_summary", {})
+        analytics["category_summary"] = {
+            translate_text(category, get_user_language(request)): duration
+            for category, duration in category_summary.items()
+        }
+
         return Response(
             {
 
@@ -1164,12 +1331,13 @@ class UserAnalyticsView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-class OrganizationAnalyticsView(APIView):
+class OrganizationAnalyticsView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsOrganizationAdmin]
 
     def get(self, request):
 
         organization = request.user.organization
+        language_code = get_user_language(request)
 
         users = User.objects.filter(
     organization=organization,
@@ -1188,6 +1356,15 @@ class OrganizationAnalyticsView(APIView):
         for user in users:
 
             analytics = calculate_user_analytics(user)
+            category_summary = analytics.get("category_summary", {})
+
+            # Category summaries use category names as dictionary keys. Those
+            # keys are normally protected by the response translation layer to
+            # preserve API contracts, so translate them here for chart labels.
+            analytics["category_summary"] = {
+                translate_text(str(category), language_code): duration
+                for category, duration in category_summary.items()
+            }
 
             productivity = analytics.get(
                 "productive_percentage",
@@ -1457,7 +1634,7 @@ class EmployeeDeactivationRequestView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
-class EmployeeDeactivationRequestListView(APIView):
+class EmployeeDeactivationRequestListView(TranslatedResponseMixin, APIView):
     permission_classes = [
         IsAuthenticated,
         IsOrganizationAdmin,
@@ -1494,7 +1671,7 @@ class EmployeeDeactivationRequestListView(APIView):
         )
 from django.db import transaction
 
-class ApproveEmployeeDeactivationRequestView(APIView):
+class ApproveEmployeeDeactivationRequestView(TranslatedResponseMixin, APIView):
     permission_classes = [
         IsAuthenticated,
         IsOrganizationAdmin,
@@ -1565,7 +1742,7 @@ class ApproveEmployeeDeactivationRequestView(APIView):
         )
 from django.db import transaction
 
-class RejectEmployeeDeactivationRequestView(APIView):
+class RejectEmployeeDeactivationRequestView(TranslatedResponseMixin, APIView):
     permission_classes = [
         IsAuthenticated,
         IsOrganizationAdmin,
@@ -1632,7 +1809,7 @@ class RejectEmployeeDeactivationRequestView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-class OrganizationDeactivationRequestView(APIView):
+class OrganizationDeactivationRequestView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsOrganizationAdmin]
 
     def post(self, request):
@@ -1867,7 +2044,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-class DashboardTrendAPIView(APIView):
+class DashboardTrendAPIView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -1875,15 +2052,18 @@ class DashboardTrendAPIView(APIView):
         selected_date = request.GET.get("date")
 
         if selected_date:
-
-            end_date = datetime.strptime(
-                selected_date,
-                "%Y-%m-%d",
-            ).date()
-
+            try:
+                end_date = datetime.strptime(
+                    selected_date,
+                    "%Y-%m-%d",
+                ).date()
+            except ValueError:
+                return Response(
+                    {"error": "Invalid date format. Use YYYY-MM-DD."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         else:
-
-            end_date = datetime.today().date()
+            end_date = timezone.localdate()
 
         start_date = end_date - timedelta(days=6)
 
@@ -1906,8 +2086,10 @@ class DashboardTrendAPIView(APIView):
 
         trend = defaultdict(
             lambda: {
-                "productive": 0,
-                "unproductive": 0,
+                "productive_seconds": 0,
+                "non_productive_seconds": 0,
+                "neutral_seconds": 0,
+                "idle_seconds": 0,
             }
         )
 
@@ -1915,28 +2097,59 @@ class DashboardTrendAPIView(APIView):
 
             if activity.duration:
 
-                hours = activity.duration.total_seconds() / 3600
+                seconds = activity.duration.total_seconds()
 
             elif activity.is_active:
 
-                hours = (
+                seconds = (
                     timezone.now() -
                     activity.start_time
-                ).total_seconds() / 3600
+                ).total_seconds()
 
             else:
 
-                hours = 0
+                seconds = 0
 
-            day = activity.start_time.strftime("%a")
+            # The database date filter uses Django's configured timezone.
+            # Group by that same local date; using `.date()` here groups an
+            # aware UTC timestamp under the previous day for users in IST.
+            day = timezone.localtime(activity.start_time).date()
 
             if activity.productivity_type == "PRODUCTIVE":
 
-                trend[day]["productive"] += hours
+                trend[day]["productive_seconds"] += seconds
 
             elif activity.productivity_type == "NON_PRODUCTIVE":
 
-                trend[day]["unproductive"] += hours
+                trend[day]["non_productive_seconds"] += seconds
+
+            else:
+                trend[day]["neutral_seconds"] += seconds
+
+        inactivity_logs = UserInactivity.objects.filter(
+            inactive_from__date__range=(start_date, end_date),
+        )
+
+        if request.user.role == "SUB_ADMIN":
+            inactivity_logs = inactivity_logs.filter(
+                user__organization=request.user.organization,
+                user__role="USER",
+            )
+        else:
+            inactivity_logs = inactivity_logs.filter(user=request.user)
+
+        for inactivity in inactivity_logs:
+            if inactivity.duration:
+                seconds = inactivity.duration.total_seconds()
+            elif inactivity.is_active:
+                seconds = (
+                    timezone.now() - inactivity.inactive_from
+                ).total_seconds()
+            else:
+                seconds = 0
+
+            local_day = timezone.localtime(inactivity.inactive_from).date()
+            trend[local_day]["idle_seconds"] += seconds
 
         response = []
 
@@ -1944,24 +2157,38 @@ class DashboardTrendAPIView(APIView):
 
             current = start_date + timedelta(days=i)
 
-            day = current.strftime("%a")
+            values = trend[current]
+            productive_seconds = round(values["productive_seconds"], 2)
+            non_productive_seconds = round(
+                values["non_productive_seconds"], 2
+            )
+            neutral_seconds = round(values["neutral_seconds"], 2)
+            idle_seconds = round(values["idle_seconds"], 2)
+            total_seconds = round(
+                productive_seconds + non_productive_seconds + neutral_seconds,
+                2,
+            )
 
             response.append({
-                "name": day,
-                "day": day,
-                "productive": round(
-                    trend[day]["productive"],
-                    2,
+                # ISO dates make the API ordering and the frontend date join
+                # unambiguous, including weeks that cross month/year boundaries.
+                "date": current.isoformat(),
+                # Keep the duration contract used by daily analytics so every
+                # dashboard consumer refers to the same named measurements.
+                "productive_time": str(
+                    timedelta(seconds=productive_seconds)
                 ),
-                "unproductive": round(
-                    trend[day]["unproductive"],
-                    2,
+                "non_productive_time": str(
+                    timedelta(seconds=non_productive_seconds)
                 ),
-                "hours": round(
-                    trend[day]["productive"] +
-                    trend[day]["unproductive"],
-                    2,
-                ),
+                "neutral_time": str(timedelta(seconds=neutral_seconds)),
+                "idle_time": str(timedelta(seconds=idle_seconds)),
+                "total_time": str(timedelta(seconds=total_seconds)),
+                "productive_seconds": productive_seconds,
+                "non_productive_seconds": non_productive_seconds,
+                "neutral_seconds": neutral_seconds,
+                "idle_seconds": idle_seconds,
+                "total_seconds": total_seconds,
             })
 
         return Response(response)
@@ -2534,7 +2761,7 @@ class SuperAdminInvitationListView(APIView):
         return Response(data)
 # views.py
 
-class SuperAdminInvitationDeleteView(APIView):
+class SuperAdminInvitationDeleteView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def delete(self, request, invitation_id):
@@ -2563,7 +2790,7 @@ class SuperAdminInvitationDeleteView(APIView):
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import status
 
-class SuperAdminSettingsView(APIView):
+class SuperAdminSettingsView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def get(self, request):
@@ -2575,6 +2802,7 @@ class SuperAdminSettingsView(APIView):
             "email": user.email,
             "first_name": user.first_name,
             "last_name": user.last_name,
+            "preferred_language": serialize_user_language(user),
         })
 
     def put(self, request):
@@ -2589,6 +2817,12 @@ class SuperAdminSettingsView(APIView):
         current_password = request.data.get("current_password")
         new_password = request.data.get("new_password")
         confirm_password = request.data.get("confirm_password")
+        preferred_language_id = request.data.get("preferred_language")
+
+        if preferred_language_id is None:
+            preferred_language_id = request.data.get(
+                "preferred_language_id"
+            )
 
         if (
             User.objects.exclude(id=user.id)
@@ -2618,6 +2852,20 @@ class SuperAdminSettingsView(APIView):
         user.email = email
         user.first_name = first_name
         user.last_name = last_name
+
+        if preferred_language_id:
+            try:
+                user.preferred_language = Language.objects.get(
+                    id=preferred_language_id,
+                    is_active=True,
+                )
+            except Language.DoesNotExist:
+                return Response(
+                    {
+                        "error": "Invalid preferred language."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         if new_password:
 
@@ -2660,9 +2908,10 @@ class SuperAdminSettingsView(APIView):
         user.save()
 
         return Response({
-            "message": "Profile updated successfully."
+            "message": "Profile updated successfully.",
+            "preferred_language": serialize_user_language(user),
         })
-class SuperAdminLoginView(APIView):
+class SuperAdminLoginView(TranslatedResponseMixin, APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -2671,6 +2920,7 @@ class SuperAdminLoginView(APIView):
         serializer.is_valid(raise_exception=True)
 
         user = serializer.validated_data["user"]
+        self.translation_user = user
 
         if user.role != "SUPER_ADMIN":
             return Response(
@@ -2692,6 +2942,7 @@ class SuperAdminLoginView(APIView):
                     "username": user.username,
                     "email": user.email,
                     "role": user.role,
+                    "preferred_language": serialize_user_language(user),
                 },
             },
             status=status.HTTP_200_OK,

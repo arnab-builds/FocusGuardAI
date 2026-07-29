@@ -30,6 +30,12 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Dashboard requests are intentionally cancelled when their date/effect
+    // changes. They are not connectivity failures and should not be logged.
+    if (axios.isCancel(error) || error.code === "ERR_CANCELED") {
+      return Promise.reject(error);
+    }
+
     if (!error.response) {
       console.error("Network Error:", error);
       return Promise.reject(error);

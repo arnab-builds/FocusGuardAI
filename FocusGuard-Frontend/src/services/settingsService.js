@@ -25,3 +25,16 @@ export const updateUserSettings = async (settings) => {
     throw error;
   }
 };
+
+export const getActiveLanguages = async () => {
+  const response = await api.get("/api/languages/");
+  return response.data;
+};
+
+export const updatePreferredLanguage = async (preferredLanguage) => {
+  const response = await api.patch("/api/preferred-language/", {
+    preferred_language: preferredLanguage,
+  });
+
+  return response.data;
+};

@@ -1,34 +1,51 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import {
   getNotifications,
   markNotificationRead,
   deleteNotification,
 } from "../../services/notificationService";
+import { useLanguage } from "../../context/useLanguage";
 
 function Notifications() {
+  const { currentLanguageCode, t } = useLanguage();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadedLanguageCode, setLoadedLanguageCode] = useState(null);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async (signal) => {
     try {
-      const data = await getNotifications();
+      const data = await getNotifications(currentLanguageCode, signal);
 
       setNotifications(
-        Array.isArray(data)
-          ? data
-          : data.results || []
+        Array.isArray(data) ? data : data.results || []
       );
+      setLoadedLanguageCode(currentLanguageCode);
     } catch (error) {
+      if (error.name === "CanceledError") {
+        return;
+      }
+
       console.error("Notification Error:", error);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
-  };
+  }, [currentLanguageCode]);
 
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    const controller = new AbortController();
+
+    const requestTimer = window.setTimeout(() => {
+      fetchNotifications(controller.signal);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(requestTimer);
+      controller.abort();
+    };
+  }, [fetchNotifications]);
 
   const handleRead = async (id) => {
     try {
@@ -48,7 +65,7 @@ function Notifications() {
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
-      "Delete this notification?"
+      t("delete_notification_confirmation", "Delete this notification?")
     );
 
     if (!confirmed) return;
@@ -57,19 +74,17 @@ function Notifications() {
       await deleteNotification(id);
 
       setNotifications((prev) =>
-        prev.filter(
-          (notification) => notification.id !== id
-        )
+        prev.filter((notification) => notification.id !== id)
       );
     } catch (error) {
       console.error(error);
     }
   };
 
-  if (loading) {
+  if (loading || loadedLanguageCode !== currentLanguageCode) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading...
+        {t("loading", "Loading...")}
       </div>
     );
   }
@@ -77,12 +92,15 @@ function Notifications() {
   return (
     <div className="min-h-screen bg-slate-100 p-10">
       <h1 className="text-4xl font-bold mb-8">
-        🔔 Notifications
+        {t("notifications", "Notifications")}
       </h1>
 
       {notifications.length === 0 ? (
         <div className="bg-white rounded-xl shadow p-6">
-          No notifications available.
+          {t(
+            "no_notifications_available",
+            "No notifications available."
+          )}
         </div>
       ) : (
         notifications.map((notification) => (
@@ -112,7 +130,7 @@ function Notifications() {
                   <span className="text-gray-500 text-sm">
                     {new Date(
                       notification.created_at
-                    ).toLocaleString()}
+                    ).toLocaleString(currentLanguageCode || undefined)}
                   </span>
                 </div>
               </div>
@@ -120,21 +138,20 @@ function Notifications() {
               <div className="flex items-center gap-2">
                 {!notification.is_read && (
                   <button
-                    onClick={() =>
-                      handleRead(notification.id)
-                    }
+                    onClick={() => handleRead(notification.id)}
                     className="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700"
                   >
-                    Mark Read
+                    {t("mark_read", "Mark Read")}
                   </button>
                 )}
 
                 <button
-                  onClick={() =>
-                    handleDelete(notification.id)
-                  }
+                  onClick={() => handleDelete(notification.id)}
                   className="p-2 rounded-full text-red-600 hover:bg-red-100 transition"
-                  title="Delete Notification"
+                  title={t(
+                    "delete_notification",
+                    "Delete Notification"
+                  )}
                 >
                   <FiTrash2 size={18} />
                 </button>

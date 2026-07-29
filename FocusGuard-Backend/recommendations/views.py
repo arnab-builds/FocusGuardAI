@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from users.services.response_translation import TranslatedResponseMixin
 
 from .models import Recommendation
 from .serializers import RecommendationSerializer
@@ -13,7 +14,7 @@ from .analyze import AnalyzeRecommendationSerializer
 from .services import generate_ai_recommendation
 
 
-class RecommendationListAPIView(generics.ListAPIView):
+class RecommendationListAPIView(TranslatedResponseMixin, generics.ListAPIView):
     serializer_class = RecommendationSerializer
     permission_classes = [IsAuthenticated]
 
@@ -22,7 +23,7 @@ class RecommendationListAPIView(generics.ListAPIView):
             user=self.request.user
         ).order_by("-created_at")
 
-class AnalyzeRecommendationAPIView(APIView):
+class AnalyzeRecommendationAPIView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -59,6 +60,7 @@ class AnalyzeRecommendationAPIView(APIView):
          user=user,
          start_date=start_date,
          end_date=end_date,
+         language=getattr(user.preferred_language, "language_code", "en-IN"),
         )
 
         return Response(

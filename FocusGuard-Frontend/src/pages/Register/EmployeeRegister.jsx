@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  FiGlobe,
   FiKey,
   FiLock,
   FiUser,
@@ -8,6 +9,7 @@ import {
 } from "react-icons/fi";
 
 import { registerEmployee } from "../../services/authService";
+import { useLanguage } from "../../context/useLanguage";
 
 const getErrorMessage = (error) => {
   const data = error?.response?.data;
@@ -36,21 +38,73 @@ const getErrorMessage = (error) => {
 
 function EmployeeRegister() {
   const navigate = useNavigate();
+  const {
+    currentLanguageCode,
+    getLanguageByCode,
+    languages,
+    setLanguageByCode,
+    setLanguageById,
+    t,
+  } = useLanguage();
 
   const [form, setForm] = useState({
     invite_code: "",
     username: "",
     password: "",
     confirm_password: "",
+    preferred_language: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (event) => {
+  const getLanguageFromCode = (languageData, languageCode) =>
+    languageData.find(
+      (language) => language.language_code === languageCode
+    );
+
+  useEffect(() => {
+    const selectedLanguage = getLanguageByCode(currentLanguageCode);
+
+    if (!selectedLanguage) {
+      return;
+    }
+
+    setForm((currentForm) => ({
+      ...currentForm,
+      preferred_language:
+        currentForm.preferred_language ||
+        String(selectedLanguage.id),
+    }));
+  }, [currentLanguageCode, getLanguageByCode]);
+
+  const handlePublicLanguageChange = async (event) => {
+    const languageCode = event.target.value;
+    const selectedLanguage = getLanguageFromCode(
+      languages,
+      languageCode
+    );
+
+    await setLanguageByCode(languageCode);
+
+    if (selectedLanguage) {
+      setForm((currentForm) => ({
+        ...currentForm,
+        preferred_language: String(selectedLanguage.id),
+      }));
+    }
+  };
+
+  const handleChange = async (event) => {
+    const { name, value } = event.target;
+
     setForm({
       ...form,
-      [event.target.name]: event.target.value,
+      [name]: value,
     });
+
+    if (name === "preferred_language") {
+      await setLanguageById(value);
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -64,6 +118,7 @@ function EmployeeRegister() {
         username: form.username.trim(),
         password: form.password,
         confirm_password: form.confirm_password,
+        preferred_language: form.preferred_language,
       });
 
       navigate("/", {
@@ -77,7 +132,28 @@ function EmployeeRegister() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 flex items-center justify-center p-6">
+    <div className="relative min-h-screen bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 flex items-center justify-center p-6">
+      <div className="absolute right-5 top-5">
+        <div className="relative">
+          <FiGlobe className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <select
+            value={currentLanguageCode}
+            onChange={handlePublicLanguageChange}
+            aria-label={t("preferred_language", "Preferred Language")}
+            className="rounded-xl border border-white/70 bg-white py-2 pl-10 pr-4 text-sm font-medium text-slate-700 shadow-lg outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+          >
+            {languages.map((language) => (
+              <option
+                key={language.id}
+                value={language.language_code}
+              >
+                {language.native_name || language.language_name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-[440px] rounded-2xl bg-white p-8 shadow-2xl space-y-6"
@@ -88,11 +164,14 @@ function EmployeeRegister() {
           </div>
 
           <h1 className="text-3xl font-bold text-slate-800">
-            Employee Registration
+            {t("employee_registration", "Employee Registration")}
           </h1>
 
           <p className="mt-2 text-sm text-slate-500">
-            Create your FocusGuardAI account
+            {t(
+              "employee_registration_subtitle",
+              "Create your FocusGuardAI account"
+            )}
           </p>
         </div>
 
@@ -104,7 +183,7 @@ function EmployeeRegister() {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Invitation Code
+            {t("invitation_code", "Invitation Code")}
           </label>
 
           <div className="relative">
@@ -122,7 +201,7 @@ function EmployeeRegister() {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Username
+            {t("username", "Username")}
           </label>
 
           <div className="relative">
@@ -140,7 +219,38 @@ function EmployeeRegister() {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Password
+            {t("preferred_language", "Preferred Language")}
+          </label>
+
+          <div className="relative">
+            <FiGlobe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+
+            <select
+              name="preferred_language"
+              value={form.preferred_language}
+              onChange={handleChange}
+              className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-12 pr-4 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+              required
+            >
+              <option value="" disabled>
+                {t("select_language", "Select language")}
+              </option>
+
+              {languages.map((language) => (
+                <option
+                  key={language.id}
+                  value={language.id}
+                >
+                  {language.native_name || language.language_name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-700">
+            {t("password", "Password")}
           </label>
 
           <div className="relative">
@@ -159,7 +269,7 @@ function EmployeeRegister() {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Confirm Password
+            {t("confirm_password", "Confirm Password")}
           </label>
 
           <div className="relative">
@@ -181,7 +291,9 @@ function EmployeeRegister() {
           disabled={loading}
           className="w-full rounded-xl bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? "Creating Account..." : "Create Account"}
+          {loading
+            ? t("creating_account", "Creating Account...")
+            : t("create_account", "Create Account")}
         </button>
       </form>
     </div>

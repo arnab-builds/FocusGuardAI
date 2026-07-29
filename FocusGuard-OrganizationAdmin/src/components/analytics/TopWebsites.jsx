@@ -1,3 +1,5 @@
+import { useLanguage } from "../../context/useLanguage";
+
 const parseDurationToSeconds = (value) => {
     if (value === null || value === undefined || value === "") {
         return null;
@@ -24,7 +26,7 @@ const parseDurationToSeconds = (value) => {
     return hours * 3600 + minutes * 60 + seconds;
 };
 
-const formatTimeSpent = (site) => {
+const formatTimeSpent = (site, t) => {
     const seconds =
         parseDurationToSeconds(site.duration_seconds) ??
         parseDurationToSeconds(site.time_spent_seconds) ??
@@ -40,23 +42,37 @@ const formatTimeSpent = (site) => {
     const minutes = totalMinutes % 60;
 
     if (hours > 0 && minutes > 0) {
-        return `${hours} ${hours === 1 ? "hr" : "hrs"} ${minutes} mins`;
+        return `${hours} ${
+            hours === 1
+                ? t("hour_short", "hr")
+                : t("hours_short_text", "hrs")
+        } ${minutes} ${t("minutes_short", "mins")}`;
     }
 
     if (hours > 0) {
-        return `${hours} ${hours === 1 ? "hr" : "hrs"}`;
+        return `${hours} ${
+            hours === 1
+                ? t("hour_short", "hr")
+                : t("hours_short_text", "hrs")
+        }`;
     }
 
-    return `${Math.max(totalMinutes, 1)} mins`;
+    return `${Math.max(totalMinutes, 1)} ${t(
+        "minutes_short",
+        "mins"
+    )}`;
 };
 
 function TopWebsites({ websites = [] }) {
+    const { t } = useLanguage();
+
     const topWebsites = [...websites]
         .sort((a, b) => {
             const aSeconds =
                 parseDurationToSeconds(a.duration_seconds) ??
                 parseDurationToSeconds(a.duration) ??
                 0;
+
             const bSeconds =
                 parseDurationToSeconds(b.duration_seconds) ??
                 parseDurationToSeconds(b.duration) ??
@@ -67,106 +83,84 @@ function TopWebsites({ websites = [] }) {
         .slice(0, 5);
 
     return (
-
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-
             <div className="p-6 border-b">
-
                 <h2 className="text-lg font-semibold">
-
-                    Top Websites
-
+                    {t(
+                        "top_websites",
+                        "Top Websites"
+                    )}
                 </h2>
-
             </div>
 
-            {
+            {topWebsites.length > 0 ? (
+                <table className="w-full">
+                    <thead className="bg-slate-50">
+                        <tr>
+                            <th className="text-left px-6 py-4">
+                                {t(
+                                    "website",
+                                    "Website"
+                                )}
+                            </th>
 
-                topWebsites.length > 0 ? (
+                            <th className="text-left px-6 py-4">
+                                {t(
+                                    "category",
+                                    "Category"
+                                )}
+                            </th>
 
-                    <table className="w-full">
+                            <th className="text-left px-6 py-4">
+                                {t(
+                                    "time",
+                                    "Time"
+                                )}
+                            </th>
+                        </tr>
+                    </thead>
 
-                        <thead className="bg-slate-50">
+                    <tbody>
+                        {topWebsites.map(
+                            (site, index) => (
+                                <tr
+                                    key={
+                                        site.id ||
+                                        index
+                                    }
+                                    className="border-t hover:bg-slate-50"
+                                >
+                                    <td className="px-6 py-4 font-medium">
+                                        {site.website_name ||
+                                            site.name}
+                                    </td>
 
-                            <tr>
+                                    <td className="px-6 py-4">
+                                        {site.category ||
+                                            "-"}
+                                    </td>
 
-                                <th className="text-left px-6 py-4">
-
-                                    Website
-
-                                </th>
-
-                                <th className="text-left px-6 py-4">
-
-                                    Category
-
-                                </th>
-
-                                <th className="text-left px-6 py-4">
-
-                                    Time
-
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            {
-
-                                topWebsites.map((site, index) => (
-
-                                    <tr
-                                        key={site.id || index}
-                                        className="border-t hover:bg-slate-50"
-                                    >
-
-                                        <td className="px-6 py-4 font-medium">
-
-                                            {site.website_name || site.name}
-
-                                        </td>
-
-                                        <td className="px-6 py-4">
-
-                                            {site.category || "-"}
-
-                                        </td>
-
-                                        <td className="px-6 py-4 font-semibold text-indigo-600">
-
-                                            {formatTimeSpent(site)}
-
-                                        </td>
-
-                                    </tr>
-
-                                ))
-
-                            }
-
-                        </tbody>
-
-                    </table>
-
-                ) : (
-
-                    <div className="py-12 text-center text-slate-500">
-
-                        No website activity available.
-
-                    </div>
-
-                )
-
-            }
-
+                                    <td className="px-6 py-4 font-semibold text-indigo-600">
+                                        {formatTimeSpent(
+                                            site,
+                                            t
+                                        )}
+                                    </td>
+                                </tr>
+                            )
+                        )}
+                    </tbody>
+                </table>
+            ) : (
+                <div className="py-12 text-center text-slate-500">
+                    {t(
+                        "no_website_activity_available",
+                        "No website activity available."
+                    )}
+                </div>
+            )}
         </div>
-
     );
-
 }
 
 export default TopWebsites;

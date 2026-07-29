@@ -5,6 +5,22 @@ export const getProfile = async () => {
     return response.data;
 };
 
+export const getActiveLanguages = async () => {
+    const response = await api.get("languages/");
+    return response.data;
+};
+
+export const updatePreferredLanguage = async (preferredLanguage) => {
+    const response = await api.patch(
+        "preferred-language/",
+        {
+            preferred_language: preferredLanguage,
+        }
+    );
+
+    return response.data;
+};
+
 export const updateProfile = async (data) => {
     const response = await api.put("profile/", data);
     return response.data;
