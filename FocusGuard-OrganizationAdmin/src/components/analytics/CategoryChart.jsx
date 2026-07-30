@@ -7,6 +7,7 @@ import {
 } from "recharts";
 
 import { useLanguage } from "../../context/useLanguage";
+import { translateCategory } from "../../utils/categoryTranslations";
 
 const colors = [
     "#4f46e5",
@@ -20,10 +21,17 @@ const colors = [
 ];
 
 function CategoryChart({ data = [] }) {
-    const { t } = useLanguage();
+    const { currentLanguageCode, t } = useLanguage();
 
     const chartData = Array.isArray(data)
-        ? data
+        ? data.map((item) => ({
+              ...item,
+              name: translateCategory(
+                  item.name,
+                  t,
+                  currentLanguageCode
+              ),
+          }))
         : [];
 
     const total = chartData.reduce(
@@ -122,11 +130,7 @@ function CategoryChart({ data = [] }) {
                                             />
 
                                             <span className="min-w-0 break-words text-slate-600">
-                                                {item.name ||
-                                                    t(
-                                                        "unknown",
-                                                        "Unknown"
-                                                    )}
+                                                {item.name}
                                             </span>
                                         </div>
 

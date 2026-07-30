@@ -1,28 +1,31 @@
+import { useLanguage } from "../../context/useLanguage";
+
 import AdminLayout from "../../components/layout/AdminLayout";
 import AnalyticsCharts from "../../components/analytics/AnalyticsCharts";
 
 function Analytics() {
-  return (
-    <AdminLayout>
-      <div className="space-y-6">
+    const { t } = useLanguage();
 
-        <div>
+    return (
+        <AdminLayout>
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-3xl font-bold">
+                        {t("analytics", "Analytics")}
+                    </h1>
 
-          <h1 className="text-3xl font-bold">
-            Analytics
-          </h1>
+                    <p className="text-gray-500 mt-2">
+                        {t(
+                            "platform_analytics_overview",
+                            "Platform analytics overview."
+                        )}
+                    </p>
+                </div>
 
-          <p className="text-gray-500 mt-2">
-            Platform analytics overview.
-          </p>
-
-        </div>
-
-        <AnalyticsCharts />
-
-      </div>
-    </AdminLayout>
-  );
+                <AnalyticsCharts />
+            </div>
+        </AdminLayout>
+    );
 }
 
 export default Analytics;

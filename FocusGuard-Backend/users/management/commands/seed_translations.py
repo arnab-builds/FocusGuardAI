@@ -23,7 +23,13 @@ class Command(BaseCommand):
 
             for language_code, translated_text in translations.items():
 
-                language = language_map.get(language_code)
+                # The database stores short language codes (for example,
+                # ``hi``), while the Sarvam-ready seed catalog uses regional
+                # codes (``hi-IN``). Seed into the matching database record.
+                language = (
+                    language_map.get(language_code)
+                    or language_map.get(language_code.split("-", 1)[0])
+                )
 
                 if not language:
                     if language_code not in missing_languages:

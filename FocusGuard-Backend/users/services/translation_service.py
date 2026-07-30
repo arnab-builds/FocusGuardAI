@@ -7,8 +7,21 @@ from uuid import UUID
 from users.services.sarvam_service import translate_using_sarvam
 
 
-# Updated to match Sarvam language codes
+# Language records use short ISO codes; Sarvam requires the regional variants.
 DEFAULT_LANGUAGE_CODE = "en-IN"
+SARVAM_LANGUAGE_CODES = {
+    "en": "en-IN",
+    "bn": "bn-IN",
+    "gu": "gu-IN",
+    "hi": "hi-IN",
+    "kn": "kn-IN",
+    "ml": "ml-IN",
+    "mr": "mr-IN",
+    "or": "or-IN",
+    "pa": "pa-IN",
+    "ta": "ta-IN",
+    "te": "te-IN",
+}
 
 
 def get_user_language(request: Any) -> str:
@@ -42,7 +55,10 @@ def translate_text(text: str, language: str) -> str:
     allows the recursive translation engine to remain unchanged.
     """
 
-    return translate_using_sarvam(text, language)
+    return translate_using_sarvam(
+        text,
+        SARVAM_LANGUAGE_CODES.get(language, language),
+    )
 
 
 def translate_response(

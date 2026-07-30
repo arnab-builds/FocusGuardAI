@@ -2,13 +2,13 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/Login";
 
-import Dashboard from "../pages/Dashboard/Dashboard";
-import Organizations from "../pages/Organizations/Organizations";
-import OrganizationDetails from "../pages/Organizations/OrganizationDetails";
-import Invitations from "../pages/Invitations/Invitations";
-import Requests from "../pages/Requests/Requests";
-import Analytics from "../pages/Analytics/Analytics";
-import Settings from "../pages/Settings/Settings";
+import Dashboard from "../pages/dashboard/Dashboard";
+import Organizations from "../pages/organizations/Organizations";
+import OrganizationDetails from "../pages/organizations/OrganizationDetails";
+import Invitations from "../pages/invitations/Invitations";
+import Requests from "../pages/requests/Requests";
+import Analytics from "../pages/analytics/Analytics";
+import Settings from "../pages/settings/Settings";
 
 import ProtectedRoute from "./ProtectedRoute";
 

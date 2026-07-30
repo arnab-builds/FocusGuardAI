@@ -1,4 +1,5 @@
 import { useLanguage } from "../../context/useLanguage";
+import { translateCategory } from "../../utils/categoryTranslations";
 
 const parseDurationToSeconds = (value) => {
     if (value === null || value === undefined || value === "") {
@@ -64,7 +65,7 @@ const formatTimeSpent = (site, t) => {
 };
 
 function TopWebsites({ websites = [] }) {
-    const { t } = useLanguage();
+    const { currentLanguageCode, t } = useLanguage();
 
     const topWebsites = [...websites]
         .sort((a, b) => {
@@ -136,8 +137,13 @@ function TopWebsites({ websites = [] }) {
                                     </td>
 
                                     <td className="px-6 py-4">
-                                        {site.category ||
-                                            "-"}
+                                        {site.category
+                                            ? translateCategory(
+                                                  site.category,
+                                                  t,
+                                                  currentLanguageCode
+                                              )
+                                            : "-"}
                                     </td>
 
                                     <td className="px-6 py-4 font-semibold text-indigo-600">

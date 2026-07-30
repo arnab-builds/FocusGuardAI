@@ -1,299 +1,302 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  Search,
-  Bell,
-  Settings,
-  UserCircle2,
+    Search,
+    Bell,
+    Settings,
+    UserCircle2,
 } from "lucide-react";
 
+import { useLanguage } from "../../context/useLanguage";
+
 import {
-  getAdminNotifications,
-  markNotificationRead,
-  markAllNotificationsRead,
+    getAdminNotifications,
+    markNotificationRead,
+    markAllNotificationsRead,
 } from "../../services/superAdminService";
 
-const getGreeting = () => {
-  const hour = new Date().getHours();
+const getGreeting = (t) => {
+    const hour = new Date().getHours();
 
-  if (hour >= 5 && hour < 12) {
-    return "Good Morning";
-  }
+    if (hour >= 5 && hour < 12) {
+        return t("good_morning", "Good Morning");
+    }
 
-  if (hour >= 12 && hour < 17) {
-    return "Good Afternoon";
-  }
+    if (hour >= 12 && hour < 17) {
+        return t("good_afternoon", "Good Afternoon");
+    }
 
-  if (hour >= 17 && hour < 21) {
-    return "Good Evening";
-  }
+    if (hour >= 17 && hour < 21) {
+        return t("good_evening", "Good Evening");
+    }
 
-  return "Good Night";
+    return t("good_night", "Good Night");
 };
 
 function Navbar() {
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [showNotifications, setShowNotifications] =
-    useState(false);
+    const { currentLanguageCode, t } = useLanguage();
 
-  const notificationRef = useRef(null);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [showNotifications, setShowNotifications] =
+        useState(false);
 
-  const loadNotifications = async () => {
-    try {
-      const { data } =
-        await getAdminNotifications();
+    const notificationRef = useRef(null);
 
-      setNotifications(data.notifications);
-      setUnreadCount(data.unread_count);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    const loadNotifications = async () => {
+        try {
+            const { data } =
+                await getAdminNotifications();
 
-  useEffect(() => {
-    loadNotifications();
-
-    const interval = setInterval(() => {
-      loadNotifications();
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(
-          event.target
-        )
-      ) {
-        setShowNotifications(false);
-      }
+            setNotifications(data.notifications);
+            setUnreadCount(data.unread_count);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
+    useEffect(() => {
+        loadNotifications();
 
-    return () =>
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
-  }, []);
+        const interval = setInterval(() => {
+            loadNotifications();
+        }, 30000);
 
-  const handleNotificationClick = async (
-    notification
-  ) => {
-    if (notification.is_read) return;
+        return () => clearInterval(interval);
+    }, []);
 
-    try {
-      await markNotificationRead(notification.id);
-      await loadNotifications();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleMarkAllRead = async () => {
-    try {
-      await markAllNotificationsRead();
-      await loadNotifications();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  return (
-    <header className="bg-white h-20 px-8 flex items-center justify-between border-b">
-
-      <div>
-
-        <h2 className="text-3xl font-bold text-slate-800">
-          {getGreeting()}, Super Admin 👋
-        </h2>
-
-        <p className="text-slate-500 mt-1">
-          Manage organizations and monitor your
-          platform.
-        </p>
-
-      </div>
-
-      <div className="flex items-center gap-5">
-
-        <div className="relative">
-
-          <Search
-            size={18}
-            className="absolute left-4 top-3.5 text-gray-400"
-          />
-
-          <input
-            type="text"
-            placeholder="Search..."
-            className="pl-11 pr-5 h-12 w-80 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500"
-          />
-
-        </div>
-
-        <div
-          className="relative"
-          ref={notificationRef}
-        >
-
-          <button
-            onClick={() =>
-              setShowNotifications(
-                !showNotifications
-              )
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                notificationRef.current &&
+                !notificationRef.current.contains(
+                    event.target
+                )
+            ) {
+                setShowNotifications(false);
             }
-            className="relative w-12 h-12 rounded-xl border flex items-center justify-center hover:bg-slate-100"
-          >
+        };
 
-            <Bell size={20} />
+        document.addEventListener(
+            "mousedown",
+            handleClickOutside
+        );
 
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
-                {unreadCount > 99
-                  ? "99+"
-                  : unreadCount}
-              </span>
-            )}
+        return () =>
+            document.removeEventListener(
+                "mousedown",
+                handleClickOutside
+            );
+    }, []);
 
-          </button>
+    const handleNotificationClick = async (
+        notification
+    ) => {
+        if (notification.is_read) return;
 
-          {showNotifications && (
+        try {
+            await markNotificationRead(notification.id);
+            await loadNotifications();
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
-            <div className="absolute right-0 mt-3 w-96 rounded-2xl border bg-white shadow-xl z-50">
+    const handleMarkAllRead = async () => {
+        try {
+            await markAllNotificationsRead();
+            await loadNotifications();
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
-              <div className="flex items-center justify-between border-b p-4">
+    return (
+        <header className="bg-white h-20 px-8 flex items-center justify-between border-b">
+            <div>
+                <h2 className="text-3xl font-bold text-slate-800">
+                    {getGreeting(t)},{" "}
+                    {t(
+                        "super_admin",
+                        "Super Admin"
+                    )}{" "}
+                    👋
+                </h2>
 
-                <h3 className="font-semibold text-lg">
-                  Notifications
-                </h3>
-
-                {unreadCount > 0 && (
-                  <button
-                    onClick={handleMarkAllRead}
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    Mark all read
-                  </button>
-                )}
-
-              </div>
-
-              <div className="max-h-96 overflow-y-auto">
-                                {notifications.length === 0 ? (
-
-                  <div className="p-6 text-center text-gray-500">
-                    No notifications found.
-                  </div>
-
-                ) : (
-
-                  notifications.map((notification) => (
-
-                    <div
-                      key={notification.id}
-                      onClick={() =>
-                        handleNotificationClick(
-                          notification
-                        )
-                      }
-                      className={`cursor-pointer border-b p-4 transition hover:bg-slate-50 ${
-                        !notification.is_read
-                          ? "bg-blue-50"
-                          : ""
-                      }`}
-                    >
-
-                      <div className="flex items-start justify-between">
-
-                        <div>
-
-                          <h4 className="font-semibold text-slate-800">
-                            {notification.title}
-                          </h4>
-
-                          <p className="mt-1 text-sm text-slate-600">
-                            {notification.message}
-                          </p>
-
-                          <p className="mt-2 text-xs text-slate-400">
-                            {new Date(
-                              notification.created_at
-                            ).toLocaleString("en-IN", {
-                              dateStyle: "medium",
-                              timeStyle: "short",
-                            })}
-                          </p>
-
-                        </div>
-
-                        {!notification.is_read && (
-                          <span className="mt-2 h-2 w-2 rounded-full bg-blue-600"></span>
-                        )}
-
-                      </div>
-
-                    </div>
-
-                  ))
-
-                )}
-
-              </div>
-
-              <div className="border-t p-3">
-
-                <button
-                  className="w-full rounded-lg py-2 text-sm font-medium text-blue-600 transition hover:bg-slate-100"
-                >
-                  View All Notifications
-                </button>
-
-              </div>
-
+                <p className="text-slate-500 mt-1">
+                    {t(
+                        "manage_organizations_monitor_platform",
+                        "Manage organizations and monitor your platform."
+                    )}
+                </p>
             </div>
 
-          )}
+            <div className="flex items-center gap-5">
+                <div className="relative">
+                    <Search
+                        size={18}
+                        className="absolute left-4 top-3.5 text-gray-400"
+                    />
 
-        </div>
+                    <input
+                        type="text"
+                        placeholder={t(
+                            "search",
+                            "Search..."
+                        )}
+                        className="pl-11 pr-5 h-12 w-80 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
 
-        <button className="flex h-12 w-12 items-center justify-center rounded-xl border hover:bg-slate-100">
-          <Settings size={20} />
-        </button>
+                <div
+                    className="relative"
+                    ref={notificationRef}
+                >
+                    <button
+                        onClick={() =>
+                            setShowNotifications(
+                                !showNotifications
+                            )
+                        }
+                        className="relative w-12 h-12 rounded-xl border flex items-center justify-center hover:bg-slate-100"
+                    >
+                        <Bell size={20} />
 
-        <div className="flex items-center gap-3">
+                        {unreadCount > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
+                                {unreadCount > 99
+                                    ? "99+"
+                                    : unreadCount}
+                            </span>
+                        )}
+                    </button>
 
-          <UserCircle2
-            size={42}
-            className="text-blue-600"
-          />
+                    {showNotifications && (
+                        <div className="absolute right-0 mt-3 w-96 rounded-2xl border bg-white shadow-xl z-50">
+                            <div className="flex items-center justify-between border-b p-4">
+                                <h3 className="font-semibold text-lg">
+                                    {t(
+                                        "notifications",
+                                        "Notifications"
+                                    )}
+                                </h3>
 
-          <div>
+                                {unreadCount > 0 && (
+                                    <button
+                                        onClick={
+                                            handleMarkAllRead
+                                        }
+                                        className="text-sm text-blue-600 hover:underline"
+                                    >
+                                        {t(
+                                            "mark_all_read",
+                                            "Mark all read"
+                                        )}
+                                    </button>
+                                )}
+                            </div>
 
-            <h4 className="font-semibold">
-              Super Admin
-            </h4>
+                            <div className="max-h-96 overflow-y-auto">
+                                {notifications.length === 0 ? (
+                                    <div className="p-6 text-center text-gray-500">
+                                        {t(
+                                            "no_notifications_found",
+                                            "No notifications found."
+                                        )}
+                                    </div>
+                                ) : (
+                                    notifications.map(
+                                        (notification) => (
+                                            <div
+                                                key={
+                                                    notification.id
+                                                }
+                                                onClick={() =>
+                                                    handleNotificationClick(
+                                                        notification
+                                                    )
+                                                }
+                                                className={`cursor-pointer border-b p-4 transition hover:bg-slate-50 ${
+                                                    !notification.is_read
+                                                        ? "bg-blue-50"
+                                                        : ""
+                                                }`}
+                                            >
+                                                <div className="flex items-start justify-between">
+                                                    <div>
+                                                        <h4 className="font-semibold text-slate-800">
+                                                            {notification.title}
+                                                        </h4>
 
-            <p className="text-sm text-slate-500">
-              Administrator
-            </p>
+                                                        <p className="mt-1 text-sm text-slate-600">
+                                                            {notification.message}
+                                                        </p>
 
-          </div>
+                                                        <p className="mt-2 text-xs text-slate-400">
+                                                            {new Date(
+                                                                notification.created_at
+                                                            ).toLocaleString(
+                                                                currentLanguageCode,
+                                                                {
+                                                                    dateStyle:
+                                                                        "medium",
+                                                                    timeStyle:
+                                                                        "short",
+                                                                }
+                                                            )}
+                                                        </p>
+                                                    </div>
 
-        </div>
+                                                    {!notification.is_read && (
+                                                        <span className="mt-2 h-2 w-2 rounded-full bg-blue-600"></span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )
+                                    )
+                                )}
+                            </div>
 
-      </div>
+                            <div className="border-t p-3">
+                                <button className="w-full rounded-lg py-2 text-sm font-medium text-blue-600 transition hover:bg-slate-100">
+                                    {t(
+                                        "view_all_notifications",
+                                        "View All Notifications"
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
 
-    </header>
+                <button className="flex h-12 w-12 items-center justify-center rounded-xl border hover:bg-slate-100">
+                    <Settings size={20} />
+                </button>
 
-  );
+                <div className="flex items-center gap-3">
+                    <UserCircle2
+                        size={42}
+                        className="text-blue-600"
+                    />
+
+                    <div>
+                        <h4 className="font-semibold">
+                            {t(
+                                "super_admin",
+                                "Super Admin"
+                            )}
+                        </h4>
+
+                        <p className="text-sm text-slate-500">
+                            {t(
+                                "administrator",
+                                "Administrator"
+                            )}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
 }
 
 export default Navbar;

@@ -3,66 +3,73 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
 import InvitationsTable from "../../components/invitations/InvitationsTable";
 
+import { useLanguage } from "../../context/useLanguage";
+
 import { getInvitations } from "../../services/superAdminService";
 
 function Invitations() {
-  const [invitations, setInvitations] = useState([]);
-  const [loading, setLoading] = useState(true);
+    const { t } = useLanguage();
 
-  const loadInvitations = async () => {
-    try {
-      setLoading(true);
+    const [invitations, setInvitations] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-      const res = await getInvitations();
+    const loadInvitations = async () => {
+        try {
+            setLoading(true);
 
-      console.log("Invitations API:", res.data);
+            const res = await getInvitations();
 
-      setInvitations(res.data);
-    } catch (err) {
-      console.error("Error loading invitations:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+            console.log("Invitations API:", res.data);
 
-  useEffect(() => {
-    loadInvitations();
-  }, []);
+            setInvitations(res.data);
+        } catch (err) {
+            console.error("Error loading invitations:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return (
-    <AdminLayout>
-      <div className="space-y-6">
+    useEffect(() => {
+        loadInvitations();
+    }, []);
 
-        <div className="flex justify-between items-center">
+    return (
+        <AdminLayout>
+            <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold">
+                            {t(
+                                "invitations",
+                                "Invitations"
+                            )}
+                        </h1>
 
-          <div>
+                        <p className="text-gray-500 mt-2">
+                            {t(
+                                "manage_organization_invitations",
+                                "Manage organization invitations."
+                            )}
+                        </p>
+                    </div>
+                </div>
 
-            <h1 className="text-3xl font-bold">
-              Invitations
-            </h1>
-
-            <p className="text-gray-500 mt-2">
-              Manage organization invitations.
-            </p>
-
-          </div>
-
-        </div>
-
-        {loading ? (
-          <div className="bg-white rounded-2xl border p-10 text-center">
-            Loading invitations...
-          </div>
-        ) : (
-          <InvitationsTable
-            invitations={invitations}
-            refreshInvitations={loadInvitations}
-          />
-        )}
-
-      </div>
-    </AdminLayout>
-  );
+                {loading ? (
+                    <div className="bg-white rounded-2xl border p-10 text-center">
+                        {t(
+                            "loading_invitations",
+                            "Loading invitations..."
+                        )}
+                    </div>
+                ) : (
+                    <InvitationsTable
+                        invitations={invitations}
+                        refreshInvitations={loadInvitations}
+                    />
+                )}
+            </div>
+        </AdminLayout>
+    );
 }
 
 export default Invitations;

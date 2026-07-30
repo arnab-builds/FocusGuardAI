@@ -51,6 +51,14 @@ EXACT_CONTRACT_KEYS = {
     "id",
     "pk",
     "role",
+    # Status is a database enum. Clients use its PENDING/APPROVED/REJECTED
+    # values to decide which request actions are available.
+    "status",
+    # These values are machine-readable enums used by the activity-history
+    # UI for status styling and analytics calculations. Translating them
+    # turns PRODUCTIVE into display text and makes every row hit the
+    # non-productive fallback.
+    "productivity_type",
     "language_code",
     "name",
     # AI responses are already generated in the user's preferred language.
@@ -118,8 +126,18 @@ def translate_api_response(
     so the centralized recursive translator can still process the full payload
     without sending protected values to the provider.
     """
+    # Public clients keep the active UI language locally until a profile
+    # update is saved. Honour the explicit request language first so that
+    # translated API data (notifications, analytics, etc.) cannot drift from
+    # the language currently displayed by the frontend.
+    requested_language = (
+        request.query_params.get("language")
+        if request is not None
+        else None
+    )
     target_language = (
         language
+        or requested_language
         or _get_language_from_user(user)
         or (get_user_language(request) if request is not None else None)
         or DEFAULT_LANGUAGE_CODE

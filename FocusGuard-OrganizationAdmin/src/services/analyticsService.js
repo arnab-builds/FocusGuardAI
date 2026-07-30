@@ -1,7 +1,9 @@
 import api from "../api/api";
 
-export const getOrganizationAnalytics = async () => {
-    const response = await api.get("organization/analytics/");
+export const getOrganizationAnalytics = async (languageCode) => {
+    const response = await api.get("organization/analytics/", {
+        params: languageCode ? { language: languageCode } : undefined,
+    });
     return response.data;
 };
 

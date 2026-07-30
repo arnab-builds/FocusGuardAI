@@ -53,7 +53,7 @@ const buildCategoryData = (analytics) => {
 };
 
 function Analytics() {
-    const { t } = useLanguage();
+    const { currentLanguageCode, t } = useLanguage();
 
     const [analytics, setAnalytics] = useState({
         total_employees: 0,
@@ -69,7 +69,9 @@ function Analytics() {
     async function loadAnalytics() {
         try {
             const analyticsResponse =
-                await getOrganizationAnalytics();
+                await getOrganizationAnalytics(
+                    currentLanguageCode
+                );
 
             setAnalytics(analyticsResponse);
 
@@ -97,7 +99,7 @@ function Analytics() {
         const timeout = setTimeout(loadAnalytics, 0);
 
         return () => clearTimeout(timeout);
-    }, []);
+    }, [currentLanguageCode]);
 
     return (
         <DashboardLayout>

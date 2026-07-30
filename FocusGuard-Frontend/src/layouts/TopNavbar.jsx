@@ -101,7 +101,7 @@ const navigate = useNavigate();
   useEffect(() => {
   const loadNotifications = async () => {
     try {
-      const data = await getNotifications();
+      const data = await getNotifications(currentLanguageCode);
       setNotifications(data);
     } catch (err) {
       console.error(err);
@@ -109,7 +109,7 @@ const navigate = useNavigate();
   };
 
   loadNotifications();
-}, []);
+}, [currentLanguageCode]);
   return (
         <header className="border-b border-slate-200 bg-white px-8 py-5">
       <div className="flex items-center justify-between">

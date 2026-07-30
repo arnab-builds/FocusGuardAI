@@ -91,9 +91,10 @@ export function LanguageProvider({ children }) {
 
     if (cachedTranslations) {
       applyTranslations(languageCode, cachedTranslations);
-    } else {
-      applyTranslations(languageCode, {});
+      return cachedTranslations;
     }
+
+    applyTranslations(languageCode, {});
 
     const translationData =
       await fetchAndCacheTranslations(languageCode);

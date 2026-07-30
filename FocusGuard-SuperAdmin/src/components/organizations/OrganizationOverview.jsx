@@ -1,135 +1,140 @@
 import {
-  Building2,
-  Users,
-  UserCheck,
-  UserX,
+    Building2,
+    Users,
+    UserCheck,
+    UserX,
 } from "lucide-react";
 
+import { useLanguage } from "../../context/useLanguage";
+
 function ProgressBar({ value, color }) {
-  return (
-    <div className="mt-2">
+    return (
+        <div className="mt-2">
+            <div className="w-full h-4 rounded-full bg-gray-200">
+                <div
+                    className={`${color} h-4 rounded-full transition-all duration-500`}
+                    style={{ width: `${value}%` }}
+                />
+            </div>
 
-      <div className="w-full h-4 rounded-full bg-gray-200">
-
-        <div
-          className={`${color} h-4 rounded-full transition-all duration-500`}
-          style={{ width: `${value}%` }}
-        />
-
-      </div>
-
-      <p className="mt-2 font-semibold">
-        {value}%
-      </p>
-
-    </div>
-  );
+            <p className="mt-2 font-semibold">
+                {value}%
+            </p>
+        </div>
+    );
 }
 
 function Card({ icon, title, value }) {
-  return (
-    <div className="bg-white rounded-2xl shadow-sm border p-6 flex items-center gap-5">
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border p-6 flex items-center gap-5">
+            <div className="bg-blue-100 p-4 rounded-xl text-blue-600">
+                {icon}
+            </div>
 
-      <div className="bg-blue-100 p-4 rounded-xl text-blue-600">
-        {icon}
-      </div>
+            <div>
+                <p className="text-gray-500">
+                    {title}
+                </p>
 
-      <div>
-
-        <p className="text-gray-500">
-          {title}
-        </p>
-
-        <h2 className="text-3xl font-bold">
-          {value}
-        </h2>
-
-      </div>
-
-    </div>
-  );
+                <h2 className="text-3xl font-bold">
+                    {value}
+                </h2>
+            </div>
+        </div>
+    );
 }
 
 function OrganizationOverview({
-  organization,
-  summary,
+    organization,
+    summary,
 }) {
+    const { t } = useLanguage();
 
-  return (
-    <>
+    return (
+        <>
+            <div>
+                <h1 className="text-3xl font-bold">
+                    {organization.name}
+                </h1>
 
-      <div>
+                <p className="text-gray-500 mt-2">
+                    {organization.address ||
+                        t(
+                            "organization_performance_overview",
+                            "Organization Performance Overview"
+                        )}
+                </p>
+            </div>
 
-        <h1 className="text-3xl font-bold">
-          {organization.name}
-        </h1>
+            <div className="grid grid-cols-4 gap-6">
+                <Card
+                    title={t(
+                        "employees",
+                        "Employees"
+                    )}
+                    value={summary.employees}
+                    icon={<Users />}
+                />
 
-        <p className="text-gray-500 mt-2">
-          {organization.address || "Organization Performance Overview"}
-        </p>
+                <Card
+                    title={t(
+                        "active",
+                        "Active"
+                    )}
+                    value={summary.active}
+                    icon={<UserCheck />}
+                />
 
-      </div>
+                <Card
+                    title={t(
+                        "inactive",
+                        "Inactive"
+                    )}
+                    value={summary.inactive}
+                    icon={<UserX />}
+                />
 
-      <div className="grid grid-cols-4 gap-6">
+                <Card
+                    title={t(
+                        "organization",
+                        "Organization"
+                    )}
+                    value={organization.id}
+                    icon={<Building2 />}
+                />
+            </div>
 
-        <Card
-          title="Employees"
-          value={summary.employees}
-          icon={<Users />}
-        />
+            <div className="grid grid-cols-2 gap-6">
+                <div className="bg-white rounded-2xl border shadow-sm p-6">
+                    <h2 className="text-xl font-semibold">
+                        {t(
+                            "overall_productivity",
+                            "Overall Productivity"
+                        )}
+                    </h2>
 
-        <Card
-          title="Active"
-          value={summary.active}
-          icon={<UserCheck />}
-        />
+                    <ProgressBar
+                        value={summary.productive}
+                        color="bg-green-500"
+                    />
+                </div>
 
-        <Card
-          title="Inactive"
-          value={summary.inactive}
-          icon={<UserX />}
-        />
+                <div className="bg-white rounded-2xl border shadow-sm p-6">
+                    <h2 className="text-xl font-semibold">
+                        {t(
+                            "overall_unproductive",
+                            "Overall Unproductive"
+                        )}
+                    </h2>
 
-        <Card
-          title="Organization"
-          value={organization.id}
-          icon={<Building2 />}
-        />
-
-      </div>
-
-      <div className="grid grid-cols-2 gap-6">
-
-        <div className="bg-white rounded-2xl border shadow-sm p-6">
-
-          <h2 className="text-xl font-semibold">
-            Overall Productivity
-          </h2>
-
-          <ProgressBar
-            value={summary.productive}
-            color="bg-green-500"
-          />
-
-        </div>
-
-        <div className="bg-white rounded-2xl border shadow-sm p-6">
-
-          <h2 className="text-xl font-semibold">
-            Overall Unproductive
-          </h2>
-
-          <ProgressBar
-            value={summary.unproductive}
-            color="bg-red-500"
-          />
-
-        </div>
-
-      </div>
-
-    </>
-  );
+                    <ProgressBar
+                        value={summary.unproductive}
+                        color="bg-red-500"
+                    />
+                </div>
+            </div>
+        </>
+    );
 }
 
 export default OrganizationOverview;

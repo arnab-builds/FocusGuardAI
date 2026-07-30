@@ -5,7 +5,7 @@ from datetime import datetime
 from django.conf import settings
 from django.core.mail import send_mail
 from django.utils import duration, timezone
-from rest_framework import generics, status
+from rest_framework import generics, serializers, status
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -36,6 +36,7 @@ from .serializers import (
     RegisterSerializer,
     UserInactivitySerializer,
     UserListSerializer,
+    validate_username_identifier,
 )
 from .serializers import RegisterWithInviteCodeSerializer
 
@@ -1337,7 +1338,10 @@ class OrganizationAnalyticsView(TranslatedResponseMixin, APIView):
     def get(self, request):
 
         organization = request.user.organization
-        language_code = get_user_language(request)
+        language_code = (
+            request.query_params.get("language")
+            or get_user_language(request)
+        )
 
         users = User.objects.filter(
     organization=organization,
@@ -1384,7 +1388,14 @@ class OrganizationAnalyticsView(TranslatedResponseMixin, APIView):
                     website_totals[website_name] = {
                         "website_name": website_name,
                         "website_url": website.get("website_url", ""),
-                        "category": website.get("category", "Unknown"),
+                        # Unlike category_summary, top_websites is assembled
+                        # manually below. Translate its category here so old
+                        # records and newly tracked websites use the same
+                        # preferred-language label in the table.
+                        "category": translate_text(
+                            str(website.get("category", "Unknown")),
+                            language_code,
+                        ),
                         "duration_seconds": 0,
                         "visits": 0,
                     }
@@ -1491,7 +1502,7 @@ class InactivityStartView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
-class SuperAdminAnalyticsView(APIView):
+class SuperAdminAnalyticsView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def get(self, request):
@@ -1857,7 +1868,7 @@ class OrganizationDeactivationRequestView(TranslatedResponseMixin, APIView):
             },
             status=status.HTTP_201_CREATED
         )
-class OrganizationDeactivationRequestListView(APIView):
+class OrganizationDeactivationRequestListView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def get(self, request):
@@ -1878,7 +1889,7 @@ class OrganizationDeactivationRequestListView(APIView):
 from admin_notifications.utils import create_admin_notification
 
 
-class ApproveOrganizationDeactivationRequestView(APIView):
+class ApproveOrganizationDeactivationRequestView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def post(self, request, request_id):
@@ -1938,7 +1949,7 @@ class ApproveOrganizationDeactivationRequestView(APIView):
             "organization": organization.name,
             "users_deactivated": users_deactivated
         })
-class RejectOrganizationDeactivationRequestView(APIView):
+class RejectOrganizationDeactivationRequestView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def post(self, request, request_id):
@@ -2196,7 +2207,7 @@ from django.db.models import Count
 
 from django.db.models import Count
 
-class SuperAdminDashboardView(APIView):
+class SuperAdminDashboardView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def get(self, request):
@@ -2273,7 +2284,7 @@ class SuperAdminDashboardView(APIView):
     for invite in pending_invitations
 ],
         })
-class SuperAdminOrganizationListView(APIView):
+class SuperAdminOrganizationListView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def get(self, request):
@@ -2352,7 +2363,7 @@ class SuperAdminOrganizationListView(APIView):
             })
 
         return Response(data)
-class SuperAdminOrganizationDetailView(APIView):
+class SuperAdminOrganizationDetailView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def duration_to_seconds(self, duration):
@@ -2475,7 +2486,7 @@ class SuperAdminOrganizationDetailView(APIView):
             },
             "employees_data": employee_data,
         })
-class SuperAdminOrganizationUpdateDeleteView(APIView):
+class SuperAdminOrganizationUpdateDeleteView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def put(self, request, organization_id):
@@ -2537,7 +2548,7 @@ class SuperAdminOrganizationUpdateDeleteView(APIView):
         )
 # views.py
 
-class SuperAdminEmployeesSummaryView(APIView):
+class SuperAdminEmployeesSummaryView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def get(self, request, organization_id):
@@ -2582,7 +2593,7 @@ class SuperAdminEmployeesSummaryView(APIView):
         return Response(data)
 # views.py
 
-class SuperAdminAnalyticsAPIView(APIView):
+class SuperAdminAnalyticsAPIView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def get(self, request):
@@ -2734,7 +2745,7 @@ class SuperAdminAnalyticsAPIView(APIView):
                 "organizations_data": organizations_data,
             }
         )
-class SuperAdminInvitationListView(APIView):
+class SuperAdminInvitationListView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def get(self, request):
@@ -2818,6 +2829,14 @@ class SuperAdminSettingsView(TranslatedResponseMixin, APIView):
         new_password = request.data.get("new_password")
         confirm_password = request.data.get("confirm_password")
         preferred_language_id = request.data.get("preferred_language")
+
+        try:
+            username = validate_username_identifier(username)
+        except serializers.ValidationError as error:
+            return Response(
+                {"error": error.detail[0]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         if preferred_language_id is None:
             preferred_language_id = request.data.get(

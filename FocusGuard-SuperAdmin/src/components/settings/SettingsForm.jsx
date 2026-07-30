@@ -1,260 +1,360 @@
 import { useEffect, useState } from "react";
 import {
-  getSettings,
-  updateSettings,
+    getSettings,
+    updateSettings,
 } from "../../services/superAdminService";
 import { useLanguage } from "../../context/LanguageContext";
 
 function SettingsForm() {
-  const {
-    languages,
-    setLanguageById,
-    setLanguageFromPreference,
-  } = useLanguage();
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    first_name: "",
-    last_name: "",
-    current_password: "",
-    new_password: "",
-    confirm_password: "",
-    preferred_language: "",
-  });
+    const {
+        t,
+        languages,
+        setLanguageById,
+        setLanguageFromPreference,
+    } = useLanguage();
 
-  const [loading, setLoading] = useState(false);
-
-  async function loadSettings() {
-    try {
-      const res = await getSettings();
-
-      setFormData((prev) => ({
-        ...prev,
-        username: res.data.username || "",
-        email: res.data.email || "",
-        first_name: res.data.first_name || "",
-        last_name: res.data.last_name || "",
-        preferred_language:
-          res.data.preferred_language?.id
-            ? String(res.data.preferred_language.id)
-            : "",
-      }));
-    } catch (err) {
-      console.error(err);
-      alert("Failed to load settings.");
-    }
-  }
-
-  useEffect(() => {
-    const timeout = setTimeout(loadSettings, 0);
-
-    return () => clearTimeout(timeout);
-  }, []);
-
-  const handleChange = async (e) => {
-    const { name, value } = e.target;
-
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-
-    if (name === "preferred_language") {
-      await setLanguageById(value);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      setLoading(true);
-
-      const response = await updateSettings(formData);
-
-      await setLanguageFromPreference(
-        response.data?.preferred_language
-      );
-
-      alert("Profile updated successfully.");
-
-      setFormData((prev) => ({
-        ...prev,
+    const [formData, setFormData] = useState({
+        username: "",
+        email: "",
+        first_name: "",
+        last_name: "",
         current_password: "",
         new_password: "",
         confirm_password: "",
-      }));
-    } catch (err) {
-      alert(
-        err.response?.data?.error ||
-          "Something went wrong."
-      );
-    } finally {
-      setLoading(false);
+        preferred_language: "",
+    });
+
+    const [loading, setLoading] = useState(false);
+
+    async function loadSettings() {
+        try {
+            const res = await getSettings();
+
+            setFormData((prev) => ({
+                ...prev,
+                username: res.data.username || "",
+                email: res.data.email || "",
+                first_name: res.data.first_name || "",
+                last_name: res.data.last_name || "",
+                preferred_language:
+                    res.data.preferred_language?.id
+                        ? String(
+                              res.data.preferred_language.id
+                          )
+                        : "",
+            }));
+        } catch (err) {
+            console.error(err);
+            alert(
+                t(
+                    "failed_to_load_settings",
+                    "Failed to load settings."
+                )
+            );
+        }
     }
-  };
 
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white rounded-2xl shadow-sm border p-8 max-w-5xl"
-    >
-      <h2 className="text-2xl font-bold mb-8">
-        Profile Settings
-      </h2>
+    useEffect(() => {
+        const timeout = setTimeout(
+            loadSettings,
+            0
+        );
 
-      <div className="grid grid-cols-2 gap-6">
+        return () => clearTimeout(timeout);
+    }, []);
 
-        <div>
-          <label className="block font-semibold mb-2">
-            First Name
-          </label>
+    const handleChange = async (e) => {
+        const { name, value } = e.target;
 
-          <input
-            name="first_name"
-            value={formData.first_name}
-            onChange={handleChange}
-            className="w-full border rounded-xl p-3"
-          />
-        </div>
+        setFormData({
+            ...formData,
+            [name]: value,
+        });
 
-        <div>
-          <label className="block font-semibold mb-2">
-            Last Name
-          </label>
+        if (
+            name === "preferred_language"
+        ) {
+            await setLanguageById(value);
+        }
+    };
 
-          <input
-            name="last_name"
-            value={formData.last_name}
-            onChange={handleChange}
-            className="w-full border rounded-xl p-3"
-          />
-        </div>
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-        <div>
-          <label className="block font-semibold mb-2">
-            Username
-          </label>
+        try {
+            setLoading(true);
 
-          <input
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            className="w-full border rounded-xl p-3"
-          />
-        </div>
+            const response =
+                await updateSettings(formData);
 
-        <div>
-          <label className="block font-semibold mb-2">
-            Email
-          </label>
+            await setLanguageFromPreference(
+                response.data
+                    ?.preferred_language
+            );
 
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full border rounded-xl p-3"
-          />
-        </div>
+            alert(
+                t(
+                    "profile_updated_successfully",
+                    "Profile updated successfully."
+                )
+            );
 
-        <div>
-          <label className="block font-semibold mb-2">
-            Preferred Language
-          </label>
+            setFormData((prev) => ({
+                ...prev,
+                current_password: "",
+                new_password: "",
+                confirm_password: "",
+            }));
+        } catch (err) {
+            alert(
+                err.response?.data?.error ||
+                    t(
+                        "something_went_wrong",
+                        "Something went wrong."
+                    )
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
 
-          <select
-            name="preferred_language"
-            value={formData.preferred_language}
-            onChange={handleChange}
-            className="w-full border rounded-xl p-3 bg-white"
-            required
-          >
-            <option value="" disabled>
-              Select language
-            </option>
-
-            {languages.map((language) => (
-              <option
-                key={language.id}
-                value={language.id}
-              >
-                {language.native_name || language.language_name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-      </div>
-
-      <hr className="my-8" />
-
-      <h3 className="text-xl font-semibold mb-6">
-        Change Password
-      </h3>
-
-      <div className="grid grid-cols-1 gap-6">
-
-        <div>
-          <label className="block font-semibold mb-2">
-            Current Password
-          </label>
-
-          <input
-            type="password"
-            name="current_password"
-            value={formData.current_password}
-            onChange={handleChange}
-            className="w-full border rounded-xl p-3"
-          />
-        </div>
-
-        <div>
-          <label className="block font-semibold mb-2">
-            New Password
-          </label>
-
-          <input
-            type="password"
-            name="new_password"
-            value={formData.new_password}
-            onChange={handleChange}
-            className="w-full border rounded-xl p-3"
-          />
-        </div>
-
-        <div>
-          <label className="block font-semibold mb-2">
-            Confirm Password
-          </label>
-
-          <input
-            type="password"
-            name="confirm_password"
-            value={formData.confirm_password}
-            onChange={handleChange}
-            className="w-full border rounded-xl p-3"
-          />
-        </div>
-
-      </div>
-
-      <div className="mt-8">
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-8 py-3 rounded-xl font-semibold transition"
+    return (
+        <form
+            onSubmit={handleSubmit}
+            className="bg-white rounded-2xl shadow-sm border p-8 max-w-5xl"
         >
-          {loading
-            ? "Saving..."
-            : "Save Changes"}
-        </button>
+            <h2 className="text-2xl font-bold mb-8">
+                {t(
+                    "profile_settings",
+                    "Profile Settings"
+                )}
+            </h2>
 
-      </div>
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block font-semibold mb-2">
+                        {t(
+                            "first_name",
+                            "First Name"
+                        )}
+                    </label>
 
-    </form>
-  );
+                    <input
+                        name="first_name"
+                        value={
+                            formData.first_name
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="w-full border rounded-xl p-3"
+                    />
+                </div>
+
+                <div>
+                    <label className="block font-semibold mb-2">
+                        {t(
+                            "last_name",
+                            "Last Name"
+                        )}
+                    </label>
+
+                    <input
+                        name="last_name"
+                        value={
+                            formData.last_name
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="w-full border rounded-xl p-3"
+                    />
+                </div>
+
+                <div>
+                    <label className="block font-semibold mb-2">
+                        {t(
+                            "username",
+                            "Username"
+                        )}
+                    </label>
+
+                    <input
+                        name="username"
+                        value={
+                            formData.username
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="w-full border rounded-xl p-3"
+                    />
+                </div>
+
+                <div>
+                    <label className="block font-semibold mb-2">
+                        {t(
+                            "email",
+                            "Email"
+                        )}
+                    </label>
+
+                    <input
+                        type="email"
+                        name="email"
+                        value={
+                            formData.email
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="w-full border rounded-xl p-3"
+                    />
+                </div>
+
+                <div>
+                    <label className="block font-semibold mb-2">
+                        {t(
+                            "preferred_language",
+                            "Preferred Language"
+                        )}
+                    </label>
+
+                    <select
+                        name="preferred_language"
+                        value={
+                            formData.preferred_language
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="w-full border rounded-xl p-3 bg-white"
+                        required
+                    >
+                        <option
+                            value=""
+                            disabled
+                        >
+                            {t(
+                                "select_language",
+                                "Select language"
+                            )}
+                        </option>
+
+                        {languages.map(
+                            (
+                                language
+                            ) => (
+                                <option
+                                    key={
+                                        language.id
+                                    }
+                                    value={
+                                        language.id
+                                    }
+                                >
+                                    {language.native_name ||
+                                        language.language_name}
+                                </option>
+                            )
+                        )}
+                    </select>
+                </div>
+            </div>
+
+            <hr className="my-8" />
+
+            <h3 className="text-xl font-semibold mb-6">
+                {t(
+                    "change_password",
+                    "Change Password"
+                )}
+            </h3>
+
+            <div className="grid grid-cols-1 gap-6">
+                <div>
+                    <label className="block font-semibold mb-2">
+                        {t(
+                            "current_password",
+                            "Current Password"
+                        )}
+                    </label>
+
+                    <input
+                        type="password"
+                        name="current_password"
+                        value={
+                            formData.current_password
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="w-full border rounded-xl p-3"
+                    />
+                </div>
+
+                <div>
+                    <label className="block font-semibold mb-2">
+                        {t(
+                            "new_password",
+                            "New Password"
+                        )}
+                    </label>
+
+                    <input
+                        type="password"
+                        name="new_password"
+                        value={
+                            formData.new_password
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="w-full border rounded-xl p-3"
+                    />
+                </div>
+
+                <div>
+                    <label className="block font-semibold mb-2">
+                        {t(
+                            "confirm_password",
+                            "Confirm Password"
+                        )}
+                    </label>
+
+                    <input
+                        type="password"
+                        name="confirm_password"
+                        value={
+                            formData.confirm_password
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="w-full border rounded-xl p-3"
+                    />
+                </div>
+            </div>
+
+            <div className="mt-8">
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-8 py-3 rounded-xl font-semibold transition"
+                >
+                    {loading
+                        ? t(
+                              "saving",
+                              "Saving..."
+                          )
+                        : t(
+                              "save_changes",
+                              "Save Changes"
+                          )}
+                </button>
+            </div>
+        </form>
+    );
 }
 
 export default SettingsForm;

@@ -4,6 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission, IsAuthenticated
 
+from users.services.response_translation import TranslatedResponseMixin
+
 from .models import AdminNotification
 from .serializers import AdminNotificationSerializer
 
@@ -17,7 +19,7 @@ class IsSuperAdmin(BasePermission):
         )
 
 
-class AdminNotificationListView(APIView):
+class AdminNotificationListView(TranslatedResponseMixin, APIView):
 
     permission_classes = [
         IsAuthenticated,
@@ -43,7 +45,7 @@ class AdminNotificationListView(APIView):
         })
 
 
-class UnreadNotificationCountView(APIView):
+class UnreadNotificationCountView(TranslatedResponseMixin, APIView):
 
     permission_classes = [
         IsAuthenticated,
@@ -62,7 +64,7 @@ class UnreadNotificationCountView(APIView):
         })
 
 
-class MarkNotificationReadView(APIView):
+class MarkNotificationReadView(TranslatedResponseMixin, APIView):
 
     permission_classes = [
         IsAuthenticated,
@@ -85,7 +87,7 @@ class MarkNotificationReadView(APIView):
         })
 
 
-class MarkAllNotificationsReadView(APIView):
+class MarkAllNotificationsReadView(TranslatedResponseMixin, APIView):
 
     permission_classes = [
         IsAuthenticated,

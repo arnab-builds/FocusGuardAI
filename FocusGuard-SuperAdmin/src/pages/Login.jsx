@@ -58,9 +58,21 @@ function Login() {
 
             navigate("/dashboard");
         } catch (error) {
+            const responseData = error.response?.data;
+            const isCredentialValidationError =
+                error.response?.status === 400 &&
+                (responseData?.non_field_errors ||
+                    responseData?.username ||
+                    responseData?.password);
+
             alert(
-                error.response?.data?.error ||
-                "Login failed"
+                isCredentialValidationError
+                    ? t(
+                          "invalid_username_or_password",
+                          "Invalid username or password."
+                      )
+                    : responseData?.error ||
+                t("login_failed", "Login failed")
             );
         }
     };

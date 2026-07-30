@@ -4,6 +4,7 @@ import {
     useContext,
     useEffect,
     useMemo,
+    useRef,
     useState,
 } from "react";
 
@@ -14,9 +15,27 @@ import {
 
 export const PREFERRED_LANGUAGE_KEY = "preferredLanguage";
 export const LEGACY_PUBLIC_LANGUAGE_KEY = "focusguard_public_language";
-export const TRANSLATION_CACHE_PREFIX = "translations_";
+// Bump this when the translation catalog changes so incomplete cached payloads
+// from earlier releases cannot keep the interface in English.
+export const TRANSLATION_CACHE_PREFIX = "translations_v2_";
 
 const DEFAULT_LANGUAGE_CODE = "en-IN";
+const translationRequests = new Map();
+
+// Older screens used a small number of overly-specific keys which were not
+// part of the shared catalog. Keep those labels localized while the catalog is
+// refreshed, instead of falling back to English.
+const FALLBACK_TRANSLATION_KEYS = {
+    address: "organization_address",
+    approved: "accepted",
+    current_password: "password",
+    delete_organization_confirmation: "action_cannot_be_undone",
+    invalid_username_or_password: "login_failed",
+    organization_active: "active",
+    organization_name_placeholder: "organization_name",
+    recent_organizations: "organizations",
+    rejected: "reject",
+};
 
 const LanguageContext = createContext(null);
 
@@ -38,6 +57,31 @@ const readJsonCache = (key) => {
 
 const writeJsonCache = (key, value) => {
     localStorage.setItem(key, JSON.stringify(value));
+};
+
+const fetchAndCacheTranslations = async (languageCode) => {
+    if (translationRequests.has(languageCode)) {
+        return translationRequests.get(languageCode);
+    }
+
+    const request = getTranslations(languageCode)
+        .then((response) => {
+            const translationData = getResponseData(response) || {};
+
+            writeJsonCache(
+                getTranslationCacheKey(languageCode),
+                translationData
+            );
+
+            return translationData;
+        })
+        .finally(() => {
+            translationRequests.delete(languageCode);
+        });
+
+    translationRequests.set(languageCode, request);
+
+    return request;
 };
 
 const getStoredLanguageCode = () =>
@@ -83,6 +127,7 @@ export function LanguageProvider({ children }) {
         useState(getStoredLanguageCode);
     const [translations, setTranslations] = useState({});
     const [loading, setLoading] = useState(true);
+    const activeLanguageCodeRef = useRef(currentLanguageCode);
 
     const getLanguageByCode = useCallback(
         (languageCode) =>
@@ -100,9 +145,20 @@ export function LanguageProvider({ children }) {
         [languages]
     );
 
+    const applyTranslations = useCallback(
+        (languageCode, translationData) => {
+            if (activeLanguageCodeRef.current === languageCode) {
+                setTranslations(translationData);
+            }
+        },
+        []
+    );
+
     const loadTranslations = useCallback(async (languageCode) => {
         if (!languageCode) {
-            setTranslations({});
+            if (!activeLanguageCodeRef.current) {
+                setTranslations({});
+            }
             return {};
         }
 
@@ -110,18 +166,16 @@ export function LanguageProvider({ children }) {
         const cachedTranslations = readJsonCache(cacheKey);
 
         if (cachedTranslations) {
-            setTranslations(cachedTranslations);
+            applyTranslations(languageCode, cachedTranslations);
             return cachedTranslations;
         }
 
-        const response = await getTranslations(languageCode);
-        const translationData = getResponseData(response) || {};
-
-        writeJsonCache(cacheKey, translationData);
-        setTranslations(translationData);
+        applyTranslations(languageCode, {});
+        const translationData = await fetchAndCacheTranslations(languageCode);
+        applyTranslations(languageCode, translationData);
 
         return translationData;
-    }, []);
+    }, [applyTranslations]);
 
     const setLanguageByCode = useCallback(
         async (languageCode) => {
@@ -138,14 +192,12 @@ export function LanguageProvider({ children }) {
                 DEFAULT_LANGUAGE_CODE;
 
             persistPreferredLanguage(nextLanguageCode);
+            activeLanguageCodeRef.current = nextLanguageCode;
             setCurrentLanguageCode(nextLanguageCode);
 
-            try {
-                await loadTranslations(nextLanguageCode);
-            } catch (error) {
+            loadTranslations(nextLanguageCode).catch((error) => {
                 console.error("Translations could not be loaded:", error);
-                setTranslations({});
-            }
+            });
 
             return nextLanguage;
         },
@@ -215,8 +267,9 @@ export function LanguageProvider({ children }) {
                     selectedLanguage?.language_code || DEFAULT_LANGUAGE_CODE;
 
                 persistPreferredLanguage(nextLanguageCode);
+                activeLanguageCodeRef.current = nextLanguageCode;
                 setCurrentLanguageCode(nextLanguageCode);
-                await loadTranslations(nextLanguageCode);
+                void loadTranslations(nextLanguageCode);
             } catch (error) {
                 console.error("Languages could not be loaded:", error);
             } finally {
@@ -234,7 +287,10 @@ export function LanguageProvider({ children }) {
     }, [loadTranslations]);
 
     const t = useCallback(
-        (key, fallback = "") => translations[key] || fallback,
+        (key, fallback = "") =>
+            translations[key] ||
+            translations[FALLBACK_TRANSLATION_KEYS[key]] ||
+            fallback,
         [translations]
     );
 

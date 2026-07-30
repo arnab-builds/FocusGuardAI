@@ -1,28 +1,34 @@
 import AdminLayout from "../../components/layout/AdminLayout";
 import RequestsTable from "../../components/requests/RequestsTable";
 
+import { useLanguage } from "../../context/useLanguage";
+
 function Requests() {
-  return (
-    <AdminLayout>
-      <div className="space-y-6">
+    const { t } = useLanguage();
 
-        <div>
+    return (
+        <AdminLayout>
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-3xl font-bold">
+                        {t(
+                            "deactivation_requests",
+                            "Deactivation Requests"
+                        )}
+                    </h1>
 
-          <h1 className="text-3xl font-bold">
-            Deactivation Requests
-          </h1>
+                    <p className="text-gray-500 mt-2">
+                        {t(
+                            "approve_reject_organization_requests",
+                            "Approve or reject organization requests."
+                        )}
+                    </p>
+                </div>
 
-          <p className="text-gray-500 mt-2">
-            Approve or reject organization requests.
-          </p>
-
-        </div>
-
-        <RequestsTable />
-
-      </div>
-    </AdminLayout>
-  );
+                <RequestsTable />
+            </div>
+        </AdminLayout>
+    );
 }
 
 export default Requests;

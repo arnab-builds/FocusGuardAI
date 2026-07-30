@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+import unicodedata
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -6,6 +7,30 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import EmployeeDeactivationRequest, OrganizationDeactivationRequest, User, Organization, Invitation, ActivityLog, UserInactivity, Language, Translation
 
 from .models import User, Organization, Invitation
+
+
+def validate_username_identifier(value):
+    """Reject accidental mixing of Latin and non-Latin identifier text."""
+    has_latin_letter = False
+    has_non_latin_letter = False
+
+    for character in value:
+        if not character.isalpha():
+            continue
+
+        character_name = unicodedata.name(character, "")
+
+        if character_name.startswith("LATIN "):
+            has_latin_letter = True
+        else:
+            has_non_latin_letter = True
+
+    if has_latin_letter and has_non_latin_letter:
+        raise serializers.ValidationError(
+            "Username cannot mix Latin and non-Latin characters."
+        )
+
+    return value
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -22,6 +47,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+
+    def validate_username(self, value):
+        return validate_username_identifier(value)
 
     class Meta:
         model = User
@@ -241,6 +269,9 @@ class RegisterWithInviteCodeSerializer(serializers.Serializer):
     preferred_language = serializers.PrimaryKeyRelatedField(
         queryset=Language.objects.filter(is_active=True),
     )
+
+    def validate_username(self, value):
+        return validate_username_identifier(value)
 
     def validate(self, attrs):
 

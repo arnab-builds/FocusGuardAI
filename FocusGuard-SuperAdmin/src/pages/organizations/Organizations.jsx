@@ -4,76 +4,92 @@ import AdminLayout from "../../components/layout/AdminLayout";
 import OrganizationsTable from "../../components/organizations/OrganizationsTable";
 import CreateOrganizationModal from "../../components/organizations/CreateOrganizationModal";
 
+import { useLanguage } from "../../context/useLanguage";
+
 import { getOrganizations } from "../../services/superAdminService";
 
 function Organizations() {
-  const [open, setOpen] = useState(false);
-  const [organizations, setOrganizations] = useState([]);
-  const [loading, setLoading] = useState(true);
+    const { t } = useLanguage();
 
-  const loadOrganizations = async () => {
-    try {
-      setLoading(true);
+    const [open, setOpen] = useState(false);
+    const [organizations, setOrganizations] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-      const res = await getOrganizations();
+    const loadOrganizations = async () => {
+        try {
+            setLoading(true);
 
-      console.log("Organizations API:", res.data);
+            const res = await getOrganizations();
 
-      setOrganizations(res.data);
-    } catch (err) {
-      console.error("Error loading organizations:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+            console.log("Organizations API:", res.data);
 
-  useEffect(() => {
-    loadOrganizations();
-  }, []);
+            setOrganizations(res.data);
+        } catch (err) {
+            console.error("Error loading organizations:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">
-              Organizations
-            </h1>
+    useEffect(() => {
+        loadOrganizations();
+    }, []);
 
-            <p className="text-gray-500 mt-2">
-              Manage organizations.
-            </p>
-          </div>
+    return (
+        <AdminLayout>
+            <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold">
+                            {t(
+                                "organizations",
+                                "Organizations"
+                            )}
+                        </h1>
 
-          <button
-            onClick={() => setOpen(true)}
-            className="bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700"
-          >
-            + Create Organization
-          </button>
-        </div>
+                        <p className="text-gray-500 mt-2">
+                            {t(
+                                "manage_organizations",
+                                "Manage organizations."
+                            )}
+                        </p>
+                    </div>
 
-        {loading ? (
-          <div className="bg-white rounded-2xl border p-10 text-center">
-            Loading organizations...
-          </div>
-        ) : (
-          <OrganizationsTable
-            organizations={organizations}
-            refreshOrganizations={loadOrganizations}
-          />
-        )}
-      </div>
+                    <button
+                        onClick={() => setOpen(true)}
+                        className="bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700"
+                    >
+                        {t(
+                            "create_organization",
+                            "+ Create Organization"
+                        )}
+                    </button>
+                </div>
 
-      <CreateOrganizationModal
-        open={open}
-        onClose={() => {
-          setOpen(false);
-          loadOrganizations();
-        }}
-      />
-    </AdminLayout>
-  );
+                {loading ? (
+                    <div className="bg-white rounded-2xl border p-10 text-center">
+                        {t(
+                            "loading_organizations",
+                            "Loading organizations..."
+                        )}
+                    </div>
+                ) : (
+                    <OrganizationsTable
+                        organizations={organizations}
+                        refreshOrganizations={loadOrganizations}
+                    />
+                )}
+            </div>
+
+            <CreateOrganizationModal
+                open={open}
+                onClose={() => {
+                    setOpen(false);
+                    loadOrganizations();
+                }}
+            />
+        </AdminLayout>
+    );
 }
 
 export default Organizations;

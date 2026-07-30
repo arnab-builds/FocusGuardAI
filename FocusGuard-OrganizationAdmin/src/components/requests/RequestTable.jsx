@@ -9,7 +9,6 @@ import {
 } from "../../services/requestService";
 
 import {
-    displayStatus,
     getApiErrorMessage,
     normalizeListResponse,
     normalizeStatus,
@@ -17,6 +16,19 @@ import {
 
 function RequestTable() {
     const { t } = useLanguage();
+
+    const getStatusLabel = (status) => {
+        const labels = {
+            PENDING: t("pending", "Pending"),
+            APPROVED: t("accepted", "Approved"),
+            REJECTED: t("reject", "Rejected"),
+        };
+
+        return (
+            labels[normalizeStatus(status)] ||
+            t("unknown", "Unknown")
+        );
+    };
 
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -213,7 +225,7 @@ function RequestTable() {
                                     </td>
 
                                     <td className="px-6 py-4">
-                                        {displayStatus(
+                                        {getStatusLabel(
                                             request.status
                                         )}
                                     </td>
