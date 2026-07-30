@@ -3,25 +3,17 @@ import { useEffect, useState } from "react";
 import {
     getProfile,
     requestOrganizationDeactivation,
-    updatePreferredLanguage,
 } from "../../services/settingsService";
 
 import { useLanguage } from "../../context/useLanguage";
 import { getApiErrorMessage } from "../../utils/responseUtils";
 
 function SettingsForm() {
-    const {
-        t,
-        languages,
-        setLanguageById,
-        setLanguageFromPreference,
-    } = useLanguage();
+    const { t } = useLanguage();
 
     const [organization, setOrganization] = useState("");
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
-    const [preferredLanguage, setPreferredLanguage] = useState("");
-    const [message, setMessage] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
     const [deactivationReason, setDeactivationReason] = useState("");
@@ -40,12 +32,6 @@ function SettingsForm() {
             );
 
             setEmail(data.email || "");
-
-            setPreferredLanguage(
-                data.preferred_language?.id
-                    ? String(data.preferred_language.id)
-                    : ""
-            );
 
             setError("");
         } catch (error) {
@@ -70,59 +56,6 @@ function SettingsForm() {
 
         return () => clearTimeout(timeout);
     }, []);
-
-    const handlePreferredLanguageChange = async (event) => {
-        const languageId = event.target.value;
-
-        setPreferredLanguage(languageId);
-        await setLanguageById(languageId);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        try {
-            setLoading(true);
-            setError("");
-            setMessage("");
-
-            const data = await updatePreferredLanguage(
-                preferredLanguage
-            );
-
-            setPreferredLanguage(
-                data.preferred_language?.id
-                    ? String(data.preferred_language.id)
-                    : ""
-            );
-
-            await setLanguageFromPreference(
-                data.preferred_language
-            );
-
-            setMessage(
-                data.message ||
-                    t(
-                        "preferred_language_updated_successfully",
-                        "Preferred language updated successfully."
-                    )
-            );
-        } catch (error) {
-            console.error(error);
-
-            setError(
-                getApiErrorMessage(
-                    error,
-                    t(
-                        "preferred_language_update_failed",
-                        "Preferred language could not be updated."
-                    )
-                )
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleDeactivationSubmit = async (e) => {
         e.preventDefault();
@@ -169,10 +102,7 @@ function SettingsForm() {
     };
     return (
     <div className="max-w-3xl space-y-6">
-        <form
-            onSubmit={handleSubmit}
-            className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8"
-        >
+        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
             <div className="space-y-6">
                 {loading && (
                     <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
@@ -180,12 +110,6 @@ function SettingsForm() {
                             "loading_settings",
                             "Loading settings..."
                         )}
-                    </div>
-                )}
-
-                {message && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                        {message}
                     </div>
                 )}
 
@@ -205,39 +129,6 @@ function SettingsForm() {
                         readOnly
                         className="w-full border rounded-xl px-4 py-3 bg-slate-50 text-slate-600"
                     />
-                </div>
-
-                <div>
-                    <label className="block mb-2 font-medium">
-                        {t(
-                            "preferred_language",
-                            "Preferred Language"
-                        )}
-                    </label>
-
-                    <select
-                        value={preferredLanguage}
-                        onChange={handlePreferredLanguageChange}
-                        required
-                        className="w-full border rounded-xl px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                        <option value="" disabled>
-                            {t(
-                                "select_language",
-                                "Select language"
-                            )}
-                        </option>
-
-                        {languages.map((language) => (
-                            <option
-                                key={language.id}
-                                value={language.id}
-                            >
-                                {language.native_name ||
-                                    language.language_name}
-                            </option>
-                        ))}
-                    </select>
                 </div>
 
                 <div>
@@ -277,26 +168,8 @@ function SettingsForm() {
                     />
                 </div>
 
-                <button
-                    type="submit"
-                    disabled={
-                        loading ||
-                        !preferredLanguage
-                    }
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-6 py-3"
-                >
-                    {loading
-                        ? t(
-                              "saving",
-                              "Saving..."
-                          )
-                        : t(
-                              "save_changes",
-                              "Save Changes"
-                          )}
-                </button>
             </div>
-        </form>
+        </section>
                 <form
             onSubmit={handleDeactivationSubmit}
             className="bg-white rounded-2xl border border-red-200 shadow-sm p-8"

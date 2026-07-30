@@ -67,6 +67,11 @@ export const getSettings = () =>
 export const getLanguages = () =>
   API.get("languages/");
 
+export const updatePreferredLanguage = (preferredLanguage) =>
+  API.patch("preferred-language/", {
+    preferred_language: preferredLanguage,
+  });
+
 export const updateSettings = (data) =>
   API.put(
     "super-admin/settings/",

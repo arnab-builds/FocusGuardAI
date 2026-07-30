@@ -4,6 +4,7 @@ import {
     Bell,
     Settings,
     UserCircle2,
+    Languages,
 } from "lucide-react";
 
 import {
@@ -17,6 +18,7 @@ import {
     getStoredOrganizationName,
 } from "../utils/activityUtils";
 import { useLanguage } from "../context/useLanguage";
+import { updatePreferredLanguage } from "../services/settingsService";
 
 const getGreeting = (t) => {
     const hour = new Date().getHours();
@@ -34,7 +36,7 @@ const getGreeting = (t) => {
 };
 
 function Navbar() {
-    const { t } = useLanguage();
+    const { currentLanguageCode, languages, setLanguageById, t } = useLanguage();
 
     const [notifications, setNotifications] =
         useState([]);
@@ -44,6 +46,7 @@ function Navbar() {
 
     const [showNotifications, setShowNotifications] =
         useState(false);
+    const [languageSaving, setLanguageSaving] = useState(false);
 
     const notificationRef = useRef(null);
 
@@ -215,6 +218,21 @@ function Navbar() {
             }
         };
 
+    const handleLanguageChange = async (event) => {
+        const languageId = event.target.value;
+        if (!languageId || languageSaving) return;
+
+        try {
+            setLanguageSaving(true);
+            await updatePreferredLanguage(languageId);
+            await setLanguageById(languageId);
+        } catch (error) {
+            console.error("Preferred language could not be updated:", error);
+        } finally {
+            setLanguageSaving(false);
+        }
+    };
+
     return (
         <header className="bg-white h-20 px-8 flex items-center justify-between border-b">
             <div>
@@ -231,6 +249,23 @@ function Navbar() {
             </div>
 
             <div className="flex items-center gap-5">
+                <label className="flex h-12 items-center rounded-xl border border-gray-200 bg-slate-50 px-3 text-slate-600 transition focus-within:border-indigo-500 focus-within:bg-white">
+                    <Languages size={18} className="mr-2 text-indigo-600" aria-hidden="true" />
+                    <span className="sr-only">{t("preferred_language", "Preferred Language")}</span>
+                    <select
+                        value={languages.find((language) => language.language_code === currentLanguageCode)?.id ?? ""}
+                        onChange={handleLanguageChange}
+                        disabled={languageSaving || !languages.length}
+                        className="max-w-28 bg-transparent text-sm font-medium outline-none disabled:cursor-wait"
+                        aria-label={t("preferred_language", "Preferred Language")}
+                    >
+                        {languages.map((language) => (
+                            <option key={language.id} value={language.id}>
+                                {language.native_name || language.language_name}
+                            </option>
+                        ))}
+                    </select>
+                </label>
                 <div className="relative">
                     <Search
                         size={18}

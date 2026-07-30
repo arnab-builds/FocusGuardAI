@@ -6,12 +6,7 @@ import {
 import { useLanguage } from "../../context/LanguageContext";
 
 function SettingsForm() {
-    const {
-        t,
-        languages,
-        setLanguageById,
-        setLanguageFromPreference,
-    } = useLanguage();
+    const { t } = useLanguage();
 
     const [formData, setFormData] = useState({
         username: "",
@@ -21,7 +16,6 @@ function SettingsForm() {
         current_password: "",
         new_password: "",
         confirm_password: "",
-        preferred_language: "",
     });
 
     const [loading, setLoading] = useState(false);
@@ -36,12 +30,6 @@ function SettingsForm() {
                 email: res.data.email || "",
                 first_name: res.data.first_name || "",
                 last_name: res.data.last_name || "",
-                preferred_language:
-                    res.data.preferred_language?.id
-                        ? String(
-                              res.data.preferred_language.id
-                          )
-                        : "",
             }));
         } catch (err) {
             console.error(err);
@@ -63,19 +51,13 @@ function SettingsForm() {
         return () => clearTimeout(timeout);
     }, []);
 
-    const handleChange = async (e) => {
+    const handleChange = (e) => {
         const { name, value } = e.target;
 
         setFormData({
             ...formData,
             [name]: value,
         });
-
-        if (
-            name === "preferred_language"
-        ) {
-            await setLanguageById(value);
-        }
     };
 
     const handleSubmit = async (e) => {
@@ -84,13 +66,7 @@ function SettingsForm() {
         try {
             setLoading(true);
 
-            const response =
-                await updateSettings(formData);
-
-            await setLanguageFromPreference(
-                response.data
-                    ?.preferred_language
-            );
+            await updateSettings(formData);
 
             alert(
                 t(
@@ -212,54 +188,6 @@ function SettingsForm() {
                     />
                 </div>
 
-                <div>
-                    <label className="block font-semibold mb-2">
-                        {t(
-                            "preferred_language",
-                            "Preferred Language"
-                        )}
-                    </label>
-
-                    <select
-                        name="preferred_language"
-                        value={
-                            formData.preferred_language
-                        }
-                        onChange={
-                            handleChange
-                        }
-                        className="w-full border rounded-xl p-3 bg-white"
-                        required
-                    >
-                        <option
-                            value=""
-                            disabled
-                        >
-                            {t(
-                                "select_language",
-                                "Select language"
-                            )}
-                        </option>
-
-                        {languages.map(
-                            (
-                                language
-                            ) => (
-                                <option
-                                    key={
-                                        language.id
-                                    }
-                                    value={
-                                        language.id
-                                    }
-                                >
-                                    {language.native_name ||
-                                        language.language_name}
-                                </option>
-                            )
-                        )}
-                    </select>
-                </div>
             </div>
 
             <hr className="my-8" />

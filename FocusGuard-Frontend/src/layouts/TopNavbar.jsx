@@ -4,10 +4,12 @@ import {
   FiCheckCircle,
   FiAlertCircle,
   FiClock,
+  FiGlobe,
 } from "react-icons/fi";
 import { getNotifications } from "../services/notificationService";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/useLanguage";
+import { updatePreferredLanguage } from "../services/settingsService";
 
 const getGreetingKey = () => {
   const hour = new Date().getHours();
@@ -82,7 +84,8 @@ export default function TopNavbar({
   selectedDate,
   onDateChange,
 }) {
-  const { currentLanguageCode, t } = useLanguage();
+  const { currentLanguageCode, languages, setLanguageById, t } = useLanguage();
+  const [languageSaving, setLanguageSaving] = useState(false);
   const username = profile?.username || "";
 
   const [greetingKey, greetingFallback] = getGreetingKey();
@@ -98,6 +101,20 @@ export default function TopNavbar({
     useState(false);
 const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
+  const handleLanguageChange = async (event) => {
+    const languageId = event.target.value;
+    if (!languageId || languageSaving) return;
+
+    try {
+      setLanguageSaving(true);
+      await updatePreferredLanguage(languageId);
+      await setLanguageById(languageId);
+    } catch (error) {
+      console.error("Preferred language could not be updated:", error);
+    } finally {
+      setLanguageSaving(false);
+    }
+  };
   useEffect(() => {
   const loadNotifications = async () => {
     try {
@@ -136,6 +153,24 @@ const navigate = useNavigate();
 
         {/* Right */}
         <div className="flex items-center gap-5">
+
+          <label className="relative flex items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-600 transition focus-within:border-indigo-500 focus-within:bg-white">
+            <FiGlobe className="mr-2 text-indigo-600" aria-hidden="true" />
+            <span className="sr-only">{t("preferred_language", "Preferred Language")}</span>
+            <select
+              value={languages.find((language) => language.language_code === currentLanguageCode)?.id ?? ""}
+              onChange={handleLanguageChange}
+              disabled={languageSaving || !languages.length}
+              className="max-w-28 bg-transparent text-sm font-medium outline-none disabled:cursor-wait"
+              aria-label={t("preferred_language", "Preferred Language")}
+            >
+              {languages.map((language) => (
+                <option key={language.id} value={language.id}>
+                  {language.native_name || language.language_name}
+                </option>
+              ))}
+            </select>
+          </label>
 
           {/* Date Picker */}
           <input
