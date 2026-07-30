@@ -89,7 +89,12 @@ export function LanguageProvider({ children }) {
     const cacheKey = getTranslationCacheKey(languageCode);
     const cachedTranslations = readJsonCache(cacheKey);
 
-    if (cachedTranslations) {
+    // An earlier failed request may have cached `{}`. Treat that as a cache
+    // miss; otherwise every translated label falls back to English forever.
+    if (
+      cachedTranslations &&
+      Object.keys(cachedTranslations).length > 0
+    ) {
       applyTranslations(languageCode, cachedTranslations);
       return cachedTranslations;
     }

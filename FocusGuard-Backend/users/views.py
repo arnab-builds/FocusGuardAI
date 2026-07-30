@@ -227,6 +227,16 @@ class TranslationListView(APIView):
             is_active=True,
         ).first()
 
+        # Language records use ISO 639-1 codes (for example ``kn``), while
+        # translation providers and some clients use regional BCP 47 codes
+        # (``kn-IN``). Accept either form so Kannada and the other Indian
+        # languages do not silently fall back to English.
+        if not language and "-" in language_code:
+            language = Language.objects.filter(
+                language_code=language_code.split("-", 1)[0],
+                is_active=True,
+            ).first()
+
         if not language:
             language = get_default_language()
 

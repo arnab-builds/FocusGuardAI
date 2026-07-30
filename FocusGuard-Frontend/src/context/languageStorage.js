@@ -1,9 +1,12 @@
 export const PREFERRED_LANGUAGE_KEY = "preferredLanguage";
 export const LEGACY_PUBLIC_LANGUAGE_KEY = "focusguard_public_language";
 export const TRANSLATION_CACHE_PREFIX = "translations_";
+// Bump this when the translation catalog or its loading behavior changes so
+// clients do not retain an earlier, incomplete catalog indefinitely.
+export const TRANSLATION_CACHE_VERSION = "v2";
 
 export const getTranslationCacheKey = (languageCode) =>
-  `${TRANSLATION_CACHE_PREFIX}${languageCode}`;
+  `${TRANSLATION_CACHE_PREFIX}${TRANSLATION_CACHE_VERSION}_${languageCode}`;
 
 const canUseLocalStorage = () =>
   typeof window !== "undefined" && Boolean(window.localStorage);
