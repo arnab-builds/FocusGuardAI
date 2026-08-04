@@ -20,45 +20,87 @@ export default function CategoryBarChart({ analytics }) {
   const { t } = useLanguage();
 
   const data = Object.entries(
-    analytics.category_summary
+    analytics.category_summary || {}
   ).map(([category, time]) => ({
     category,
     seconds: parseTime(time),
   }));
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <h2 className="mb-5 text-xl font-semibold">
-        {t("category_usage", "Category Usage")}
-      </h2>
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md">
+      {/* Header */}
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
+          {t("category_usage", "Category Usage")}
+        </h2>
 
-      <div className="h-96">
+        <p className="mt-1 text-sm text-slate-500">
+          {t(
+            "time_spent_per_category",
+            "Time spent across different website categories."
+          )}
+        </p>
+      </div>
+
+      <div className="h-[320px] sm:h-[380px] lg:h-[430px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
             layout="vertical"
+            margin={{
+              top: 10,
+              right: 20,
+              left: 15,
+              bottom: 5,
+            }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#E2E8F0"
+              horizontal
+              vertical={false}
+            />
 
-            <XAxis type="number" />
+            <XAxis
+              type="number"
+              tick={{
+                fontSize: 12,
+                fill: "#64748B",
+              }}
+              axisLine={false}
+              tickLine={false}
+            />
 
             <YAxis
               dataKey="category"
               type="category"
               width={120}
+              tick={{
+                fontSize: 12,
+                fill: "#475569",
+              }}
+              axisLine={false}
+              tickLine={false}
             />
 
-            <Tooltip />
+            <Tooltip
+              contentStyle={{
+                borderRadius: "12px",
+                border: "1px solid #E2E8F0",
+                boxShadow:
+                  "0 10px 25px rgba(0,0,0,0.08)",
+              }}
+            />
 
             <Bar
               dataKey="seconds"
               fill="#10B981"
-              barSize={16}
               radius={[0, 8, 8, 0]}
+              maxBarSize={24}
             />
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </section>
   );
 }

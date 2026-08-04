@@ -1,38 +1,116 @@
-import { FiInfo } from "react-icons/fi";
+import {
+  FiInfo,
+  FiPackage,
+  FiCode,
+  FiUser,
+} from "react-icons/fi";
 import { useLanguage } from "../../context/useLanguage";
 
 export default function AboutCard() {
   const { t } = useLanguage();
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <div className="mb-5 flex items-center gap-3">
-        <FiInfo size={24} />
+    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
 
-        <h2 className="text-xl font-semibold">
-          {t("about", "About")}
-        </h2>
+      {/* Header */}
+
+      <div className="mb-6 flex items-center gap-4">
+
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-600 text-white shadow-md">
+
+          <FiInfo size={28} />
+
+        </div>
+
+        <div>
+
+          <h2 className="text-xl font-bold text-slate-900">
+            {t("about", "About")}
+          </h2>
+
+          <p className="text-sm text-slate-500">
+            {t(
+              "application_information",
+              "Application information"
+            )}
+          </p>
+
+        </div>
+
       </div>
 
-      <div className="space-y-2">
-        <p>
-          <strong>{t("application", "Application")}</strong>
-          <br />
-          FocusGuard
-        </p>
+      {/* Information */}
 
-        <p>
-          <strong>{t("version", "Version")}</strong>
-          <br />
-          v1.0.0
-        </p>
+      <div className="space-y-4">
 
-        <p>
-          <strong>{t("made_by", "Made by")}</strong>
-          <br />
-          Arnab
-        </p>
+        <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+
+            <FiPackage size={20} />
+
+          </div>
+
+          <div>
+
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {t("application", "Application")}
+            </p>
+
+            <p className="font-semibold text-slate-900">
+              FocusGuard
+            </p>
+
+          </div>
+
+        </div>
+
+        <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+
+            <FiCode size={20} />
+
+          </div>
+
+          <div>
+
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {t("version", "Version")}
+            </p>
+
+            <p className="font-semibold text-slate-900">
+              v1.0.0
+            </p>
+
+          </div>
+
+        </div>
+
+        <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
+
+            <FiUser size={20} />
+
+          </div>
+
+          <div>
+
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {t("made_by", "Made by")}
+            </p>
+
+            <p className="font-semibold text-slate-900">
+              Arnab
+            </p>
+
+          </div>
+
+        </div>
+
       </div>
-    </div>
+
+    </section>
   );
 }

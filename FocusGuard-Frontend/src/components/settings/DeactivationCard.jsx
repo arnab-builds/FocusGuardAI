@@ -1,3 +1,8 @@
+import {
+  FiAlertTriangle,
+  FiSend,
+  FiCheckCircle,
+} from "react-icons/fi";
 import { useState } from "react";
 import { requestDeactivation } from "../../services/deactivationService";
 import { useLanguage } from "../../context/useLanguage";
@@ -50,40 +55,117 @@ export default function DeactivationCard() {
   };
 
   return (
-    <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-      <h2 className="mb-4 text-xl font-semibold text-red-600">
-        {t(
-          "account_deactivation",
-          "Account Deactivation"
-        )}
-      </h2>
+    <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
 
-      <p className="mb-5 text-gray-500">
-        {t(
-          "send_deactivation_request_description",
-          "Send a deactivation request to your administrator."
-        )}
-      </p>
+      {/* Header */}
 
-      <textarea
-        rows="4"
-        value={reason}
-        onChange={(e) => setReason(e.target.value)}
-        placeholder={t("reason", "Reason...")}
-        className="mb-5 w-full rounded-lg border p-3"
-      />
+      <div className="mb-6 flex items-center gap-4">
+
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-md">
+
+          <FiAlertTriangle size={28} />
+
+        </div>
+
+        <div>
+
+          <h2 className="text-xl font-bold text-slate-900">
+            {t(
+              "account_deactivation",
+              "Account Deactivation"
+            )}
+          </h2>
+
+          <p className="text-sm text-slate-500">
+            {t(
+              "send_deactivation_request_description",
+              "Send a deactivation request for administrator review."
+            )}
+          </p>
+
+        </div>
+
+      </div>
+
+      {/* Warning */}
+
+      <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+
+        <p className="text-sm leading-6 text-amber-700">
+          {t(
+            "deactivation_warning",
+            "Your account will not be deactivated immediately. An administrator will review your request before taking any action."
+          )}
+        </p>
+
+      </div>
+
+      {/* Reason */}
+
+      <div>
+
+        <label className="mb-2 block text-sm font-semibold text-slate-700">
+          {t("reason", "Reason")}
+        </label>
+
+        <textarea
+          rows={5}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder={t(
+            "reason_placeholder",
+            "Please explain why you want to deactivate your account..."
+          )}
+          className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-200"
+        />
+
+      </div>
+
+      {/* Success */}
+
+      {success && (
+        <div className="mt-5 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-700">
+
+          <FiCheckCircle size={22} />
+
+          <span className="font-medium">
+            {t(
+              "request_sent_successfully",
+              "Your deactivation request has been sent successfully."
+            )}
+          </span>
+
+        </div>
+      )}
+
+      {/* Button */}
 
       <button
         disabled={loading || success}
         onClick={handleRequest}
-        className="rounded-lg bg-red-600 px-5 py-3 text-white hover:bg-red-700 disabled:bg-gray-400"
+        className={`mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold text-white transition-all duration-300 ${
+          success
+            ? "cursor-not-allowed bg-emerald-600"
+            : loading
+            ? "cursor-not-allowed bg-slate-400"
+            : "bg-red-600 hover:bg-red-700 active:scale-[0.99]"
+        }`}
       >
-        {success
-          ? t("request_sent", "Request Sent")
-          : loading
-          ? t("sending", "Sending...")
-          : t("send_request", "Send Request")}
+        {success ? (
+          <>
+            <FiCheckCircle />
+            {t("request_sent", "Request Sent")}
+          </>
+        ) : (
+          <>
+            <FiSend />
+            {loading
+              ? t("sending", "Sending...")
+              : t("send_request", "Send Request")}
+          </>
+        )}
       </button>
-    </div>
+
+    </section>
   );
 }

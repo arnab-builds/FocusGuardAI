@@ -114,7 +114,7 @@ function ChatWindow() {
     };
 
     return (
-        <div className="w-full max-w-6xl h-[88vh] bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-col">
+        <div className="w-full max-w-full min-h-[70vh] bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-col">
             <div className="bg-gradient-to-r from-indigo-700 via-violet-600 to-blue-600 px-8 py-6 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <div className="h-14 w-14 rounded-2xl bg-white/20 flex items-center justify-center">

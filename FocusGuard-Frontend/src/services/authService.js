@@ -12,6 +12,11 @@ export const registerEmployee = async (data) => {
   return response.data;
 };
 
+export const registerNormalUser = async (data) => {
+  const response = await api.post("/api/normal-user-register/", data);
+  return response.data;
+};
+
 export const getActiveLanguages = async () => {
   const response = await api.get("/api/languages/");
 

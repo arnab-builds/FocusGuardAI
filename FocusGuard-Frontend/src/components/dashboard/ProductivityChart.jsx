@@ -31,7 +31,10 @@ const durationToSeconds = (duration) => {
   return hours * 3600 + minutes * 60 + seconds;
 };
 
-export default function ProductivityChart({ activities, selectedDate }) {
+export default function ProductivityChart({
+  activities,
+  selectedDate,
+}) {
   const { currentLanguageCode, t } = useLanguage();
 
   const numberFormatter = useMemo(
@@ -43,19 +46,26 @@ export default function ProductivityChart({ activities, selectedDate }) {
     () =>
       getWeekDates(selectedDate).map((date) => {
         const dateKey = date.toISOString().slice(0, 10);
+
         const item = Array.isArray(activities)
           ? activities.find((activity) => activity.date === dateKey) || {}
           : {};
 
         return {
-          productive: Math.max(0, durationToSeconds(item.productive_time)) / 60,
+          productive:
+            Math.max(0, durationToSeconds(item.productive_time)) / 60,
           nonProductive:
-            Math.max(0, durationToSeconds(item.non_productive_time)) / 60,
-          idle: Math.max(0, durationToSeconds(item.idle_time)) / 60,
-          name: new Intl.DateTimeFormat(currentLanguageCode || undefined, {
-            weekday: "short",
-            day: "numeric",
-          }).format(date),
+            Math.max(0, durationToSeconds(item.non_productive_time)) /
+            60,
+          idle:
+            Math.max(0, durationToSeconds(item.idle_time)) / 60,
+          name: new Intl.DateTimeFormat(
+            currentLanguageCode || undefined,
+            {
+              weekday: "short",
+              day: "numeric",
+            }
+          ).format(date),
         };
       }),
     [activities, currentLanguageCode, selectedDate]
@@ -65,47 +75,49 @@ export default function ProductivityChart({ activities, selectedDate }) {
     () =>
       data.some(
         (item) =>
-          item.productive > 0 || item.nonProductive > 0 || item.idle > 0
+          item.productive > 0 ||
+          item.nonProductive > 0 ||
+          item.idle > 0
       ),
     [data]
   );
 
   const formatTooltip = useCallback(
     (value, name) => [
-      `${numberFormatter.format(Number(value) || 0)} ${t("minutes_short", "min")}`,
+      `${numberFormatter.format(Number(value) || 0)} ${t(
+        "minutes_short",
+        "min"
+      )}`,
       name === "productive"
         ? t("productive", "Productive")
         : name === "nonProductive"
-          ? t("non_productive", "Non Productive")
-          : t("idle", "Idle"),
+        ? t("non_productive", "Non Productive")
+        : t("idle", "Idle"),
     ],
     [numberFormatter, t]
   );
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-5 flex items-center justify-between">
-        <div>
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             {t("productivity_trend", "Productivity Trend")}
           </p>
 
-          <h2 className="mt-1 text-xl font-bold text-slate-900">
+          <h2 className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">
             {t("weekly_trend", "Weekly Trend")}
           </h2>
         </div>
 
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100">
-          <FiBarChart2
-            size={18}
-            className="text-slate-700"
-          />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100">
+          <FiBarChart2 className="h-6 w-6 text-slate-700" />
         </div>
       </div>
 
-      <div className="h-52">
+      <div className="h-[300px] sm:h-[360px] lg:h-[420px]">
         {!hasTrendData ? (
-          <div className="flex h-full items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-500">
+          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center text-sm text-slate-500">
             {t(
               "no_productivity_data_for_period",
               "No productivity data available for this period."
@@ -117,45 +129,57 @@ export default function ProductivityChart({ activities, selectedDate }) {
               data={data}
               margin={{
                 top: 10,
-                right: 10,
-                left: -20,
-                bottom: 0,
+                right: 15,
+                left: -15,
+                bottom: 5,
               }}
+              barCategoryGap="18%"
             >
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
+                stroke="#E2E8F0"
               />
 
               <XAxis
                 dataKey="name"
                 tickLine={false}
                 axisLine={false}
+                tick={{
+                  fontSize: 12,
+                  fill: "#64748B",
+                }}
               />
 
               <Tooltip
                 formatter={formatTooltip}
+                contentStyle={{
+                  borderRadius: "12px",
+                  border: "1px solid #E2E8F0",
+                  boxShadow:
+                    "0 10px 25px rgba(0,0,0,0.08)",
+                }}
               />
 
               <Bar
                 dataKey="productive"
                 fill="#4F46E5"
                 radius={[8, 8, 0, 0]}
-                barSize={26}
+                maxBarSize={32}
               />
 
               <Bar
                 dataKey="nonProductive"
                 fill="#EF4444"
                 radius={[8, 8, 0, 0]}
-                barSize={26}
+                maxBarSize={32}
               />
 
               <Bar
                 dataKey="idle"
                 fill="#0EA5E9"
                 radius={[8, 8, 0, 0]}
-                barSize={26}
+                maxBarSize={32}
               />
             </BarChart>
           </ResponsiveContainer>

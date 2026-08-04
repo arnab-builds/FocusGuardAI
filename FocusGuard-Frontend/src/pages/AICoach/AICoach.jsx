@@ -133,192 +133,118 @@ const AICoach = () => {
     }
   };
 
+  const hasUserMessage = messages.some((m) => m.sender === "user");
+
   return (
-        <div className="flex h-full items-center justify-center bg-slate-100 p-5">
-      <div className="flex h-[82vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
+      <div className="flex min-h-[72vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
 
         {/* Header */}
 
-        <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-indigo-600 via-violet-600 to-blue-600 px-8 py-5 text-white">
-
-          <div className="flex items-center gap-4">
-
-            <div className="rounded-2xl bg-white/20 p-3 backdrop-blur">
-
-              <FiCpu size={28} />
-
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-indigo-50 p-2">
+              <FiCpu className="text-indigo-600" />
             </div>
 
             <div>
-
-              <h2 className="text-2xl font-bold">
-                {t("focusguard_ai", "FocusGuard AI")}
-              </h2>
-
-              <p className="text-sm text-indigo-100">
-                {t(
-                  "productivity_assistant",
-                  "Productivity Assistant"
-                )}
-              </p>
-
+              <h2 className="text-lg font-semibold text-slate-800">{t("focusguard_ai", "FocusGuard AI")}</h2>
+              <div className="text-xs text-slate-500">{t("productivity_assistant", "Productivity Assistant")}</div>
             </div>
-
           </div>
 
-          <div className="rounded-full bg-white/20 px-4 py-2 text-sm backdrop-blur">
-
-            {selectedDate}
-
-          </div>
-
+          <div className="text-xs text-slate-600">{selectedDate}</div>
         </div>
 
         {/* Chat */}
 
-        <div className="flex-1 overflow-y-auto bg-slate-50 px-8 py-8">
+        <div className="flex-1 overflow-y-auto bg-slate-50 px-4 py-6">
+          <div className="mx-auto w-full max-w-3xl flex flex-col gap-4">
 
-          <div className="mx-auto flex max-w-4xl flex-col gap-6">
+            {/* Suggestion chips: show only before the first user message */}
+            {!hasUserMessage && (
+              <div className="flex flex-wrap gap-2">
+                {suggestions.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => handleSuggestion(q)}
+                    disabled={loading}
+                    className="chip rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-sm text-indigo-700"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {messages.map((msg) => (
-
               <div
                 key={msg.id}
-                className={`flex ${
-                  msg.sender === "user"
-                    ? "justify-end"
-                    : "justify-start"
-                }`}
+                className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
               >
-
                 {msg.sender === "ai" && (
-
-                  <div className="mr-3 mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white">
-
-                    <FiCpu />
-
+                  <div className="mr-3 mt-1 flex h-8 w-8 items-center justify-center rounded-md bg-indigo-600 text-white">
+                    <FiCpu className="text-white" />
                   </div>
-
                 )}
 
                 <div
-                  className={`max-w-[72%] rounded-3xl px-6 py-4 shadow ${
+                  className={`max-w-[78%] rounded-xl px-4 py-2 ${
                     msg.sender === "user"
                       ? "rounded-br-md bg-indigo-600 text-white"
                       : "rounded-bl-md border border-slate-200 bg-white text-slate-800"
                   }`}
                 >
-
-                  <div className="prose prose-sm max-w-none">
-                    <ReactMarkdown>
-                      {msg.text}
-                    </ReactMarkdown>
+                  <div className="prose prose-sm max-w-none leading-snug">
+                    <ReactMarkdown>{msg.text}</ReactMarkdown>
                   </div>
-
                 </div>
-
               </div>
-
             ))}
 
             {loading && (
-
-              <div className="flex justify-start">
-
-                <div className="mr-3 mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white">
-
-                  <FiCpu />
-
+              <div className="flex justify-start items-center gap-3">
+                <div className="mr-3 mt-1 flex h-8 w-8 items-center justify-center rounded-md bg-indigo-600 text-white">
+                  <FiCpu className="text-white" />
                 </div>
-
-                <div className="rounded-3xl rounded-bl-md border bg-white px-6 py-4 shadow">
-
+                <div className="rounded-xl rounded-bl-md border bg-white px-4 py-2">
                   <div className="flex items-center gap-2">
-
-                    <div className="h-2 w-2 animate-bounce rounded-full bg-indigo-500"></div>
-
-                    <div
-                      className="h-2 w-2 animate-bounce rounded-full bg-indigo-500"
-                      style={{
-                        animationDelay: ".15s",
-                      }}
-                    ></div>
-
-                    <div
-                      className="h-2 w-2 animate-bounce rounded-full bg-indigo-500"
-                      style={{
-                        animationDelay: ".30s",
-                      }}
-                    ></div>
-
-                    <span className="ml-3 text-sm text-slate-500">
-                      {t(
-                        "thinking_message",
-                        "FocusGuard AI is thinking..."
-                      )}
-                    </span>
-
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" />
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" style={{ animationDelay: ".12s" }} />
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" style={{ animationDelay: ".24s" }} />
+                    <span className="ml-3 text-sm text-slate-500">{t("thinking_message", "FocusGuard AI is thinking...")}</span>
                   </div>
-
                 </div>
-
               </div>
-
             )}
 
             <div ref={messagesEndRef} />
-
           </div>
-
         </div>
 
-                <div className="border-t border-slate-200 bg-white px-6 py-4">
-
-          <div className="mb-4 flex flex-wrap gap-3">
-
-            {suggestions.map((question) => (
-
-              <button
-                key={question}
-                onClick={() => handleSuggestion(question)}
-                disabled={loading}
-                className="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 transition hover:bg-indigo-600 hover:text-white"
-              >
-                {question}
-              </button>
-
-            ))}
-
+        <div className="sticky bottom-0 border-t border-slate-100 bg-white px-4 py-3">
+          <div className="mb-3">
+            {/* on small screens suggestions shown above messages; once user messages exist they hide */}
           </div>
 
-          {/* Input */}
-
-          <div className="flex items-center gap-4">
-
+          <div className="flex items-center gap-3">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={t(
-                "ask_anything_productivity",
-                "Ask anything about your productivity..."
-              )}
-              className="flex-1 rounded-2xl border border-slate-300 px-5 py-4 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+              placeholder={t("ask_anything_productivity", "Ask anything about your productivity...")}
+              className="flex-1 rounded-full border border-slate-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200"
             />
 
             <button
               onClick={handleSend}
               disabled={loading}
-              className="flex items-center gap-2 rounded-2xl bg-indigo-600 px-7 py-4 font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white transition hover:bg-indigo-700 disabled:opacity-60"
+              aria-label={t("send", "Send")}
             >
               <FiSend />
-
-              {t("send", "Send")}
-
             </button>
-
           </div>
-
         </div>
 
       </div>

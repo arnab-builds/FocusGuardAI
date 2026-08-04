@@ -40,34 +40,49 @@ export default function Analytics() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center text-lg">
+      <div className="flex min-h-[60vh] items-center justify-center rounded-2xl bg-white text-lg font-medium text-slate-600 shadow-sm">
         {t("loading_analytics", "Loading Analytics...")}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-3xl font-bold">
-        {t("analytics", "Analytics")}
-      </h1>
+    <div className="w-full">
+      <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-6">
 
-      <p className="mb-8 text-gray-500">
-        {t(
-          "detailed_productivity_insights",
-          "Detailed productivity insights."
-        )}
-      </p>
+        {/* Page Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+            {t("analytics", "Analytics")}
+          </h1>
 
-      <SummaryCards analytics={analytics} />
+          <p className="mt-2 text-sm text-slate-500 sm:text-base">
+            {t(
+              "detailed_productivity_insights",
+              "Detailed productivity insights."
+            )}
+          </p>
+        </div>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-2">
-        <ProductivityPieChart analytics={analytics} />
-        <CategoryBarChart analytics={analytics} />
-      </div>
+        {/* Summary Cards */}
+        <SummaryCards analytics={analytics} />
 
-      <div className="mt-8">
-        <WebsiteTable analytics={analytics} />
+        {/* Charts */}
+        <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <div className="min-w-0">
+            <ProductivityPieChart analytics={analytics} />
+          </div>
+
+          <div className="min-w-0">
+            <CategoryBarChart analytics={analytics} />
+          </div>
+        </section>
+
+        {/* Website Table */}
+        <section className="min-w-0">
+          <WebsiteTable analytics={analytics} />
+        </section>
+
       </div>
     </div>
   );

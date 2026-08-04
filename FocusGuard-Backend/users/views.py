@@ -1,4 +1,5 @@
 import uuid
+from urllib.parse import quote
 from collections import defaultdict
 from datetime import timedelta
 from datetime import datetime
@@ -20,7 +21,7 @@ from users.services.translation_service import (
     translate_text,
 )
 
-from .models import ActivityLog, EmployeeDeactivationRequest, Invitation, Language, Organization, OrganizationDeactivationRequest, Translation, User, UserAnalytics, UserInactivity
+from .models import ActivityLog, EmployeeDeactivationRequest, Invitation, Language, NormalUserDeactivationRequest, Organization, OrganizationDeactivationRequest, Translation, User, UserAnalytics, UserInactivity
 from .pagination import ActivityPagination
 from .serializers import (
     RegisterWithInviteCodeSerializer,
@@ -34,6 +35,8 @@ from .serializers import (
     OrganizationDeactivationRequestSerializer,
     OrganizationSerializer,
     RegisterSerializer,
+    NormalUserDeactivationRequestSerializer,
+    NormalUserRegisterSerializer,
     UserInactivitySerializer,
     UserListSerializer,
     validate_username_identifier,
@@ -540,7 +543,7 @@ Invitation Code:
 
 To complete your registration, please click the link below:
 
-http://localhost:3000/employee-register
+http://localhost:3000/employee-register?invite_code={invitation.invite_code}&email={quote(invitation.email, safe='')}
 
 Regards,
 FocusGuardAI Team
@@ -601,6 +604,19 @@ class InvitationRegistrationBaseView(TranslatedResponseMixin, APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        invitation_email = serializer.validated_data.get("email")
+        if self.required_role == "USER" and invitation_email != invitation.email:
+            return Response(
+                {"email": "Email does not match this invitation."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if self.required_role == "USER" and not serializer.validated_data.get("username"):
+            return Response(
+                {"username": "Username is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         if invitation.is_accepted:
             return Response(
                 {
@@ -619,9 +635,9 @@ class InvitationRegistrationBaseView(TranslatedResponseMixin, APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if User.objects.filter(
-            username=serializer.validated_data["username"]
-        ).exists():
+        username = serializer.validated_data.get("username") or invitation.email
+
+        if User.objects.filter(username=username).exists():
 
             return Response(
                 {
@@ -642,7 +658,7 @@ class InvitationRegistrationBaseView(TranslatedResponseMixin, APIView):
             )
 
         user = User.objects.create_user(
-            username=serializer.validated_data["username"],
+            username=username,
             email=invitation.email,
             password=serializer.validated_data["password"],
             organization=invitation.organization,
@@ -718,6 +734,40 @@ class EmployeeRegisterWithInviteCodeView(
     InvitationRegistrationBaseView
 ):
     required_role = "USER"
+
+
+class NormalUserRegisterView(TranslatedResponseMixin, APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = NormalUserRegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = User.objects.create_user(
+            username=serializer.validated_data["username"],
+            email=serializer.validated_data["email"],
+            password=serializer.validated_data["password"],
+            preferred_language=serializer.validated_data["preferred_language"],
+            role="NORMAL_USER",
+        )
+        self.translation_user = user
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "message": "Registration successful.",
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "role": user.role,
+                    "preferred_language": serialize_user_language(user),
+                },
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            },
+            status=status.HTTP_201_CREATED,
+        )
 class OrganizationMembersView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
@@ -2049,6 +2099,116 @@ class ActivityStopView(TranslatedResponseMixin, APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class NormalUserDeactivationRequestView(TranslatedResponseMixin, APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role != "NORMAL_USER":
+            return Response(
+                {"error": "Only normal users can send this request."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if NormalUserDeactivationRequest.objects.filter(
+            user=request.user, status="PENDING"
+        ).exists():
+            return Response(
+                {"error": "You already have a pending deactivation request."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = NormalUserDeactivationRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        deactivation_request = NormalUserDeactivationRequest.objects.create(
+            user=request.user,
+            reason=serializer.validated_data["reason"],
+        )
+        create_admin_notification(
+            title="Normal User Deactivation Request",
+            message=f"{request.user.email} requested account deactivation.",
+            notification_type="request",
+        )
+        return Response(
+            {
+                "message": "Deactivation request submitted successfully.",
+                "request": NormalUserDeactivationRequestSerializer(
+                    deactivation_request
+                ).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class SuperAdminNormalUserListView(TranslatedResponseMixin, APIView):
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    def get(self, request):
+        users = User.objects.filter(role="NORMAL_USER").order_by("-date_joined")
+        latest_request_by_user = {}
+        for item in NormalUserDeactivationRequest.objects.filter(
+            user__in=users
+        ).order_by("user_id", "-requested_at"):
+            latest_request_by_user.setdefault(item.user_id, item)
+        return Response({
+            "count": users.count(),
+            "results": [
+                {
+                    "id": user.id,
+                    "email": user.email,
+                    "created_at": user.date_joined,
+                    # The super-admin list intentionally exposes no activity,
+                    # analytics, browsing, or request-detail data.
+                    "deactivation_request": (
+                        {
+                            "id": latest_request_by_user[user.id].id,
+                            "status": latest_request_by_user[user.id].status,
+                        }
+                        if user.id in latest_request_by_user else None
+                    ),
+                }
+                for user in users
+            ],
+        })
+
+
+class SuperAdminNormalUserDeactivationRequestActionView(
+    TranslatedResponseMixin, APIView
+):
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    def post(self, request, request_id, action):
+        action = {"approve": "APPROVED", "reject": "REJECTED"}.get(action)
+        if action is None:
+            return Response({"error": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            deactivation_request = NormalUserDeactivationRequest.objects.select_related(
+                "user"
+            ).get(id=request_id)
+        except NormalUserDeactivationRequest.DoesNotExist:
+            return Response({"error": "Request not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if deactivation_request.status != "PENDING":
+            return Response(
+                {"error": "This request has already been processed."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        deactivation_request.status = action
+        deactivation_request.reviewed_by = request.user
+        deactivation_request.reviewed_at = timezone.now()
+        deactivation_request.save()
+
+        if action == "APPROVED":
+            deactivation_request.user.is_active = False
+            deactivation_request.user.save(update_fields=["is_active"])
+
+        return Response({
+            "message": "Request approved successfully." if action == "APPROVED" else "Request rejected successfully.",
+            "request": NormalUserDeactivationRequestSerializer(deactivation_request).data,
+        })
 from datetime import datetime, timedelta
 
 from rest_framework.views import APIView

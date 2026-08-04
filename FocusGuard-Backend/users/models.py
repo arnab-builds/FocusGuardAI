@@ -111,6 +111,7 @@ class User(AbstractUser):
         ("SUPER_ADMIN", "Super Admin"),
         ("SUB_ADMIN", "Organization Admin"),
         ("USER", "Employee"),
+        ("NORMAL_USER", "Normal User"),
     ]
 
     email = models.EmailField(unique=True)
@@ -388,6 +389,35 @@ class OrganizationDeactivationRequest(models.Model):
 
     def __str__(self):
         return f"{self.organization.name} - {self.status}"
+
+
+class NormalUserDeactivationRequest(models.Model):
+
+    STATUS_CHOICES = [
+        ("PENDING", "Pending"),
+        ("APPROVED", "Approved"),
+        ("REJECTED", "Rejected"),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="normal_user_deactivation_requests",
+    )
+    reason = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
+    requested_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reviewed_normal_user_deactivation_requests",
+    )
+
+    def __str__(self):
+        return f"{self.user.email} - {self.status}"
     
 class UserAnalytics(models.Model):
 

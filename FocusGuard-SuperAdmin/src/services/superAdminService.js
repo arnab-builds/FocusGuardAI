@@ -57,8 +57,16 @@ export const rejectOrganizationDeactivation = (id) =>
   API.post(
     `organization/deactivation-request/${id}/reject/`
   );
-  export const getAnalytics = () =>
+export const getAnalytics = () =>
   API.get("super-admin/analytics/");
+
+export const getNormalUsers = () =>
+  API.get("super-admin/normal-users/");
+
+export const reviewNormalUserDeactivation = (requestId, action) =>
+  API.post(
+    `super-admin/normal-user-deactivation-requests/${requestId}/${action}/`
+  );
   // Settings
 
 export const getSettings = () =>

@@ -14,14 +14,37 @@ const getTodayInputValue = () => {
 };
 
 export default function DashboardLayout() {
-  const [selectedDate, setSelectedDate] = useState(
-    getTodayInputValue()
-  );
+  const [selectedDate, setSelectedDate] = useState(getTodayInputValue());
 
   const [dashboardHeader, setDashboardHeader] = useState({
     profile: null,
     analytics: null,
   });
+
+  // Sidebar state (closed by default, initialized based on screen size)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 768px)");
+
+    setIsSidebarOpen(mql.matches);
+
+    const handler = (e) => setIsSidebarOpen(e.matches);
+
+    if (mql.addEventListener) {
+      mql.addEventListener("change", handler);
+    } else {
+      mql.addListener(handler);
+    }
+
+    return () => {
+      if (mql.removeEventListener) {
+        mql.removeEventListener("change", handler);
+      } else {
+        mql.removeListener(handler);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const loadHeader = async () => {
@@ -54,21 +77,25 @@ export default function DashboardLayout() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-100">
-      <Sidebar />
+    <div className="flex min-h-screen bg-slate-100">
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
 
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex flex-1 min-w-0 flex-col overflow-hidden transition-all duration-300">
         <TopNavbar
           profile={dashboardHeader.profile}
           analytics={dashboardHeader.analytics}
           selectedDate={selectedDate}
           onDateChange={setSelectedDate}
+          onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
         />
 
-        <main className="flex-1 overflow-y-auto px-6 py-5">
-          <Outlet
-            context={outletContext}
-          />
+        <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 sm:px-6 md:px-8 lg:px-10 xl:px-12">
+          <div className="mx-auto w-full max-w-screen-2xl">
+            <Outlet context={outletContext} />
+          </div>
         </main>
       </div>
     </div>

@@ -7,12 +7,13 @@ import {
     Settings,
     LogOut,
     ShieldCheck,
+    Users,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 import { useLanguage } from "../../context/useLanguage";
 
-function Sidebar() {
+function Sidebar({ isOpen = true, onClose = () => {} }) {
     const { t } = useLanguage();
 
     const menus = [
@@ -37,6 +38,11 @@ function Sidebar() {
             path: "/requests",
         },
         {
+            title: t("normal_users", "Normal Users"),
+            icon: Users,
+            path: "/normal-users",
+        },
+        {
             title: t("analytics", "Analytics"),
             icon: BarChart3,
             path: "/analytics",
@@ -49,7 +55,13 @@ function Sidebar() {
     ];
 
     return (
-        <aside className="w-72 h-screen bg-slate-900 text-white flex flex-col shadow-xl">
+        <>
+            <div
+                className={`fixed inset-0 z-40 bg-black bg-opacity-40 transition-opacity md:hidden ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                onClick={onClose}
+                aria-hidden={!isOpen}
+            />
+            <aside className={`fixed left-0 top-0 z-50 h-screen w-72 max-w-full transform flex flex-col bg-slate-900 text-white shadow-xl transition-transform md:relative md:translate-x-0 md:flex md:h-screen ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             <div className="flex items-center gap-3 px-6 py-7 border-b border-slate-800">
                 <div className="bg-blue-600 rounded-xl p-3">
                     <ShieldCheck size={26} />
@@ -126,6 +138,7 @@ function Sidebar() {
                 </button>
             </div>
         </aside>
+        </>
     );
 }
 

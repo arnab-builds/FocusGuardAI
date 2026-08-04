@@ -56,10 +56,7 @@ export default function Reports() {
 
   const handlePDFDownload = async () => {
     try {
-      await downloadPDFReport(
-        reportType,
-        selectedDate
-      );
+      await downloadPDFReport(reportType, selectedDate);
     } catch (error) {
       console.error(error);
 
@@ -74,10 +71,7 @@ export default function Reports() {
 
   const handleCSVDownload = async () => {
     try {
-      await downloadCSVReport(
-        reportType,
-        selectedDate
-      );
+      await downloadCSVReport(reportType, selectedDate);
     } catch (error) {
       console.error(error);
 
@@ -91,80 +85,109 @@ export default function Reports() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">
-          {t("reports", "Reports")}
-        </h1>
+    <div className="w-full">
+      <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-6">
 
-        <p className="mt-2 text-gray-500">
-          {t(
-            "generate_review_reports",
-            "Generate and review your productivity reports."
-          )}
-        </p>
-      </div>
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+            {t("reports", "Reports")}
+          </h1>
 
-      <ReportCards onGenerate={generateReport} />
-
-      {loading && (
-        <div className="mt-8 rounded-xl bg-white p-6 text-center shadow-sm">
-          {t(
-            "generating_report",
-            "Generating report..."
-          )}
-        </div>
-      )}
-
-      {report && (
-        <div className="mt-8">
-          <ReportStats report={report} />
-        </div>
-      )}
-
-      <div className="mt-8">
-        <ReportPreview report={report} />
-      </div>
-
-      <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
-        <h2 className="mb-5 text-xl font-semibold">
-          {t("export_report", "Export Report")}
-        </h2>
-
-        <div className="flex flex-wrap gap-4">
-          <button
-            onClick={handlePDFDownload}
-            disabled={!report}
-            className={`flex items-center gap-2 rounded-lg px-5 py-3 text-white transition ${
-              report
-                ? "bg-red-600 hover:bg-red-700"
-                : "cursor-not-allowed bg-gray-400"
-            }`}
-          >
-            <FiDownload />
-            {t("download_pdf", "Download PDF")}
-          </button>
-
-          <button
-            onClick={handleCSVDownload}
-            disabled={!report}
-            className={`flex items-center gap-2 rounded-lg px-5 py-3 text-white transition ${
-              report
-                ? "bg-green-600 hover:bg-green-700"
-                : "cursor-not-allowed bg-gray-400"
-            }`}
-          >
-            <FiDownload />
-            {t("download_csv", "Download CSV")}
-          </button>
-        </div>
-
-        {report && (
-          <p className="mt-4 text-sm capitalize text-gray-500">
-            {t("current_report", "Current Report")}:{" "}
-            <strong>{reportType}</strong>
+          <p className="mt-2 text-sm text-slate-500 sm:text-base">
+            {t(
+              "generate_review_reports",
+              "Generate and review your productivity reports."
+            )}
           </p>
+        </div>
+
+        {/* Report Type Cards */}
+        <ReportCards onGenerate={generateReport} />
+
+        {/* Loading */}
+        {loading && (
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+            <p className="text-lg font-medium text-slate-600">
+              {t(
+                "generating_report",
+                "Generating report..."
+              )}
+            </p>
+          </div>
         )}
+
+        {/* Report Statistics */}
+        {report && (
+          <section>
+            <ReportStats report={report} />
+          </section>
+        )}
+
+        {/* Report Preview */}
+        <section>
+          <ReportPreview report={report} />
+        </section>
+
+        {/* Export */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md">
+
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
+              {t("export_report", "Export Report")}
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              {t(
+                "download_report_formats",
+                "Download the generated report in your preferred format."
+              )}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+            <button
+              onClick={handlePDFDownload}
+              disabled={!report}
+              className={`flex w-full items-center justify-center gap-3 rounded-xl px-5 py-3 font-semibold text-white transition-all duration-200 ${
+                report
+                  ? "bg-red-600 hover:bg-red-700 active:scale-[0.98]"
+                  : "cursor-not-allowed bg-slate-400"
+              }`}
+            >
+              <FiDownload className="h-5 w-5" />
+              {t("download_pdf", "Download PDF")}
+            </button>
+
+            <button
+              onClick={handleCSVDownload}
+              disabled={!report}
+              className={`flex w-full items-center justify-center gap-3 rounded-xl px-5 py-3 font-semibold text-white transition-all duration-200 ${
+                report
+                  ? "bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98]"
+                  : "cursor-not-allowed bg-slate-400"
+              }`}
+            >
+              <FiDownload className="h-5 w-5" />
+              {t("download_csv", "Download CSV")}
+            </button>
+
+          </div>
+
+          {report && (
+            <div className="mt-5 rounded-xl bg-slate-50 px-4 py-3">
+              <p className="text-sm text-slate-600">
+                {t("current_report", "Current Report")}:
+                <span className="ml-2 font-semibold capitalize text-slate-900">
+                  {reportType}
+                </span>
+              </p>
+            </div>
+          )}
+
+        </section>
+
       </div>
     </div>
   );

@@ -15,6 +15,7 @@ from .views import (
     InvitationCreateView,
     OrganizationAdminRegisterWithInviteCodeView,
     EmployeeRegisterWithInviteCodeView,
+    NormalUserRegisterView,
 
     ActivityStartView,
     ActivityStopView,
@@ -34,6 +35,9 @@ from .views import (
     EmployeeDeactivationRequestListView,
     ApproveEmployeeDeactivationRequestView,
     RejectEmployeeDeactivationRequestView,
+    NormalUserDeactivationRequestView,
+    SuperAdminNormalUserDeactivationRequestActionView,
+    SuperAdminNormalUserListView,
 
     OrganizationDeactivationRequestView,
     OrganizationDeactivationRequestListView,
@@ -68,6 +72,11 @@ urlpatterns = [
         "employee-register/",
         EmployeeRegisterWithInviteCodeView.as_view(),
         name="employee-register-with-invite-code",
+    ),
+    path(
+        "normal-user-register/",
+        NormalUserRegisterView.as_view(),
+        name="normal-user-register",
     ),
 
     path(
@@ -344,5 +353,20 @@ urlpatterns = [
         "super-admin/settings/",
         SuperAdminSettingsView.as_view(),
         name="super-admin-settings",
+    ),
+    path(
+        "normal-user/deactivation-request/",
+        NormalUserDeactivationRequestView.as_view(),
+        name="normal-user-deactivation-request",
+    ),
+    path(
+        "super-admin/normal-users/",
+        SuperAdminNormalUserListView.as_view(),
+        name="super-admin-normal-users",
+    ),
+    path(
+        "super-admin/normal-user-deactivation-requests/<int:request_id>/<str:action>/",
+        SuperAdminNormalUserDeactivationRequestActionView.as_view(),
+        name="super-admin-normal-user-deactivation-request-action",
     ),
 ]

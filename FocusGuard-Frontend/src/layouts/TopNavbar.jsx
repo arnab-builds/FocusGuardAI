@@ -83,11 +83,15 @@ export default function TopNavbar({
   analytics,
   selectedDate,
   onDateChange,
+  onToggleSidebar,
 }) {
   const { currentLanguageCode, languages, setLanguageById, t } = useLanguage();
   const [languageSaving, setLanguageSaving] = useState(false);
-  const username = profile?.username || "";
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const navigate = useNavigate();
 
+  const username = profile?.username || "";
   const [greetingKey, greetingFallback] = getGreetingKey();
   const greeting = t(greetingKey, greetingFallback);
   const numberFormatter = new Intl.NumberFormat(
@@ -97,10 +101,6 @@ export default function TopNavbar({
   const productivityScore =
     getProductivityScore(analytics);
 
-  const [showNotifications, setShowNotifications] =
-    useState(false);
-const navigate = useNavigate();
-  const [notifications, setNotifications] = useState([]);
   const handleLanguageChange = async (event) => {
     const languageId = event.target.value;
     if (!languageId || languageSaving) return;
@@ -116,33 +116,52 @@ const navigate = useNavigate();
       setLanguageSaving(false);
     }
   };
+
   useEffect(() => {
-  const loadNotifications = async () => {
-    try {
-      const data = await getNotifications(currentLanguageCode);
-      setNotifications(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    const loadNotifications = async () => {
+      try {
+        const data = await getNotifications(currentLanguageCode);
+        setNotifications(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  loadNotifications();
-}, [currentLanguageCode]);
+    loadNotifications();
+  }, [currentLanguageCode]);
+
   return (
-        <header className="border-b border-slate-200 bg-white px-8 py-5">
-      <div className="flex items-center justify-between">
+    <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-8 sm:py-5">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-col gap-4 min-w-0">
+          <div className="flex items-start gap-3">
+            <button
+              onClick={() => onToggleSidebar?.()}
+              className="inline-flex items-center rounded-md bg-slate-50 p-2 text-slate-700 hover:bg-slate-100 md:hidden"
+              aria-label="Open menu"
+            >
+              <svg
+                className="h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
 
-        {/* Left */}
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800">
-            {greeting}
-          </h1>
-
-          {username && (
-            <p className="mt-1 text-base font-medium text-slate-700">
-              {username}
-            </p>
-          )}
+            <div className="min-w-0">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-900">
+                {greeting}
+              </p>
+            </div>
+          </div>
 
           <p className="mt-2 text-sm text-slate-500">
             {formatSelectedDate(
@@ -152,17 +171,21 @@ const navigate = useNavigate();
           </p>
         </div>
 
-        {/* Right */}
-        <div className="flex items-center gap-5">
-
-          <label className="relative flex items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-600 transition focus-within:border-indigo-500 focus-within:bg-white">
-            <FiGlobe className="mr-2 text-indigo-600" aria-hidden="true" />
-            <span className="sr-only">{t("preferred_language", "Preferred Language")}</span>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+          <label className="relative flex h-12 min-w-[190px] items-center rounded-2xl border border-slate-200 bg-white px-4 shadow-sm transition hover:shadow-md focus-within:border-indigo-500">
+            <span className="sr-only">
+              {t("preferred_language", "Preferred Language")}
+            </span>
             <select
-              value={languages.find((language) => language.language_code === currentLanguageCode)?.id ?? ""}
+              value={
+                languages.find(
+                  (language) =>
+                    language.language_code === currentLanguageCode
+                )?.id ?? ""
+              }
               onChange={handleLanguageChange}
               disabled={languageSaving || !languages.length}
-              className="max-w-28 bg-transparent text-sm font-medium outline-none disabled:cursor-wait"
+              className="min-w-0 w-full bg-transparent text-sm font-medium outline-none disabled:cursor-wait"
               aria-label={t("preferred_language", "Preferred Language")}
             >
               {languages.map((language) => (
@@ -173,20 +196,17 @@ const navigate = useNavigate();
             </select>
           </label>
 
-          {/* Date Picker */}
           <input
             type="date"
             value={selectedDate || ""}
             onChange={(e) => onDateChange?.(e.target.value)}
-            className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm outline-none transition focus:border-indigo-500 focus:bg-white"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm outline-none transition hover:shadow-md focus:border-indigo-500 sm:w-auto"
           />
 
-          {/* Productivity Score */}
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-2">
+          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-100 px-6 py-3 shadow-sm">
             <p className="text-xs font-medium text-emerald-700">
               {t("productivity_score", "Productivity Score")}
             </p>
-
             <p className="text-xl font-bold text-emerald-700">
               {productivityScore === null
                 ? "--"
@@ -194,119 +214,108 @@ const navigate = useNavigate();
             </p>
           </div>
 
-          {/* Notifications */}
           <div className="relative">
-
             <button
-              onClick={() =>
-                setShowNotifications(!showNotifications)
-              }
-              className="relative rounded-xl p-2 transition hover:bg-slate-100"
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              aria-label={t("notifications", "Notifications")}
             >
               <FiBell size={22} />
-
               {notifications.some((n) => !n.is_read) && (
-                <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-red-500" />
               )}
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 z-50 mt-3 w-80 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-
-                <div className="border-b border-slate-200 p-4">
-                  <h3 className="font-semibold text-slate-900">
-                    {t("notifications", "Notifications")}
-                  </h3>
+              <div className="absolute right-0 top-full z-50 mt-3 w-[min(100vw-1rem,420px)] max-w-[420px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                <div className="border-b border-slate-200 px-5 py-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        {t("notifications", "Notifications")}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {notifications.length} {t("new", "new")}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-
+                <div className="max-h-96 overflow-y-auto px-2 py-2">
                   {notifications.slice(0, 3).map((item) => (
                     <div
                       key={item.id}
-                      className="flex gap-3 border-b border-slate-100 p-4 hover:bg-slate-50"
+                      className={`group flex gap-3 rounded-2xl px-4 py-4 transition ${
+                        item.is_read
+                          ? "hover:bg-slate-50"
+                          : "bg-slate-50 ring-1 ring-indigo-100"
+                      }`}
                     >
-
-                      <div className="mt-1">
-
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 shadow-sm">
                         {item.notification_type === "PRODUCTIVE_SESSION" && (
-                          <FiCheckCircle className="text-green-500" />
+                          <FiCheckCircle className="h-5 w-5 text-emerald-500" />
                         )}
-
                         {item.notification_type === "NON_PRODUCTIVE" && (
-                          <FiAlertCircle className="text-yellow-500" />
+                          <FiAlertCircle className="h-5 w-5 text-amber-500" />
                         )}
-
                         {![
-  "PRODUCTIVE_SESSION",
-  "NON_PRODUCTIVE",
-].includes(item.notification_type) && (
-                          <FiClock className="text-indigo-500" />
+                          "PRODUCTIVE_SESSION",
+                          "NON_PRODUCTIVE",
+                        ].includes(item.notification_type) && (
+                          <FiClock className="h-5 w-5 text-indigo-500" />
                         )}
-
                       </div>
 
-                      <div className="flex-1">
-
-                        <p className="font-medium text-slate-800">
-  {item.title}
-</p>
-
-<p className="mt-1 text-sm text-slate-600">
-  {item.message}
-</p>
-
-<p className="mt-2 text-xs text-slate-500">
-  {new Date(item.created_at).toLocaleString(
-    currentLanguageCode || undefined
-  )}
-</p>
-
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-900">
+                          {item.title}
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                          {item.message}
+                        </p>
+                        <p className="mt-3 text-xs text-slate-500">
+                          {new Date(item.created_at).toLocaleString(
+                            currentLanguageCode || undefined
+                          )}
+                        </p>
                       </div>
-
                     </div>
                   ))}
-
                 </div>
 
                 <button
-  onClick={() => {
-    setShowNotifications(false);
-    navigate("/notifications");
-  }}
-  className="w-full border-t border-slate-200 p-3 text-sm font-medium text-indigo-600 transition hover:bg-slate-50"
->
-  {t("view_all_notifications", "View All Notifications")}
-</button>
-
+                  onClick={() => {
+                    setShowNotifications(false);
+                    navigate("/notifications");
+                  }}
+                  className="sticky bottom-0 w-full border-t border-slate-200 bg-white px-5 py-3 text-sm font-medium text-indigo-600 transition hover:bg-slate-50"
+                >
+                  {t("view_all_notifications", "View All Notifications")}
+                </button>
               </div>
             )}
-
           </div>
 
-          {/* Profile */}
-          <div className="flex items-center gap-3 border-l border-slate-200 pl-5">
-
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white">
-              {username.charAt(0).toUpperCase() || "?"}
+          <div className="flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:shadow-md sm:w-auto">
+            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 text-lg font-bold text-white shadow-lg shadow-indigo-500/10">
+              <span className="text-base font-semibold">
+                {username.charAt(0).toUpperCase() || "?"}
+              </span>
+              <span className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
             </div>
 
-            <div>
-
-              <p className="font-semibold text-slate-800">
+            <div className="min-w-0">
+              <p className="text-base font-semibold text-slate-900 truncate">
                 {username}
               </p>
-
-              <p className="text-xs text-slate-500">
-                {t("employee", "Employee")}
+              <p className="mt-1 text-sm text-slate-500">
+                {profile?.role === "NORMAL_USER"
+                  ? t("user", "User")
+                  : t("employee", "Employee")}
               </p>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
     </header>
   );

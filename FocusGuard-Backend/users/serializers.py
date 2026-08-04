@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import EmployeeDeactivationRequest, OrganizationDeactivationRequest, User, Organization, Invitation, ActivityLog, UserInactivity, Language, Translation
+from .models import EmployeeDeactivationRequest, NormalUserDeactivationRequest, OrganizationDeactivationRequest, User, Organization, Invitation, ActivityLog, UserInactivity, Language, Translation
 
 from .models import User, Organization, Invitation
 
@@ -247,10 +247,7 @@ class TranslationSerializer(serializers.ModelSerializer):
 
 
 class RegisterWithInviteCodeSerializer(serializers.Serializer):
-
-    username = serializers.CharField(
-        max_length=150
-    )
+    username = serializers.CharField(max_length=150, required=False)
 
     password = serializers.CharField(
         write_only=True,
@@ -266,12 +263,14 @@ class RegisterWithInviteCodeSerializer(serializers.Serializer):
         max_length=15,
     )
 
+    # Organization-admin registration keeps supporting the legacy invitation
+    # payload. Employee links always provide this value and are validated in
+    # the view against the invitation's email.
+    email = serializers.EmailField(required=False)
+
     preferred_language = serializers.PrimaryKeyRelatedField(
         queryset=Language.objects.filter(is_active=True),
     )
-
-    def validate_username(self, value):
-        return validate_username_identifier(value)
 
     def validate(self, attrs):
 
@@ -287,6 +286,42 @@ class RegisterWithInviteCodeSerializer(serializers.Serializer):
             )
 
         return attrs
+
+    def validate_username(self, value):
+        return validate_username_identifier(value)
+
+
+class NormalUserRegisterSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        max_length=150,
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message="Username already exists.",
+            )
+        ],
+    )
+    email = serializers.EmailField(
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message="User already exists.",
+            )
+        ]
+    )
+    password = serializers.CharField(write_only=True, min_length=8)
+    confirm_password = serializers.CharField(write_only=True, min_length=8)
+    preferred_language = serializers.PrimaryKeyRelatedField(
+        queryset=Language.objects.filter(is_active=True),
+    )
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        return attrs
+
+    def validate_username(self, value):
+        return validate_username_identifier(value)
 
 from rest_framework import serializers
 
@@ -521,4 +556,19 @@ class OrganizationDeactivationRequestSerializer(serializers.ModelSerializer):
             "status",
             "requested_at",
             "reviewed_at",
+        ]
+
+
+class NormalUserDeactivationRequestSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source="user.email", read_only=True)
+
+    class Meta:
+        model = NormalUserDeactivationRequest
+        fields = [
+            "id", "user", "email", "reason", "status", "requested_at",
+            "reviewed_at", "reviewed_by",
+        ]
+        read_only_fields = [
+            "user", "email", "status", "requested_at", "reviewed_at",
+            "reviewed_by",
         ]

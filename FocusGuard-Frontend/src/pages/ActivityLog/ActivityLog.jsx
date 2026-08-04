@@ -43,6 +43,7 @@ const formatDate = (date, locale) => {
 export default function ActivityLog() {
   const { selectedDate } = useOutletContext();
   const { currentLanguageCode, t } = useLanguage();
+
   const numberFormatter = new Intl.NumberFormat(
     currentLanguageCode || undefined
   );
@@ -82,133 +83,153 @@ export default function ActivityLog() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">
-          {t("activity_history", "Activity History")}
-        </h1>
+    <div className="w-full">
+      <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-6">
 
-        <p className="mt-2 text-gray-500">
-          {t(
-            "browse_website_activity",
-            "Browse your website activity."
-          )}
-        </p>
-      </div>
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+            {t("activity_history", "Activity History")}
+          </h1>
 
-      <div className="relative mb-6">
-        <FiSearch className="absolute left-4 top-3.5 text-gray-400" />
-
-        <input
-          type="text"
-          placeholder={t("search_website", "Search website...")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border bg-white py-3 pl-11 pr-4 outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
-
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-        <div className="grid grid-cols-5 bg-gray-100 px-6 py-4 font-semibold">
-          <div>{t("website", "Website")}</div>
-          <div>{t("category", "Category")}</div>
-          <div>{t("duration", "Duration")}</div>
-          <div>{t("status", "Status")}</div>
-          <div>{t("started", "Started")}</div>
+          <p className="mt-2 text-sm text-slate-500">
+            {t(
+              "browse_website_activity",
+              "Browse your website activity."
+            )}
+          </p>
         </div>
 
-        {loading ? (
-          <div className="p-8 text-center">
-            {t("loading", "Loading...")}
+        {/* Search */}
+        <div className="relative">
+          <FiSearch className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+
+          <input
+            type="text"
+            placeholder={t("search_website", "Search website...")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-12 pr-4 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+
+        {/* Activity List */}
+        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+          {/* Desktop Header */}
+          <div className="hidden bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-600 lg:grid lg:grid-cols-5">
+            <div>{t("website", "Website")}</div>
+            <div>{t("category", "Category")}</div>
+            <div>{t("duration", "Duration")}</div>
+            <div>{t("status", "Status")}</div>
+            <div>{t("started", "Started")}</div>
           </div>
-        ) : (
-          filtered.map((activity) => (
-            <div
-              key={activity.id}
-              className="grid grid-cols-5 items-center border-b px-6 py-5 hover:bg-gray-50"
-            >
-              <div>
-                <div className="flex items-center gap-2 font-semibold">
-                  <FiMonitor />
 
-                  <a
-                    href={activity.website_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-indigo-600 hover:underline"
-                  >
-                    {activity.website_name}
-                  </a>
-                </div>
-
-                <p className="mt-1 truncate text-xs text-gray-500">
-                  {activity.tab_title}
-                </p>
-              </div>
-
-              <div>{activity.category}</div>
-
-              <div className="flex items-center gap-2">
-                <FiClock />
-                {formatDuration(
-                  activity.duration,
-                  t,
-                  currentLanguageCode
-                )}
-              </div>
-
-              <div>
-                {activity.productivity_type ===
-                "PRODUCTIVE" ? (
-                  <span className="inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
-                    <FiCheckCircle />
-                    {t("productive", "Productive")}
-                  </span>
-                ) : activity.productivity_type ===
-                  "NEUTRAL" ? (
-                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
-                    <FiClock />
-                    {t("neutral", "Neutral")}
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
-                    <FiXCircle />
-                    {t("non_productive", "Non Productive")}
-                  </span>
-                )}
-              </div>
-
-              <div className="text-sm text-gray-500">
-                {formatDate(
-                  activity.start_time,
-                  currentLanguageCode
-                )}
-              </div>
+          {loading ? (
+            <div className="p-12 text-center text-slate-500">
+              {t("loading", "Loading...")}
             </div>
-          ))
-        )}
-      </div>
+          ) : (
+            filtered.map((activity) => (
+              <div
+                key={activity.id}
+                className="border-b border-slate-100 p-5 transition hover:bg-slate-50"
+              >
+                <div className="grid gap-4 lg:grid-cols-5 lg:items-center">
 
-      <div className="mt-6 flex items-center justify-between">
-        <button
-          disabled={!pagination.previous}
-          onClick={() => setPage((p) => p - 1)}
-          className="rounded-lg bg-indigo-600 px-5 py-2 text-white disabled:bg-gray-300"
-        >
-          {t("previous", "Previous")}
-        </button>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 font-semibold">
+                      <FiMonitor className="shrink-0" />
 
-        <span className="font-medium">
-          {t("page", "Page")} {numberFormatter.format(page)}
-        </span>
+                      <a
+                        href={activity.website_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="truncate text-indigo-600 hover:underline"
+                      >
+                        {activity.website_name}
+                      </a>
+                    </div>
 
-        <button
-          disabled={!pagination.next}
-          onClick={() => setPage((p) => p + 1)}
-          className="rounded-lg bg-indigo-600 px-5 py-2 text-white disabled:bg-gray-300"
-        >
-          {t("next", "Next")}
-        </button>
+                    <p className="mt-1 truncate text-xs text-slate-500">
+                      {activity.tab_title}
+                    </p>
+                  </div>
+
+                  <div className="text-sm">
+                    <span className="font-medium lg:hidden">
+                      {t("category", "Category")}:{" "}
+                    </span>
+                    {activity.category}
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <FiClock />
+
+                    {formatDuration(
+                      activity.duration,
+                      t,
+                      currentLanguageCode
+                    )}
+                  </div>
+
+                  <div>
+                    {activity.productivity_type === "PRODUCTIVE" ? (
+                      <span className="inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+                        <FiCheckCircle />
+                        {t("productive", "Productive")}
+                      </span>
+                    ) : activity.productivity_type === "NEUTRAL" ? (
+                      <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+                        <FiClock />
+                        {t("neutral", "Neutral")}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
+                        <FiXCircle />
+                        {t("non_productive", "Non Productive")}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="text-sm text-slate-500">
+                    {formatDate(
+                      activity.start_time,
+                      currentLanguageCode
+                    )}
+                  </div>
+
+                </div>
+              </div>
+            ))
+          )}
+        </section>
+
+        {/* Pagination */}
+        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+
+          <button
+            disabled={!pagination.previous}
+            onClick={() => setPage((p) => p - 1)}
+            className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-medium text-white transition hover:bg-indigo-700 disabled:bg-slate-300 sm:w-auto"
+          >
+            {t("previous", "Previous")}
+          </button>
+
+          <span className="font-semibold text-slate-700">
+            {t("page", "Page")} {numberFormatter.format(page)}
+          </span>
+
+          <button
+            disabled={!pagination.next}
+            onClick={() => setPage((p) => p + 1)}
+            className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-medium text-white transition hover:bg-indigo-700 disabled:bg-slate-300 sm:w-auto"
+          >
+            {t("next", "Next")}
+          </button>
+
+        </div>
+
       </div>
     </div>
   );

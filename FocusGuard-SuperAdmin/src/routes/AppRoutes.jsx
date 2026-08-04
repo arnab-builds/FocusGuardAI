@@ -9,6 +9,7 @@ import Invitations from "../pages/invitations/Invitations";
 import Requests from "../pages/requests/Requests";
 import Analytics from "../pages/analytics/Analytics";
 import Settings from "../pages/settings/Settings";
+import NormalUsers from "../pages/normal-users/NormalUsers";
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -85,6 +86,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Settings />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/normal-users"
+        element={
+          <ProtectedRoute>
+            <NormalUsers />
           </ProtectedRoute>
         }
       />

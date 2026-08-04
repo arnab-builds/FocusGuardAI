@@ -35,7 +35,7 @@ const getGreeting = (t) => {
     return t("good_night", "Good Night");
 };
 
-function Navbar() {
+function Navbar({ onToggleSidebar }) {
     const { currentLanguageCode, languages, setLanguageById, t } = useLanguage();
 
     const [notifications, setNotifications] =
@@ -235,8 +235,20 @@ function Navbar() {
     };
 
     return (
-        <header className="bg-white h-20 px-8 flex items-center justify-between border-b">
-            <div>
+        <header className="bg-white h-auto min-h-[80px] px-4 py-4 sm:px-8 sm:py-5 border-b">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+                    <button
+                        onClick={() => onToggleSidebar?.()}
+                        className="inline-flex items-center rounded-md bg-slate-50 p-2 text-slate-700 hover:bg-slate-100 md:hidden"
+                        aria-label="Open menu"
+                    >
+                    <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+
+                <div>
                 <h2 className="text-3xl font-bold text-slate-800">
                     {getGreeting(t)}, {username} 👋
                 </h2>
@@ -248,16 +260,17 @@ function Navbar() {
                     )}
                 </p>
             </div>
+                </div>
 
-            <div className="flex items-center gap-5">
-                <label className="flex h-12 items-center rounded-xl border border-gray-200 bg-slate-50 px-3 text-slate-600 transition focus-within:border-indigo-500 focus-within:bg-white">
+            <div className="flex flex-wrap items-center justify-end gap-3">
+                <label className="flex h-12 min-w-[180px] w-full sm:w-auto items-center rounded-xl border border-gray-200 bg-slate-50 px-3 text-slate-600 transition focus-within:border-indigo-500 focus-within:bg-white">
                     <Languages size={18} className="mr-2 text-indigo-600" aria-hidden="true" />
                     <span className="sr-only">{t("preferred_language", "Preferred Language")}</span>
                     <select
                         value={languages.find((language) => language.language_code === currentLanguageCode)?.id ?? ""}
                         onChange={handleLanguageChange}
                         disabled={languageSaving || !languages.length}
-                        className="max-w-28 bg-transparent text-sm font-medium outline-none disabled:cursor-wait"
+                        className="max-w-28 w-full bg-transparent text-sm font-medium outline-none disabled:cursor-wait"
                         aria-label={t("preferred_language", "Preferred Language")}
                     >
                         {languages.map((language) => (
@@ -279,7 +292,7 @@ function Navbar() {
                             "search_employees",
                             "Search employees..."
                         )}
-                        className="pl-11 pr-5 h-12 w-80 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="pl-11 pr-5 h-12 w-full max-w-xl rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                 </div>
 
@@ -390,7 +403,7 @@ function Navbar() {
                 <button className="flex h-12 w-12 items-center justify-center rounded-xl border hover:bg-slate-100">
                     <Settings size={20} />
                 </button>
-                                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                     <UserCircle2
                         size={42}
                         className="text-indigo-600"
@@ -406,6 +419,7 @@ function Navbar() {
                         </p>
                     </div>
                 </div>
+            </div>
             </div>
         </header>
     );

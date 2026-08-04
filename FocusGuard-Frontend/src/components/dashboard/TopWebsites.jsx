@@ -32,33 +32,33 @@ export default function TopWebsites({ websiteSummary }) {
   const maxDuration = sorted[0]?.duration || 1;
 
   return (
-    <section className="flex h-[430px] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="flex min-h-[420px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md">
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <div>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+        <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             {t("top_websites", "Top Websites")}
           </p>
 
-          <h2 className="mt-1 text-xl font-bold text-slate-900">
+          <h2 className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">
             {t("top_5_domains", "Top 5 Domains")}
           </h2>
         </div>
 
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
-          <FiArrowRight size={18} />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100">
+          <FiArrowRight className="h-6 w-6 text-slate-700" />
         </div>
       </div>
 
       {/* List */}
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
         {sorted.length === 0 ? (
-          <p className="text-sm text-slate-500">
+          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center text-sm text-slate-500">
             {t(
               "no_website_activity_available",
               "No website activity available."
             )}
-          </p>
+          </div>
         ) : (
           sorted.map((website) => {
             const ratio = Math.max(
@@ -69,29 +69,29 @@ export default function TopWebsites({ websiteSummary }) {
             return (
               <div
                 key={website.name}
-                className="rounded-xl bg-slate-50 p-3 transition hover:bg-slate-100"
+                className="rounded-xl border border-slate-100 bg-slate-50 p-4 transition-all duration-200 hover:border-slate-200 hover:bg-slate-100"
               >
-                <div className="flex items-center justify-between">
-                  <span className="truncate font-semibold text-slate-900">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="max-w-[70%] truncate text-sm font-semibold text-slate-900 sm:text-base">
                     {website.name}
                   </span>
 
-                  <span className="text-sm text-slate-500">
+                  <span className="shrink-0 text-xs text-slate-500 sm:text-sm">
                     {numberFormatter.format(website.visits)}{" "}
                     {t("visits", "visits")}
                   </span>
                 </div>
 
-                <div className="mt-1 text-xs text-slate-500">
+                <div className="mt-2 text-xs font-medium text-slate-500 sm:text-sm">
                   {numberFormatter.format(
                     Math.round(website.duration / 60)
                   )}{" "}
                   {t("minutes_short", "min")}
                 </div>
 
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
+                <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-200">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500"
+                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 transition-all duration-500"
                     style={{ width: `${ratio}%` }}
                   />
                 </div>

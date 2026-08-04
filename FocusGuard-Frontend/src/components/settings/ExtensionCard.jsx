@@ -1,35 +1,77 @@
-import { FiMonitor } from "react-icons/fi";
+import {
+  FiMonitor,
+  FiCheckCircle,
+} from "react-icons/fi";
 import { useLanguage } from "../../context/useLanguage";
 
 export default function ExtensionCard() {
   const { t } = useLanguage();
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <div className="mb-5 flex items-center gap-3">
-        <FiMonitor size={24} />
+    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
 
-        <h2 className="text-xl font-semibold">
-          {t("browser_extension", "Browser Extension")}
-        </h2>
-      </div>
+      {/* Header */}
 
-      <div className="flex items-center gap-3">
-        <div className="h-3 w-3 rounded-full bg-green-500"></div>
+      <div className="mb-6 flex items-center gap-4">
+
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-md">
+
+          <FiMonitor size={28} />
+
+        </div>
 
         <div>
-          <p className="font-medium">
-            {t("connected", "Connected")}
-          </p>
 
-          <p className="text-sm text-gray-500">
+          <h2 className="text-xl font-bold text-slate-900">
+            {t("browser_extension", "Browser Extension")}
+          </h2>
+
+          <p className="text-sm text-slate-500">
             {t(
-              "chrome_extension_active",
-              "Chrome Extension Active"
+              "browser_extension_status",
+              "Extension connection status"
             )}
           </p>
+
         </div>
+
       </div>
-    </div>
+
+      {/* Status */}
+
+      <div className="flex flex-col gap-5 rounded-xl border border-slate-200 bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+
+        <div className="flex items-center gap-4">
+
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+
+            <FiCheckCircle size={20} />
+
+          </div>
+
+          <div>
+
+            <p className="font-semibold text-slate-900">
+              {t("connected", "Connected")}
+            </p>
+
+            <p className="text-sm text-slate-500">
+              {t(
+                "chrome_extension_active",
+                "Chrome Extension Active"
+              )}
+            </p>
+
+          </div>
+
+        </div>
+
+        <span className="inline-flex w-fit items-center rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
+          ● {t("online", "Online")}
+        </span>
+
+      </div>
+
+    </section>
   );
 }

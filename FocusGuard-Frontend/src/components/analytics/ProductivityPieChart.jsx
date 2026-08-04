@@ -45,19 +45,33 @@ export default function ProductivityPieChart({ analytics }) {
   ];
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <h2 className="mb-5 text-xl font-semibold">
-        {t("productivity_breakdown", "Productivity Breakdown")}
-      </h2>
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md">
+      {/* Header */}
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
+          {t("productivity_breakdown", "Productivity Breakdown")}
+        </h2>
 
-      <div className="h-96">
+        <p className="mt-1 text-sm text-slate-500">
+          {t(
+            "visual_distribution_of_productivity",
+            "Visual distribution of your productivity."
+          )}
+        </p>
+      </div>
+
+      <div className="h-[320px] sm:h-[380px] lg:h-[430px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               dataKey="value"
-              outerRadius={130}
-              label
+              cx="50%"
+              cy="45%"
+              innerRadius={55}
+              outerRadius="70%"
+              paddingAngle={3}
+              labelLine={false}
             >
               {data.map((_, index) => (
                 <Cell
@@ -69,10 +83,18 @@ export default function ProductivityPieChart({ analytics }) {
 
             <Tooltip />
 
-            <Legend />
+            <Legend
+              verticalAlign="bottom"
+              align="center"
+              iconType="circle"
+              wrapperStyle={{
+                paddingTop: 20,
+                fontSize: 13,
+              }}
+            />
           </PieChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </section>
   );
 }

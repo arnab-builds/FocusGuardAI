@@ -8,9 +8,11 @@ export default function ProfileCard({ profile, analytics }) {
         <div>
           <p className="text-sm text-slate-500">Quick profile</p>
           <h2 className="text-3xl font-semibold text-slate-900">{profile.username}</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            {profile.organization || "Not Assigned"}
-          </p>
+          {profile.role !== "NORMAL_USER" && (
+            <p className="mt-1 text-sm text-slate-500">
+              {profile.organization || "Not Assigned"}
+            </p>
+          )}
         </div>
       </div>
 

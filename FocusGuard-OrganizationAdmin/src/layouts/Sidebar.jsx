@@ -9,13 +9,14 @@ import {
     Settings,
     LogOut,
     Building2,
+    X,
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
 import { getStoredOrganizationName } from "../utils/activityUtils";
 import { useLanguage } from "../context/useLanguage";
 
-function Sidebar() {
+function Sidebar({ isOpen = true, onClose = () => {} }) {
     const { t } = useLanguage();
 
     const menus = [
@@ -73,23 +74,40 @@ function Sidebar() {
         "admin@organization.com";
 
     return (
-        <aside className="w-72 h-screen bg-slate-900 text-white flex flex-col shadow-xl">
+        <>
+            <div
+                className={`fixed inset-0 z-40 bg-black bg-opacity-40 transition-opacity md:hidden ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                onClick={onClose}
+                aria-hidden={!isOpen}
+            />
+
+            <aside className={`fixed left-0 top-0 z-50 h-screen w-72 max-w-full transform flex-col bg-slate-900 text-white shadow-xl transition-transform md:relative md:translate-x-0 md:flex md:h-screen ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             {/* Logo */}
 
-            <div className="flex items-center gap-3 px-6 py-7 border-b border-slate-800">
-                <div className="bg-indigo-600 rounded-xl p-3">
-                    <Building2 size={26} />
+            <div className="flex items-center justify-between gap-3 px-6 py-7 border-b border-slate-800">
+                <div className="flex items-center gap-3">
+                    <div className="bg-indigo-600 rounded-xl p-3">
+                        <Building2 size={26} />
+                    </div>
+
+                    <div>
+                        <h1 className="text-2xl font-bold">
+                            FocusGuardAI
+                        </h1>
+
+                        <p className="text-sm text-slate-400">
+                            {organizationName}
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <h1 className="text-2xl font-bold">
-                        FocusGuardAI
-                    </h1>
-
-                    <p className="text-sm text-slate-400">
-                        {organizationName}
-                    </p>
-                </div>
+                <button
+                    onClick={onClose}
+                    className="rounded-md bg-slate-800 p-2 text-white hover:bg-slate-700 md:hidden"
+                    aria-label="Close menu"
+                >
+                    <X size={20} />
+                </button>
             </div>
 
             {/* Navigation */}
@@ -146,6 +164,7 @@ function Sidebar() {
                 </button>
             </div>
         </aside>
+        </>
     );
 }
 
