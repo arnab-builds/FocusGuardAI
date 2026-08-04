@@ -18,31 +18,32 @@ import {
     getRoundedProductivity,
     normalizeListResponse,
 } from "../../utils/responseUtils";
+import { translateCategory } from "../../utils/categoryTranslations";
 
 const PAGE_SIZE = 10;
 
-const formatDate = (value) => {
+const formatDate = (value, locale) => {
     if (!value) return "-";
 
     const date = new Date(value);
 
     if (Number.isNaN(date.getTime())) return "-";
 
-    return date.toLocaleDateString([], {
+    return date.toLocaleDateString(locale || undefined, {
         year: "numeric",
         month: "short",
         day: "numeric",
     });
 };
 
-const formatTime = (value) => {
+const formatTime = (value, locale) => {
     if (!value) return "-";
 
     const date = new Date(value);
 
     if (Number.isNaN(date.getTime())) return "-";
 
-    return date.toLocaleTimeString([], {
+    return date.toLocaleTimeString(locale || undefined, {
         hour: "numeric",
         minute: "2-digit",
     });
@@ -86,20 +87,28 @@ const formatDuration = (value, t) => {
     return `${seconds} ${t("seconds_short", "secs")}`;
 };
 
-const displayProductivityType = (value) =>
-    String(value || "NEUTRAL")
+const displayProductivityType = (value, t) => {
+    const normalized = String(value || "NEUTRAL").toUpperCase();
+    const labels = {
+        PRODUCTIVE: t("productive", "Productive"),
+        NON_PRODUCTIVE: t("unproductive", "Non Productive"),
+        NEUTRAL: t("neutral", "Neutral"),
+    };
+
+    return labels[normalized] || normalized
         .toLowerCase()
         .replace(/_/g, " ")
         .replace(/\b\w/g, (letter) =>
             letter.toUpperCase()
         );
+};
 
 function EmployeeAnalyticsDialog({
     open,
     onClose,
     employee,
 }) {
-    const { t } = useLanguage();
+    const { currentLanguageCode, t } = useLanguage();
 
     const [historyDate, setHistoryDate] =
         useState("");
@@ -131,6 +140,7 @@ function EmployeeAnalyticsDialog({
                         employee.id,
                         {
                             date: historyDate,
+                            language: currentLanguageCode,
                             page: historyPage,
                             pageSize: PAGE_SIZE,
                         }
@@ -173,6 +183,8 @@ function EmployeeAnalyticsDialog({
         employee?.id,
         historyDate,
         historyPage,
+        currentLanguageCode,
+        t,
     ]);
 
     if (!employee) return null;
@@ -462,8 +474,13 @@ function EmployeeAnalyticsDialog({
                                                         </td>
 
                                                         <td className="px-4 py-3 text-slate-600">
-                                                            {activity.category ||
-                                                                "-"}
+                                                            {activity.category
+                                                                ? translateCategory(
+                                                                      activity.category,
+                                                                      t,
+                                                                      currentLanguageCode
+                                                                  )
+                                                                : "-"}
                                                         </td>
 
                                                         <td className="px-4 py-3 text-slate-600">
@@ -475,19 +492,22 @@ function EmployeeAnalyticsDialog({
 
                                                         <td className="px-4 py-3 text-slate-600">
                                                             {formatDate(
-                                                                activity.start_time
+                                                                activity.start_time,
+                                                                currentLanguageCode
                                                             )}
                                                         </td>
 
                                                         <td className="px-4 py-3 text-slate-600">
                                                             {formatTime(
-                                                                activity.start_time
+                                                                activity.start_time,
+                                                                currentLanguageCode
                                                             )}
                                                         </td>
 
                                                         <td className="px-4 py-3 text-slate-600">
                                                             {displayProductivityType(
-                                                                activity.productivity_type
+                                                                activity.productivity_type,
+                                                                t
                                                             )}
                                                         </td>
                                                     </tr>

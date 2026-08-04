@@ -111,7 +111,7 @@ class RegisterView(TranslatedResponseMixin, generics.CreateAPIView):
         )
 
 
-class LoginView(TokenObtainPairView):
+class LoginView(TranslatedResponseMixin, TokenObtainPairView):
     serializer_class = LoginSerializer
 
 
@@ -755,7 +755,7 @@ class OrganizationMembersView(TranslatedResponseMixin, APIView):
     "members": serializer.data,
     "users": serializer.data,
 })
-class ActivityStartView(APIView):
+class ActivityStartView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -978,7 +978,7 @@ class OrganizationActivityView(TranslatedResponseMixin, APIView):
             },
             status=status.HTTP_200_OK,
         )
-class AdminActivityView(APIView):
+class AdminActivityView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def get(self, request):
@@ -1476,7 +1476,7 @@ class OrganizationAnalyticsView(TranslatedResponseMixin, APIView):
 
         })
 
-class InactivityStartView(APIView):
+class InactivityStartView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -1554,7 +1554,7 @@ class SuperAdminAnalyticsView(TranslatedResponseMixin, APIView):
         })
 
 
-class InactivityStopView(APIView):
+class InactivityStopView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -1592,7 +1592,7 @@ class InactivityStopView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-class EmployeeDeactivationRequestView(APIView):
+class EmployeeDeactivationRequestView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -2017,7 +2017,7 @@ class RejectOrganizationDeactivationRequestView(TranslatedResponseMixin, APIView
         return Response({
             "message": "Organization deactivation request rejected successfully."
         })
-class ActivityStopView(APIView):
+class ActivityStopView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):

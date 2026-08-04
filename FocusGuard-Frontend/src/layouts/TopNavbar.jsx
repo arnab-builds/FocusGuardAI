@@ -109,6 +109,7 @@ const navigate = useNavigate();
       setLanguageSaving(true);
       await updatePreferredLanguage(languageId);
       await setLanguageById(languageId);
+      window.location.reload();
     } catch (error) {
       console.error("Preferred language could not be updated:", error);
     } finally {

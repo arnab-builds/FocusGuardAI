@@ -45,6 +45,28 @@ class Translation(models.Model):
         return f"{self.key} ({self.language.language_code})"
 
 
+class RuntimeTranslation(models.Model):
+    """Persistent cache for provider-translated, non-catalog text."""
+
+    source_digest = models.CharField(max_length=64)
+    source_text = models.TextField()
+    target_language_code = models.CharField(max_length=10)
+    translated_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source_digest", "target_language_code"],
+                name="unique_runtime_translation_per_language",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.target_language_code}: {self.source_text[:50]}"
+
+
 class Organization(models.Model):
     name = models.CharField(max_length=255)
 

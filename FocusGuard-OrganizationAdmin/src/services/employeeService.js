@@ -22,12 +22,13 @@ export const getOrganizationActivity = async () => {
 
 export const getEmployeeBrowsingHistory = async (
     employeeId,
-    { date, page = 1, pageSize = 10 } = {}
+    { date, language, page = 1, pageSize = 10 } = {}
 ) => {
     const response = await api.get("organization/activity/", {
         params: {
             employee_id: employeeId,
             date: date || undefined,
+            language: language || undefined,
             page,
             page_size: pageSize,
         },

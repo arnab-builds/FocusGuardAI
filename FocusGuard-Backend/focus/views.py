@@ -110,7 +110,7 @@ class FocusGoalDetailView(TranslatedResponseMixin, APIView):
         )
 
 
-class GenerateFocusPlanView(APIView):
+class GenerateFocusPlanView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 
@@ -135,7 +135,7 @@ class GenerateFocusPlanView(APIView):
         )
 
 
-class FocusPlanView(APIView):
+class FocusPlanView(TranslatedResponseMixin, APIView):
 
     permission_classes = [IsAuthenticated]
 

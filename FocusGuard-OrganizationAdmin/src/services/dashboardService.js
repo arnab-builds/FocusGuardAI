@@ -10,8 +10,10 @@ export const getOrganizationAnalytics = async () => {
     return response.data;
 };
 
-export const getOrganizationActivity = async () => {
-    const response = await api.get("organization/activity/");
+export const getOrganizationActivity = async (language) => {
+    const response = await api.get("organization/activity/", {
+        params: language ? { language } : undefined,
+    });
     return response.data;
 };
 

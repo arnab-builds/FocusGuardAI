@@ -37,7 +37,7 @@ const toDateInputValue = (value) => {
 };
 
 function Activities() {
-    const { t } = useLanguage();
+    const { currentLanguageCode, t } = useLanguage();
 
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -51,7 +51,9 @@ function Activities() {
         const loadActivities = async () => {
             try {
                 const response =
-                    await getOrganizationActivity();
+                    await getOrganizationActivity(
+                        currentLanguageCode
+                    );
 
                 setActivities(
                     normalizeOrganizationActivities(
@@ -73,7 +75,7 @@ function Activities() {
         };
 
         loadActivities();
-    }, []);
+    }, [currentLanguageCode, t]);
 
     const employees = useMemo(
         () =>
