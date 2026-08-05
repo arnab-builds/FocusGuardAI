@@ -12,15 +12,15 @@ function Requests() {
         <DashboardLayout>
             <div className="space-y-8">
                 <PageHeader
-                    title={t(
-                        "requests",
-                        "Requests"
-                    )}
-                    subtitle={t(
-                        "manage_employee_requests",
-                        "Manage employee requests"
-                    )}
-                />
+    title={t(
+        "request_management",
+        "Request Management"
+    )}
+    subtitle={t(
+        "request_management_subtitle",
+        "Review employee requests, approve or reject submissions, and manage organization actions from one place."
+    )}
+/>
 
                 <RequestTable />
             </div>

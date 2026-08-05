@@ -12,15 +12,15 @@ function InviteEmployee() {
         <DashboardLayout>
             <div className="space-y-8">
                 <PageHeader
-                    title={t(
-                        "invite_employee",
-                        "Invite Employee"
-                    )}
-                    subtitle={t(
-                        "invite_employee_subtitle",
-                        "Send an invitation to add a new employee to your organization."
-                    )}
-                />
+    title={t(
+        "employee_onboarding",
+        "Employee Onboarding"
+    )}
+    subtitle={t(
+        "employee_onboarding_subtitle",
+        "Invite new employees to join your organization and start monitoring productivity."
+    )}
+/>
 
                 <InviteEmployeeForm />
             </div>

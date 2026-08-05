@@ -111,24 +111,34 @@ function Employees() {
         <DashboardLayout>
             <div className="space-y-8">
                 <PageHeader
-                    title={t(
-                        "employees",
-                        "Employees"
-                    )}
-                    subtitle={t(
-                        "manage_organization_employees",
-                        "Manage all employees in your organization"
-                    )}
+    title={t(
+        "employee_management",
+        "Employee Management"
+    )}
+    subtitle={t(
+        "manage_track_employees",
+        "Manage employees, monitor activity, and view productivity insights."
+    )}
                     action={
-                        <button className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-white shadow hover:bg-indigo-700 transition">
-                            <Users size={18} />
+                        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-sm">
+                      <div className="rounded-xl bg-indigo-100 p-3">
+                      <Users
+                     size={20}
+                  className="text-indigo-600"
+                />
+    </div>
 
-                            {t(
-                                "total_employees",
-                                "Total Employees"
-                            )}{" "}
-                            : {employees.length}
-                        </button>
+    <div>
+        <p className="text-xs uppercase tracking-wide text-slate-500">
+            {t("employees", "Employees")}
+        </p>
+
+        <h3 className="text-xl font-bold text-slate-900">
+            {employees.length}
+        </h3>
+    </div>
+</div>
+                    
                     }
                 />
 
@@ -158,73 +168,62 @@ function Employees() {
                         onView={handleView}
                     />
 
-                    <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm text-slate-600">
-                        <span>
-                            {t(
-                                "showing_employees",
-                                "Showing {visible} of {total} employees"
-                            )
-                                .replace(
-                                    "{visible}",
-                                    visibleEmployees.length
-                                )
-                                .replace(
-                                    "{total}",
-                                    filteredEmployees.length
-                                )}
-                        </span>
+                    <div className="w-full flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 md:p-5 md:flex-row md:items-center md:justify-between text-sm text-slate-600">
+                        <span className="font-medium text-slate-600 text-center md:text-left whitespace-nowrap">
+    {t("showing", "Showing")}{" "}
+    <span className="font-semibold text-slate-900">
+        {visibleEmployees.length}
+    </span>{" "}
+    {t("of", "of")}{" "}
+    <span className="font-semibold text-slate-900">
+        {filteredEmployees.length}
+    </span>{" "}
+    {t("employees", "employees")}
+</span>
 
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                disabled={page === 1}
-                                onClick={() =>
-                                    setPage((value) =>
-                                        Math.max(1, value - 1)
-                                    )
-                                }
-                                className="rounded-lg border px-3 py-2 disabled:opacity-50"
-                            >
-                                {t(
-                                    "previous",
-                                    "Previous"
-                                )}
-                            </button>
+                        <div className="flex justify-center items-center gap-3 flex-wrap">
+    <button
+        type="button"
+        disabled={page === 1}
+        onClick={() =>
+            setPage((value) =>
+                Math.max(1, value - 1)
+            )
+        }
+        className={`shrink-0 whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition-all duration-200 ${
+            page === 1
+                ? "cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400 shadow-none"
+                : "border border-slate-200 bg-white text-slate-700 hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600"
+        }`}
+    >
+        ← {t("previous", "Previous")}
+    </button>
 
-                            <span>
-                                {t(
-                                    "page_of",
-                                    "Page {page} of {total}"
-                                )
-                                    .replace(
-                                        "{page}",
-                                        page
-                                    )
-                                    .replace(
-                                        "{total}",
-                                        totalPages
-                                    )}
-                            </span>
+    <div className="shrink-0 min-w-[90px] whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 text-center">
+        {t("page", "Page")}{" "}
+        <span className="text-indigo-600">
+            {page}
+        </span>{" "}
+        / {totalPages}
+    </div>
 
-                            <button
-                                type="button"
-                                disabled={page === totalPages}
-                                onClick={() =>
-                                    setPage((value) =>
-                                        Math.min(
-                                            totalPages,
-                                            value + 1
-                                        )
-                                    )
-                                }
-                                className="rounded-lg border px-3 py-2 disabled:opacity-50"
-                            >
-                                {t(
-                                    "next",
-                                    "Next"
-                                )}
-                            </button>
-                        </div>
+    <button
+        type="button"
+        disabled={page === totalPages}
+        onClick={() =>
+            setPage((value) =>
+                Math.min(totalPages, value + 1)
+            )
+        }
+        className={`shrink-0 whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition-all duration-200 ${
+            page === totalPages
+                ? "cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400 shadow-none"
+                : "border border-slate-200 bg-white text-slate-700 hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600"
+        }`}
+    >
+        {t("next", "Next")} →
+    </button>
+</div>
                     </div>
                 </div>
 

@@ -3,36 +3,52 @@ import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 
 function DashboardLayout({ children }) {
-    // Sidebar responsive state
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    useEffect(() => {
-        const mql = window.matchMedia('(min-width: 768px)');
-        setIsSidebarOpen(mql.matches);
-        const handler = (e) => setIsSidebarOpen(e.matches);
-        mql.addEventListener?.('change', handler);
-        return () => mql.removeEventListener?.('change', handler);
-    }, []);
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 768px)");
 
-    return (
-        <div className="flex min-h-screen h-screen overflow-hidden bg-slate-100">
+    setIsSidebarOpen(mql.matches);
 
-            <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+    const handler = (e) => setIsSidebarOpen(e.matches);
 
-            <div className="flex-1 flex flex-col min-w-0">
+    if (mql.addEventListener) {
+      mql.addEventListener("change", handler);
+    } else {
+      mql.addListener(handler);
+    }
 
-                <Navbar onToggleSidebar={() => setIsSidebarOpen((s) => !s)} />
+    return () => {
+      if (mql.removeEventListener) {
+        mql.removeEventListener("change", handler);
+      } else {
+        mql.removeListener(handler);
+      }
+    };
+  }, []);
 
-                <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-8 sm:py-5">
+  return (
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100">
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
 
-                    {children}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <Navbar
+          onToggleSidebar={() =>
+            setIsSidebarOpen((prev) => !prev)
+          }
+        />
 
-                </main>
-
-            </div>
-
-        </div>
-    );
+        <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 md:px-8 lg:px-10 xl:px-12">
+          <div className="mx-auto w-full max-w-[1700px]">
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
 }
 
 export default DashboardLayout;

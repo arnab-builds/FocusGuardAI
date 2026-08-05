@@ -101,110 +101,198 @@ function SettingsForm() {
         }
     };
     return (
-    <div className="max-w-3xl space-y-6">
-        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
-            <div className="space-y-6">
+    <div className="max-w-3xl space-y-8">
+        <section className="bg-white rounded-3xl border border-slate-200 shadow-md hover:shadow-lg transition-all duration-300 p-6 sm:p-8">
+            <div className="space-y-7">
+                <div className="flex items-start gap-3">
+                    <span className="text-2xl leading-none mt-0.5">
+                        🏢
+                    </span>
+
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-900">
+                            {t(
+                                "organization_profile",
+                                "Organization Profile"
+                            )}
+                        </h2>
+
+                        <p className="mt-1 text-base text-slate-500">
+                            {t(
+                                "manage_organization_information_description",
+                                "Manage your organization information and account settings."
+                            )}
+                        </p>
+                    </div>
+                </div>
+
                 {loading && (
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                        {t(
-                            "loading_settings",
-                            "Loading settings..."
-                        )}
+                    <div className="space-y-4">
+                        {[0, 1, 2].map((skeleton) => (
+                            <div
+                                key={skeleton}
+                                className="space-y-2 animate-pulse"
+                            >
+                                <div className="h-3.5 w-28 rounded-full bg-slate-200" />
+                                <div className="h-14 w-full rounded-2xl bg-slate-100" />
+                            </div>
+                        ))}
                     </div>
                 )}
 
                 {error && (
-                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                        {error}
+                    <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+                        <span className="text-xl leading-none mt-0.5">
+                            ⚠️
+                        </span>
+
+                        <p className="text-sm sm:text-base font-medium text-red-700">
+                            {error}
+                        </p>
                     </div>
                 )}
 
-                <div>
-                    <label className="block mb-2 font-medium">
-                        {t("email", "Email")}
-                    </label>
+                {!loading && (
+                    <>
+                        <div>
+                            <label className="block mb-2.5 font-semibold text-slate-700">
+                                {t("email", "Email")}
+                            </label>
 
-                    <input
-                        value={email}
-                        readOnly
-                        className="w-full border rounded-xl px-4 py-3 bg-slate-50 text-slate-600"
-                    />
-                </div>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg leading-none text-slate-400">
+                                    📧
+                                </span>
 
-                <div>
-                    <label className="block mb-2 font-medium">
-                        {t(
-                            "organization_name",
-                            "Organization Name"
-                        )}
-                    </label>
+                                <input
+                                    value={email}
+                                    readOnly
+                                    className="w-full h-14 rounded-2xl border border-slate-200 bg-slate-50 pl-12 pr-4 text-base text-slate-600"
+                                />
+                            </div>
+                        </div>
 
-                    <input
-                        value={organization}
-                        readOnly
-                        className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                </div>
+                        <div>
+                            <label className="block mb-2.5 font-semibold text-slate-700">
+                                {t(
+                                    "organization_name",
+                                    "Organization Name"
+                                )}
+                            </label>
 
-                <div>
-                    <label className="block mb-2 font-medium">
-                        {t(
-                            "change_password",
-                            "Change Password"
-                        )}
-                    </label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg leading-none text-slate-400">
+                                    🏢
+                                </span>
 
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) =>
-                            setPassword(e.target.value)
-                        }
-                        placeholder={t(
-                            "new_password",
-                            "New Password"
-                        )}
-                        className="w-full border rounded-xl px-4 py-3"
-                    />
-                </div>
+                                <input
+                                    value={organization}
+                                    readOnly
+                                    className="w-full h-14 rounded-2xl border border-slate-200 bg-slate-50 pl-12 pr-4 text-base text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                            </div>
+                        </div>
 
+                        <div>
+                            <label className="block mb-2.5 font-semibold text-slate-700">
+                                {t(
+                                    "change_password",
+                                    "Change Password"
+                                )}
+                            </label>
+
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg leading-none text-slate-400">
+                                    🔒
+                                </span>
+
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) =>
+                                        setPassword(
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder={t(
+                                        "new_password",
+                                        "New Password"
+                                    )}
+                                    className="w-full h-14 rounded-2xl border border-slate-300 pl-12 pr-4 text-base shadow-sm outline-none transition-all duration-150 hover:border-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                                />
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
         </section>
-                <form
-            onSubmit={handleDeactivationSubmit}
-            className="bg-white rounded-2xl border border-red-200 shadow-sm p-8"
-        >
-            <div className="space-y-5">
-                <div>
-                    <h2 className="text-xl font-semibold text-slate-900">
-                        {t(
-                            "organization_deactivation_request",
-                            "Organization Deactivation Request"
-                        )}
-                    </h2>
 
-                    <p className="mt-1 text-sm text-slate-500">
+        <form
+            onSubmit={handleDeactivationSubmit}
+            className="bg-white rounded-3xl border border-red-200 shadow-md hover:shadow-lg transition-all duration-300 p-6 sm:p-8"
+        >
+            <div className="space-y-6">
+                <div className="flex items-start gap-3">
+                    <span className="text-2xl leading-none mt-0.5">
+                        ⚠️
+                    </span>
+
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-900">
+                            {t(
+                                "organization_deactivation_request",
+                                "Organization Deactivation"
+                            )}
+                        </h2>
+
+                        <p className="mt-1 text-base text-slate-500">
+                            {t(
+                                "submit_request_for_super_admin_review",
+                                "Submit a request for Super Admin review."
+                            )}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+                    <span className="text-xl leading-none mt-0.5">
+                        ⚠️
+                    </span>
+
+                    <p className="text-sm sm:text-base text-amber-800 leading-6">
                         {t(
-                            "submit_request_for_super_admin_review",
-                            "Submit a request for Super Admin review."
+                            "deactivation_warning_notice",
+                            "This action requires approval from the Super Administrator. Your organization will remain active until the request is reviewed."
                         )}
                     </p>
                 </div>
 
                 {deactivationMessage && (
-                    <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-                        {deactivationMessage}
+                    <div className="flex items-start gap-3 rounded-2xl border border-green-200 bg-green-50 px-5 py-4">
+                        <span className="text-xl leading-none mt-0.5">
+                            ✅
+                        </span>
+
+                        <p className="text-sm sm:text-base font-medium text-green-700">
+                            {deactivationMessage}
+                        </p>
                     </div>
                 )}
 
                 {deactivationError && (
-                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                        {deactivationError}
+                    <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+                        <span className="text-xl leading-none mt-0.5">
+                            ⚠️
+                        </span>
+
+                        <p className="text-sm sm:text-base font-medium text-red-700">
+                            {deactivationError}
+                        </p>
                     </div>
                 )}
 
                 <div>
-                    <label className="block mb-2 font-medium">
+                    <label className="block mb-2.5 font-semibold text-slate-700">
                         {t("reason", "Reason")}
                     </label>
 
@@ -219,7 +307,7 @@ function SettingsForm() {
                             "organization_deactivation_reason_placeholder",
                             "Explain why this organization should be deactivated."
                         )}
-                        className="w-full border rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-red-500"
+                        className="w-full rounded-2xl border border-slate-300 px-4 py-3.5 text-base leading-6 resize-none shadow-sm outline-none transition-all duration-150 hover:border-slate-400 focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-400"
                     />
                 </div>
 
@@ -229,8 +317,12 @@ function SettingsForm() {
                         deactivationLoading ||
                         !deactivationReason.trim()
                     }
-                    className="bg-red-600 hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300 text-white rounded-xl px-6 py-3"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300 text-white rounded-2xl px-8 py-4 font-semibold shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
                 >
+                    {deactivationLoading && (
+                        <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                    )}
+
                     {deactivationLoading
                         ? t(
                               "submitting",

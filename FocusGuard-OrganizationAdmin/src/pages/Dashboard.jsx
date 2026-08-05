@@ -123,22 +123,15 @@ function Dashboard() {
         <DashboardLayout>
             <div className="mx-auto max-w-[1500px] space-y-7">
                 <PageHeader
-                    title={t(
-                        "dashboard",
-                        "Dashboard"
-                    )}
+                    title={t("overview", "Overview")}
                     subtitle={t(
-                        "organization_overview",
-                        "Organization overview"
+                        "organization_performance_overview",
+                        "Monitor employee productivity, activity, and organization performance."
                     )}
                     action={
                         <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-500 shadow-sm">
                             <span className="font-semibold text-slate-700">
-                                {t(
-                                    "last_synced",
-                                    "Last synced"
-                                )}
-                                :
+                                {t("last_synced", "Last synced")}:
                             </span>{" "}
                             {syncedLabel}
                         </div>

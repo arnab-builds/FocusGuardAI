@@ -12,15 +12,15 @@ function Notifications() {
         <DashboardLayout>
             <div className="space-y-8">
                 <PageHeader
-                    title={t(
-                        "notifications",
-                        "Notifications"
-                    )}
-                    subtitle={t(
-                        "view_all_system_notifications",
-                        "View all system notifications"
-                    )}
-                />
+    title={t(
+        "notification_center",
+        "Notification Center"
+    )}
+    subtitle={t(
+        "notification_center_subtitle",
+        "Stay updated with system alerts, employee activities, invitations, approvals, and important organization events."
+    )}
+/>
 
                 <NotificationList />
             </div>

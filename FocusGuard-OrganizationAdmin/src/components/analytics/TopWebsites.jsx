@@ -84,85 +84,184 @@ function TopWebsites({ websites = [] }) {
         .slice(0, 5);
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-6 border-b">
-                <h2 className="text-lg font-semibold">
-                    {t(
-                        "top_websites",
-                        "Top Websites"
-                    )}
-                </h2>
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+            <div className="p-6 sm:p-7 border-b border-slate-100">
+                <div className="flex items-start gap-3">
+                    <span className="text-2xl leading-none mt-0.5">
+                        🌐
+                    </span>
+
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-900">
+                            {t(
+                                "top_websites",
+                                "Top Websites"
+                            )}
+                        </h2>
+
+                        <p className="text-sm text-slate-500 mt-1">
+                            {t(
+                                "most_visited_websites_description",
+                                "Most visited websites across your organization"
+                            )}
+                        </p>
+                    </div>
+                </div>
             </div>
 
             {topWebsites.length > 0 ? (
-                <table className="w-full">
-                    <thead className="bg-slate-50">
-                        <tr>
-                            <th className="text-left px-6 py-4">
-                                {t(
-                                    "website",
-                                    "Website"
-                                )}
-                            </th>
+                <>
+                    {/* Desktop / tablet table */}
+                    <div className="hidden md:block overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-slate-50">
+                                <tr>
+                                    <th className="text-left px-6 py-4 text-sm uppercase tracking-wide font-bold text-slate-700">
+                                        {t(
+                                            "website",
+                                            "Website"
+                                        )}
+                                    </th>
 
-                            <th className="text-left px-6 py-4">
-                                {t(
-                                    "category",
-                                    "Category"
-                                )}
-                            </th>
+                                    <th className="text-left px-6 py-4 text-sm uppercase tracking-wide font-bold text-slate-700">
+                                        {t(
+                                            "category",
+                                            "Category"
+                                        )}
+                                    </th>
 
-                            <th className="text-left px-6 py-4">
-                                {t(
-                                    "time",
-                                    "Time"
-                                )}
-                            </th>
-                        </tr>
-                    </thead>
+                                    <th className="text-left px-6 py-4 text-sm uppercase tracking-wide font-bold text-slate-700">
+                                        {t(
+                                            "time",
+                                            "Time"
+                                        )}
+                                    </th>
+                                </tr>
+                            </thead>
 
-                    <tbody>
-                        {topWebsites.map(
-                            (site, index) => (
-                                <tr
-                                    key={
-                                        site.id ||
-                                        index
-                                    }
-                                    className="border-t hover:bg-slate-50"
-                                >
-                                    <td className="px-6 py-4 font-medium">
+                            <tbody>
+                                {topWebsites.map(
+                                    (site, index) => (
+                                        <tr
+                                            key={
+                                                site.id ||
+                                                index
+                                            }
+                                            className="border-t border-slate-100 hover:bg-indigo-50 transition-colors duration-150"
+                                        >
+                                            <td className="px-6 py-5">
+                                                <div className="flex items-center gap-2.5">
+                                                    <span className="text-lg leading-none">
+                                                        🌐
+                                                    </span>
+
+                                                    <span className="text-base font-semibold text-slate-900">
+                                                        {site.website_name ||
+                                                            site.name}
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            <td className="px-6 py-5">
+                                                {site.category ? (
+                                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+                                                        <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                                                        {translateCategory(
+                                                            site.category,
+                                                            t,
+                                                            currentLanguageCode
+                                                        )}
+                                                    </span>
+                                                ) : (
+                                                    "-"
+                                                )}
+                                            </td>
+
+                                            <td className="px-6 py-5">
+                                                <span className="inline-flex items-center gap-1.5 text-lg font-bold text-indigo-600">
+                                                    <span className="text-base leading-none">
+                                                        ⏱
+                                                    </span>
+                                                    {formatTimeSpent(
+                                                        site,
+                                                        t
+                                                    )}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    )
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile cards */}
+                    <div className="md:hidden flex flex-col gap-3 p-4">
+                        {topWebsites.map((site, index) => (
+                            <div
+                                key={site.id || index}
+                                className="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-5 flex flex-col gap-3"
+                            >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <span className="text-lg leading-none shrink-0">
+                                        🌐
+                                    </span>
+
+                                    <span className="text-base font-semibold text-slate-900 truncate">
                                         {site.website_name ||
                                             site.name}
-                                    </td>
+                                    </span>
+                                </div>
 
-                                    <td className="px-6 py-4">
-                                        {site.category
-                                            ? translateCategory(
-                                                  site.category,
-                                                  t,
-                                                  currentLanguageCode
-                                              )
-                                            : "-"}
-                                    </td>
+                                <div className="flex items-center justify-between gap-3 flex-wrap">
+                                    {site.category ? (
+                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                                            {translateCategory(
+                                                site.category,
+                                                t,
+                                                currentLanguageCode
+                                            )}
+                                        </span>
+                                    ) : (
+                                        <span className="text-sm text-slate-400">
+                                            -
+                                        </span>
+                                    )}
 
-                                    <td className="px-6 py-4 font-semibold text-indigo-600">
+                                    <span className="inline-flex items-center gap-1.5 text-lg font-bold text-indigo-600">
+                                        <span className="text-base leading-none">
+                                            ⏱
+                                        </span>
                                         {formatTimeSpent(
                                             site,
                                             t
                                         )}
-                                    </td>
-                                </tr>
-                            )
-                        )}
-                    </tbody>
-                </table>
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
             ) : (
-                <div className="py-12 text-center text-slate-500">
-                    {t(
-                        "no_website_activity_available",
-                        "No website activity available."
-                    )}
+                <div className="py-14 px-6 flex flex-col items-center justify-center gap-3 text-center">
+                    <span className="text-5xl leading-none">
+                        🌐
+                    </span>
+
+                    <h3 className="text-lg font-bold text-slate-800">
+                        {t(
+                            "no_website_activity",
+                            "No Website Activity"
+                        )}
+                    </h3>
+
+                    <p className="text-sm text-slate-500 max-w-xs">
+                        {t(
+                            "no_website_activity_available",
+                            "Website usage data will appear once employee activity is available."
+                        )}
+                    </p>
                 </div>
             )}
         </div>

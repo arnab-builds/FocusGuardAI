@@ -30,6 +30,22 @@ function RequestTable() {
         );
     };
 
+    const getStatusPillClasses = (status) => {
+        const classes = {
+            PENDING:
+                "bg-amber-100 text-amber-700",
+            APPROVED:
+                "bg-green-100 text-green-700",
+            REJECTED:
+                "bg-red-100 text-red-700",
+        };
+
+        return (
+            classes[normalizeStatus(status)] ||
+            "bg-slate-100 text-slate-600"
+        );
+    };
+
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionId, setActionId] = useState(null);
@@ -101,6 +117,11 @@ function RequestTable() {
         );
     };
 
+    const getEmployeeId = (request) =>
+        request.employee?.id ||
+        request.employee ||
+        t("unknown", "Unknown");
+
     const handleApprove = async (
         id
     ) => {
@@ -154,137 +175,292 @@ function RequestTable() {
     };
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
             {error && (
-                <div className="border-b border-red-200 bg-red-50 px-6 py-3 text-sm text-red-700">
-                    {error}
+                <div className="flex items-start gap-3 border-b border-red-200 bg-red-50 px-6 py-4">
+                    <span className="text-xl leading-none mt-0.5">
+                        ⚠️
+                    </span>
+
+                    <p className="text-sm sm:text-base font-medium text-red-700">
+                        {error}
+                    </p>
                 </div>
             )}
 
             {loading ? (
-                <div className="p-12 text-center text-slate-500">
-                    {t(
-                        "loading_requests",
-                        "Loading requests..."
-                    )}
+                <div className="p-5 sm:p-6 space-y-4">
+                    {[0, 1, 2, 3].map((skeleton) => (
+                        <div
+                            key={skeleton}
+                            className="rounded-2xl border border-slate-200 p-5 animate-pulse"
+                        >
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="space-y-2.5 flex-1">
+                                    <div className="h-4 w-1/4 rounded-full bg-slate-200" />
+                                    <div className="h-3.5 w-2/3 rounded-full bg-slate-100" />
+                                </div>
+
+                                <div className="h-8 w-24 rounded-full bg-slate-100 shrink-0" />
+                            </div>
+                        </div>
+                    ))}
                 </div>
             ) : requests.length >
               0 ? (
-                <table className="w-full">
-                    <thead className="bg-slate-50">
-                        <tr>
-                            <th className="px-6 py-4 text-left">
-                                {t(
-                                    "employee",
-                                    "Employee"
-                                )}
-                            </th>
-
-                            <th className="px-6 py-4 text-left">
-                                {t(
-                                    "reason",
-                                    "Reason"
-                                )}
-                            </th>
-
-                            <th className="px-6 py-4 text-left">
-                                {t(
-                                    "status",
-                                    "Status"
-                                )}
-                            </th>
-
-                            <th className="px-6 py-4 text-center">
-                                {t(
-                                    "action",
-                                    "Action"
-                                )}
-                            </th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {requests.map(
-                            (request) => (
-                                <tr
-                                    key={
-                                        request.id
-                                    }
-                                    className="border-t hover:bg-slate-50"
-                                >
-                                    <td className="px-6 py-4">
-                                        {getEmployeeName(
-                                            request
+                <>
+                    {/* Desktop / tablet table */}
+                    <div className="hidden md:block overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-slate-50">
+                                <tr>
+                                    <th className="px-6 py-5 text-left text-sm uppercase tracking-wider font-bold text-slate-700">
+                                        {t(
+                                            "employee",
+                                            "Employee"
                                         )}
-                                    </td>
+                                    </th>
 
-                                    <td className="px-6 py-4">
-                                        {
-                                            request.reason
-                                        }
-                                    </td>
-
-                                    <td className="px-6 py-4">
-                                        {getStatusLabel(
-                                            request.status
+                                    <th className="px-6 py-5 text-left text-sm uppercase tracking-wider font-bold text-slate-700">
+                                        {t(
+                                            "reason",
+                                            "Reason"
                                         )}
-                                    </td>
+                                    </th>
 
-                                    <td className="px-6 py-4">
-                                        {normalizeStatus(
-                                            request.status
-                                        ) ===
-                                            "PENDING" && (
-                                            <div className="flex justify-center gap-3">
-                                                <button
-                                                    onClick={() =>
-                                                        handleApprove(
-                                                            request.id
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        actionId ===
-                                                        request.id
-                                                    }
-                                                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                                                >
-                                                    {t(
-                                                        "approve",
-                                                        "Approve"
-                                                    )}
-                                                </button>
-
-                                                <button
-                                                    onClick={() =>
-                                                        handleReject(
-                                                            request.id
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        actionId ===
-                                                        request.id
-                                                    }
-                                                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-                                                >
-                                                    {t(
-                                                        "reject",
-                                                        "Reject"
-                                                    )}
-                                                </button>
-                                            </div>
+                                    <th className="px-6 py-5 text-left text-sm uppercase tracking-wider font-bold text-slate-700">
+                                        {t(
+                                            "status",
+                                            "Status"
                                         )}
-                                    </td>
+                                    </th>
+
+                                    <th className="px-6 py-5 text-center text-sm uppercase tracking-wider font-bold text-slate-700">
+                                        {t(
+                                            "action",
+                                            "Action"
+                                        )}
+                                    </th>
                                 </tr>
-                            )
-                        )}
-                    </tbody>
-                </table>
+                            </thead>
+
+                            <tbody>
+                                {requests.map(
+                                    (request) => (
+                                        <tr
+                                            key={
+                                                request.id
+                                            }
+                                            className="border-t border-slate-100 hover:bg-indigo-50 transition-colors duration-150"
+                                        >
+                                            <td className="px-6 py-5">
+                                                <div className="flex items-center gap-2.5">
+                                                    <span className="text-lg leading-none">
+                                                        👤
+                                                    </span>
+
+                                                    <div>
+                                                        <p className="text-base font-semibold text-slate-900">
+                                                            {getEmployeeName(
+                                                                request
+                                                            )}
+                                                        </p>
+
+                                                        <p className="text-xs text-slate-500">
+                                                            {t(
+                                                                "employee",
+                                                                "Employee"
+                                                            )}{" "}
+                                                            #
+                                                            {getEmployeeId(
+                                                                request
+                                                            )}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <td className="px-6 py-5 max-w-md">
+                                                <p className="leading-6 text-slate-700">
+                                                    {
+                                                        request.reason
+                                                    }
+                                                </p>
+                                            </td>
+
+                                            <td className="px-6 py-5">
+                                                <span
+                                                    className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${getStatusPillClasses(
+                                                        request.status
+                                                    )}`}
+                                                >
+                                                    {getStatusLabel(
+                                                        request.status
+                                                    )}
+                                                </span>
+                                            </td>
+
+                                            <td className="px-6 py-5">
+                                                {normalizeStatus(
+                                                    request.status
+                                                ) ===
+                                                    "PENDING" && (
+                                                    <div className="flex justify-center gap-3">
+                                                        <button
+                                                            onClick={() =>
+                                                                handleApprove(
+                                                                    request.id
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                actionId ===
+                                                                request.id
+                                                            }
+                                                            className="min-h-[44px] px-5 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold shadow-sm transition-all duration-200 hover:from-green-700 hover:to-green-800 hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                                                        >
+                                                            {t(
+                                                                "approve",
+                                                                "Approve"
+                                                            )}
+                                                        </button>
+
+                                                        <button
+                                                            onClick={() =>
+                                                                handleReject(
+                                                                    request.id
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                actionId ===
+                                                                request.id
+                                                            }
+                                                            className="min-h-[44px] px-5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold shadow-sm transition-all duration-200 hover:from-red-700 hover:to-red-800 hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                                                        >
+                                                            {t(
+                                                                "reject",
+                                                                "Reject"
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    )
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile cards */}
+                    <div className="md:hidden flex flex-col gap-4 p-4">
+                        {requests.map((request) => (
+                            <div
+                                key={request.id}
+                                className="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col gap-4"
+                            >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <span className="text-lg leading-none shrink-0">
+                                        👤
+                                    </span>
+
+                                    <div className="min-w-0">
+                                        <p className="text-base font-semibold text-slate-900 truncate">
+                                            {getEmployeeName(
+                                                request
+                                            )}
+                                        </p>
+
+                                        <p className="text-xs text-slate-500">
+                                            {t(
+                                                "employee",
+                                                "Employee"
+                                            )}{" "}
+                                            #
+                                            {getEmployeeId(
+                                                request
+                                            )}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <p className="leading-6 text-slate-700 text-sm">
+                                    {request.reason}
+                                </p>
+
+                                <span
+                                    className={`inline-flex w-fit items-center rounded-full px-4 py-2 text-sm font-semibold ${getStatusPillClasses(
+                                        request.status
+                                    )}`}
+                                >
+                                    {getStatusLabel(
+                                        request.status
+                                    )}
+                                </span>
+
+                                {normalizeStatus(
+                                    request.status
+                                ) === "PENDING" && (
+                                    <div className="flex flex-col gap-2.5">
+                                        <button
+                                            onClick={() =>
+                                                handleApprove(
+                                                    request.id
+                                                )
+                                            }
+                                            disabled={
+                                                actionId ===
+                                                request.id
+                                            }
+                                            className="w-full min-h-[44px] rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold shadow-sm transition-all duration-200 hover:from-green-700 hover:to-green-800 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {t(
+                                                "approve",
+                                                "Approve"
+                                            )}
+                                        </button>
+
+                                        <button
+                                            onClick={() =>
+                                                handleReject(
+                                                    request.id
+                                                )
+                                            }
+                                            disabled={
+                                                actionId ===
+                                                request.id
+                                            }
+                                            className="w-full min-h-[44px] rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold shadow-sm transition-all duration-200 hover:from-red-700 hover:to-red-800 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {t(
+                                                "reject",
+                                                "Reject"
+                                            )}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </>
             ) : (
-                <div className="p-12 text-center text-slate-500">
-                    {t(
-                        "no_pending_requests",
-                        "No pending requests."
-                    )}
+                <div className="p-14 flex flex-col items-center justify-center gap-3 text-center">
+                    <span className="text-5xl leading-none">
+                        📋✅
+                    </span>
+
+                    <h3 className="text-lg font-bold text-slate-800">
+                        {t(
+                            "no_pending_requests_heading",
+                            "No Pending Requests"
+                        )}
+                    </h3>
+
+                    <p className="text-sm text-slate-500 max-w-xs">
+                        {t(
+                            "no_pending_requests",
+                            "All employee requests have been processed. New requests will appear here."
+                        )}
+                    </p>
                 </div>
             )}
         </div>
