@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { Plus, Loader2 } from "lucide-react";
+
 import AdminLayout from "../../components/layout/AdminLayout";
 import OrganizationsTable from "../../components/organizations/OrganizationsTable";
 import CreateOrganizationModal from "../../components/organizations/CreateOrganizationModal";
@@ -37,17 +39,17 @@ function Organizations() {
 
     return (
         <AdminLayout>
-            <div className="space-y-6">
-                <div className="flex justify-between items-center">
+            <div className="space-y-6 sm:space-y-8 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-5">
                     <div>
-                        <h1 className="text-3xl font-bold">
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900">
                             {t(
                                 "organizations",
                                 "Organizations"
                             )}
                         </h1>
 
-                        <p className="text-gray-500 mt-2">
+                        <p className="text-sm sm:text-base text-slate-500 mt-2">
                             {t(
                                 "manage_organizations",
                                 "Manage organizations."
@@ -57,8 +59,9 @@ function Organizations() {
 
                     <button
                         onClick={() => setOpen(true)}
-                        className="bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700"
+                        className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 px-5 sm:px-6 py-3 text-sm sm:text-base font-semibold text-white shadow-md shadow-blue-600/20 transition-all duration-300 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg hover:shadow-blue-600/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
                     >
+                        <Plus size={18} strokeWidth={2.5} />
                         {t(
                             "create_organization",
                             "+ Create Organization"
@@ -67,17 +70,29 @@ function Organizations() {
                 </div>
 
                 {loading ? (
-                    <div className="bg-white rounded-2xl border p-10 text-center">
-                        {t(
-                            "loading_organizations",
-                            "Loading organizations..."
-                        )}
+                    <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-slate-100 bg-white p-12 sm:p-16 shadow-sm">
+                        <Loader2
+                            size={32}
+                            className="animate-spin text-blue-600"
+                            strokeWidth={2}
+                        />
+
+                        <p className="text-sm sm:text-base font-medium text-slate-500">
+                            {t(
+                                "loading_organizations",
+                                "Loading organizations..."
+                            )}
+                        </p>
                     </div>
                 ) : (
-                    <OrganizationsTable
-                        organizations={organizations}
-                        refreshOrganizations={loadOrganizations}
-                    />
+                    <div className="rounded-3xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+                        <div className="p-4 sm:p-6 lg:p-7">
+                            <OrganizationsTable
+                                organizations={organizations}
+                                refreshOrganizations={loadOrganizations}
+                            />
+                        </div>
+                    </div>
                 )}
             </div>
 

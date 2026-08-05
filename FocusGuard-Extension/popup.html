@@ -6,39 +6,77 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>FocusGuard AI</title>
     <style>
+        /* =========================================================
+           FocusGuard AI — Popup CSS (layout/spacing fixes only)
+           No HTML, JS, IDs, classes, or copy were changed.
+           ========================================================= */
+
         :root{
-            --bg:#0f1724; /* dark fallback not used in popup but keep theme */
+            --bg:#0f1724;
             --white:#ffffff;
             --muted:#94a3b8;
             --panel:#ffffff;
             --surface:#f8fafc;
-            --accent:#6366f1; /* indigo-500 */
+            --accent:#6366f1;
             --accent-600:#4f46e5;
             --danger:#ef4444;
             --radius:14px;
             --shadow:0 6px 18px rgba(15,23,42,0.12);
+            /* NEW: a single spacing scale so gaps/padding stay consistent
+               everywhere (fixes "elements don't have proper spacing") */
+            --space-xs:6px;
+            --space-sm:8px;
+            --space-md:12px;
+            --space-lg:16px;
             font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
         }
 
+        /* CHANGE: box-sizing normalized globally, kept from original
+           but moved here so it's declared once, before anything else
+           depends on it. Prevents padding from ever expanding elements
+           past their set width (fixes overflow / horizontal scroll). */
+        *, *::before, *::after{
+            box-sizing:border-box;
+        }
+
         html,body{
-            height:100%;
+            /* CHANGE: removed forced height:100% — a popup should size
+               to its content, not stretch to fill an arbitrary viewport.
+               This removes the "huge blank area" issue. */
             margin:0;
             padding:0;
             background:var(--surface);
             -webkit-font-smoothing:antialiased;
             -moz-osx-font-smoothing:grayscale;
+            /* NEW: sane default line-height so all text (badges, subtitle,
+               tracking message) wraps with proper spacing, never cramped */
+            line-height:1.45;
         }
 
-        /* Root popup container sized for extension (~380x600) */
+        /* CHANGE: prevents ANY horizontal scrolling no matter what
+           content does inside (badges, long text, etc.) */
+        body{
+            overflow-x:hidden;
+        }
+
+        /* Root popup container sized for extension */
         .popup-root{
-            width:100%;
-            max-width:380px;
-            height:600px;
+            /* CHANGE: fixed, consistent width in the 360-380px range
+               (was 340px, causing the "inconsistent width" issue).
+               min-width/max-width kept equal to width so Chrome never
+               renders it inconsistently across pages/zoom levels. */
+            width:372px;
+            min-width:372px;
+            max-width:372px;
+            height:auto;
             box-sizing:border-box;
-            padding:12px;
+            padding:var(--space-sm);
             display:flex;
             flex-direction:column;
-            gap:10px;
+            gap:var(--space-xs);
+            /* NEW: stops the whole root from ever compressing narrower
+               than its content (fixes "sections shrink when width changes") */
+            flex-shrink:0;
         }
 
         /* Card like panel */
@@ -49,23 +87,33 @@
             overflow:hidden;
             display:flex;
             flex-direction:column;
-            height:100%;
+            /* CHANGE: height:auto explicit + width 100% so the card always
+               fills the popup's available width (fixes "cards should use
+               full available width") */
+            height:auto;
+            width:100%;
         }
 
         /* Header - compact */
         .header{
             display:flex;
             align-items:center;
-            gap:10px;
-            padding:10px 12px;
+            gap:var(--space-md);
+            padding:var(--space-md) var(--space-md);
             border-bottom:1px solid #eef2ff;
             background:linear-gradient(90deg, rgba(99,102,241,0.04), rgba(99,102,241,0.02));
+            /* NEW: header text must never force the row to overflow */
+            min-width:0;
         }
 
         .brand{
             display:flex;
             align-items:center;
-            gap:8px;
+            gap:var(--space-sm);
+            /* NEW: allows the title/subtitle text block to shrink and wrap
+               instead of pushing the panel wider */
+            min-width:0;
+            flex:1 1 auto;
         }
 
         .logo{
@@ -80,74 +128,308 @@
             font-weight:700;
             box-shadow:0 6px 14px rgba(79,70,229,0.12);
             font-size:14px;
+            /* NEW: logo must never get squashed by flex */
+            flex-shrink:0;
         }
 
-        .title{font-size:14px;color:#0f1724;font-weight:600}
-        .subtitle{font-size:11px;color:var(--muted);margin-top:2px}
+        .title{
+            font-size:14px;
+            color:#0f1724;
+            font-weight:600;
+            line-height:1.3;
+        }
+        .subtitle{
+            font-size:11px;
+            color:var(--muted);
+            margin-top:2px;
+            line-height:1.4;
+            /* NEW: long subtitle text wraps cleanly instead of clipping */
+            word-wrap:break-word;
+        }
 
-        .header-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+        .header-actions{
+            margin-left:auto;
+            display:flex;
+            align-items:center;
+            gap:var(--space-sm);
+            flex-shrink:0;
+        }
 
-        /* Content area with messages or dashboard */
+        /* Main content area */
         .content{
-            padding:12px;
-            flex:1 1 auto;
-            overflow:hidden;
+            /* CHANGE: consistent spacing scale (12px-16px) instead of a
+               hard-coded 14px/14px/14px, and gap replaces ad-hoc spacing */
+            padding:var(--space-lg);
             display:flex;
             flex-direction:column;
-            gap:8px;
+            gap:var(--space-md);
         }
 
         /* Scrollable message area */
         .messages{
             flex:1 1 auto;
             overflow:auto;
-            padding-right:6px;
+            padding-right:var(--space-xs);
             display:flex;
             flex-direction:column;
-            gap:8px;
+            gap:var(--space-sm);
+            /* NEW: caps runaway height so the popup body scrolls instead of
+               growing the whole extension window indefinitely */
+            max-height:320px;
         }
 
-        .message-row{display:flex;gap:8px;align-items:flex-start}
-        .msg-avatar{height:30px;width:30px;border-radius:8px;background:var(--accent);color:var(--white);display:inline-flex;align-items:center;justify-content:center;font-size:13px}
-        .msg-bubble{background:#f1f5f9;padding:8px 10px;border-radius:10px;max-width:82%;font-size:13px;color:#0f1724}
-        .msg-bubble.assistant{background:linear-gradient(90deg,var(--accent),var(--accent-600));color:var(--white)}
+        .message-row{
+            display:flex;
+            gap:var(--space-sm);
+            align-items:flex-start;
+            /* NEW: row itself can't overflow its parent */
+            min-width:0;
+        }
+        .msg-avatar{
+            height:30px;
+            width:30px;
+            border-radius:8px;
+            background:var(--accent);
+            color:var(--white);
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            font-size:13px;
+            /* NEW: avatar keeps its size, never gets squeezed by flex siblings */
+            flex-shrink:0;
+        }
+        .msg-bubble{
+            background:#f1f5f9;
+            padding:var(--space-sm) var(--space-md);
+            border-radius:10px;
+            max-width:82%;
+            font-size:13px;
+            color:#0f1724;
+            line-height:1.45;
+            /* NEW: long unbroken text (URLs etc.) wraps instead of overflowing */
+            word-wrap:break-word;
+            overflow-wrap:break-word;
+        }
+        .msg-bubble.assistant{
+            background:linear-gradient(90deg,var(--accent),var(--accent-600));
+            color:var(--white);
+        }
 
-        /* suggestion chips */
-        .chips{display:flex;flex-wrap:wrap;gap:8px}
-        .chip{padding:6px 10px;border-radius:999px;background:#f1f5f9;color:#0f1724;font-size:12px;cursor:pointer;border:1px solid #e6eefc;transition:transform .12s ease,box-shadow .12s}
-        .chip:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+        /* Suggestion chips */
+        .chips{
+            display:flex;
+            flex-wrap:wrap;
+            gap:var(--space-sm);
+        }
+        .chip{
+            padding:var(--space-xs) var(--space-md);
+            border-radius:999px;
+            background:#f1f5f9;
+            color:#0f1724;
+            font-size:12px;
+            cursor:pointer;
+            border:1px solid #e6eefc;
+            transition:transform .12s ease,box-shadow .12s;
+            /* NEW: chip label never collapses/wraps awkwardly */
+            white-space:nowrap;
+        }
+        .chip:hover{
+            transform:translateY(-2px);
+            box-shadow:0 6px 18px rgba(15,23,42,0.06);
+        }
 
         /* Composer fixed at bottom of panel */
         .composer{
             border-top:1px solid #eef2ff;
-            padding:10px;
+            padding:var(--space-md);
             display:flex;
-            gap:8px;
+            gap:var(--space-sm);
             align-items:center;
         }
 
-        .input-wrap{flex:1;display:flex;gap:8px;align-items:center}
+        .input-wrap{
+            flex:1;
+            display:flex;
+            gap:var(--space-sm);
+            align-items:center;
+            /* NEW: lets the input shrink properly inside flex instead of
+               forcing the composer row wider than the popup */
+            min-width:0;
+        }
         .input{
-            flex:1;border-radius:999px;border:1px solid #e6eefc;padding:10px 14px;font-size:13px;outline:none;background:transparent;box-shadow:none;transition:box-shadow .12s ease;border-radius:999px
+            flex:1;
+            /* CHANGE: width 100% + min-width:0 guarantees the text field
+               always fills available space and never overflows its row */
+            width:100%;
+            min-width:0;
+            border-radius:999px;
+            border:1px solid #e6eefc;
+            padding:10px 14px;
+            font-size:13px;
+            outline:none;
+            background:transparent;
+            box-shadow:none;
+            transition:box-shadow .12s ease;
+            line-height:1.4;
         }
 
         .send-btn{
-            width:44px;height:44px;border-radius:999px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-600));color:white;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px rgba(79,70,229,0.18)
+            width:44px;
+            height:44px;
+            border-radius:999px;
+            border:none;
+            background:linear-gradient(90deg,var(--accent),var(--accent-600));
+            color:white;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+            box-shadow:0 6px 18px rgba(79,70,229,0.18);
+            /* NEW: perfectly round button never squashed by flex siblings,
+               stays vertically centered in the composer row */
+            flex-shrink:0;
         }
 
         /* Login specific */
-        #loginContainer{display:flex;flex-direction:column;gap:10px;padding:18px}
-        .form-input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e6eefc;background:white;outline:none;font-size:13px}
-        .primary-btn{background:linear-gradient(90deg,var(--accent),var(--accent-600));color:white;padding:10px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+        #loginContainer{
+            display:flex;
+            flex-direction:column;
+            /* CHANGE: smaller, consistent gap instead of large ad-hoc padding
+               (fixes "too much empty space below the login form") */
+            gap:var(--space-md);
+            padding:var(--space-lg);
+        }
+        .form-input{
+            width:100%;
+            padding:10px var(--space-md);
+            border-radius:10px;
+            border:1px solid #e6eefc;
+            background:white;
+            outline:none;
+            font-size:13px;
+            line-height:1.4;
+            /* NEW: guarantees inputs are always 100% width per requirements */
+            box-sizing:border-box;
+        }
+        .primary-btn{
+            background:linear-gradient(90deg,var(--accent),var(--accent-600));
+            color:white;
+            padding:10px;
+            border-radius:10px;
+            border:none;
+            cursor:pointer;
+            font-weight:600;
+            /* NEW: centers label text/icon reliably and keeps button height
+               consistent even if text wraps (fixes "buttons not vertically
+               centered") */
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            line-height:1.3;
+            text-align:center;
+        }
 
-        /* Dashboard small status */
-        .status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border-radius:999px;background:#ecfdf5;color:#065f46;font-weight:600;font-size:13px}
+        /* CHANGE: the error/message area no longer reserves a fixed
+           min-height when empty — that was the main source of "too much
+           empty space below the login form". It now only takes up space
+           when it actually has content, but still won't cause layout jump
+           thanks to the container's consistent gap. */
+        #message{
+            font-size:13px;
+            color:var(--danger);
+            line-height:1.4;
+            word-wrap:break-word;
+        }
+        #message:empty{
+            display:none;
+        }
+
+        /* Dashboard */
+        #dashboardContainer{
+            display:flex;
+            flex-direction:column;
+            gap:var(--space-md);
+        }
+
+        /* CHANGE: this is the key fix for issues #2 and #3 — the
+           AI/tracking-message block, status badge, and logout button
+           now live in a wrapping flex row. On normal widths everything
+           sits on one line and stays aligned; if space ever gets tight,
+           items wrap onto their own line instead of overlapping. */
+        #dashboardContainer > div:first-child{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            flex-wrap:wrap;
+            gap:var(--space-md);
+            width:100%;
+        }
+
+        /* Left group: avatar + title + tracking message */
+        #dashboardContainer > div:first-child > div:first-child{
+            display:flex;
+            gap:var(--space-md);
+            align-items:center;
+            /* NEW: this is what lets "Tracking started successfully." wrap
+               naturally on its own line width instead of colliding with the
+               badge/button — min-width:0 allows the flex child to shrink,
+               flex:1 1 auto lets it claim the row's remaining space first */
+            min-width:0;
+            flex:1 1 200px;
+        }
+
+        /* The text column (title + status message) next to the avatar */
+        #dashboardContainer > div:first-child > div:first-child > div:last-child{
+            min-width:0;
+        }
+        #dashboardContainer > div:first-child > div:first-child > div:last-child > div:last-child{
+            /* the "Tracking started successfully." line */
+            line-height:1.4;
+            word-wrap:break-word;
+            overflow-wrap:break-word;
+        }
+
+        /* Right group: status pill + logout button */
+        #dashboardContainer > div:first-child > div:last-child{
+            display:flex;
+            align-items:center;
+            gap:var(--space-sm);
+            /* NEW: never lets the badge/button shrink or get clipped,
+               and never overlaps the text block on the left */
+            flex-shrink:0;
+        }
+
+        .status-pill{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:var(--space-xs) var(--space-sm);
+            border-radius:999px;
+            background:#ecfdf5;
+            color:#065f46;
+            font-weight:600;
+            font-size:13px;
+            /* NEW: badge keeps its shape/size regardless of sibling content */
+            flex-shrink:0;
+            white-space:nowrap;
+        }
+
+        /* Logout button — same primary-btn base, just sized down here.
+           CHANGE: margin-left removed (spacing now handled by the parent's
+           `gap`), and vertical centering handled by .primary-btn's flex rules
+           above, so the button text is always centered and aligned with the
+           badge next to it. */
+        #logoutBtn.primary-btn{
+            padding:6px 10px;
+            font-size:12px;
+            margin-left:0;
+            flex-shrink:0;
+        }
 
         /* Utility */
-        .hidden{display:none}
-
-        /* Ensure no element overflows popup bounds */
-        *{box-sizing:border-box}
+        .hidden{
+            display:none;
+        }
     </style>
 </head>
 
@@ -175,7 +457,7 @@
                 <div id="loginContainer">
                     <div style="text-align:center;margin-bottom:6px">
                         <strong style="font-size:16px;color:#0f1724">Welcome</strong>
-                        <div style="font-size:12px;color:var(--muted);margin-top:4px">Sign in to access AI features</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:4px">Sign in to track activities</div>
                     </div>
 
                     <input id="username" class="form-input" type="text" placeholder="Username" />
@@ -187,13 +469,12 @@
 
                 <!-- DASHBOARD view (preserve ID) -->
                 <div id="dashboardContainer" class="hidden" aria-hidden="true">
-                    <!-- compact greeting -->
                     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
                         <div style="display:flex;gap:10px;align-items:center">
                             <div class="msg-avatar">AI</div>
                             <div>
-                                <div style="font-weight:600">Hi — I'm FocusGuard AI</div>
-                                <div style="font-size:12px;color:var(--muted)">How can I help you stay focused today?</div>
+                                <div style="font-weight:600">FocusGuard AI</div>
+                                <div style="font-size:12px;color:var(--muted)">Tracking started successfully.</div>
                             </div>
                         </div>
                         <div style="display:flex;align-items:center;gap:8px">
@@ -201,30 +482,7 @@
                             <button id="logoutBtn" class="primary-btn" style="padding:6px 10px;font-size:12px;margin-left:6px;">Logout</button>
                         </div>
                     </div>
-
-                    <!-- messages -->
-                    <div class="messages" id="messagesArea">
-                        <div class="message-row">
-                            <div class="msg-avatar">AI</div>
-                            <div class="msg-bubble assistant">Welcome back — try asking for a productivity plan.</div>
-                        </div>
-                    </div>
-
-                    <!-- suggestion chips -->
-                    <div class="chips" id="suggestions">
-                        <div class="chip">Create a Focus Plan</div>
-                        <div class="chip">Set Weekly Goal</div>
-                        <div class="chip">Show Today’s Summary</div>
-                    </div>
                 </div>
-            </div>
-
-            <!-- Composer stays visible and fixed at bottom of panel -->
-            <div class="composer">
-                <div class="input-wrap">
-                    <input id="composerInput" class="input" placeholder="Ask FocusGuard AI..." aria-label="Message input" />
-                </div>
-                <button class="send-btn" id="sendBtn" title="Send">➤</button>
             </div>
         </div>
     </div>

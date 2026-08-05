@@ -8,9 +8,10 @@ import {
     LogOut,
     ShieldCheck,
     Users,
+    X,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
 
+import { NavLink } from "react-router-dom";
 import { useLanguage } from "../../context/useLanguage";
 
 function Sidebar({ isOpen = true, onClose = () => {} }) {
@@ -56,88 +57,174 @@ function Sidebar({ isOpen = true, onClose = () => {} }) {
 
     return (
         <>
+            {/* Mobile Overlay */}
+
             <div
-                className={`fixed inset-0 z-40 bg-black bg-opacity-40 transition-opacity md:hidden ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-all duration-300 md:hidden ${
+                    isOpen
+                        ? "opacity-100 visible"
+                        : "opacity-0 invisible"
+                }`}
                 onClick={onClose}
-                aria-hidden={!isOpen}
             />
-            <aside className={`fixed left-0 top-0 z-50 h-screen w-72 max-w-full transform flex flex-col bg-slate-900 text-white shadow-xl transition-transform md:relative md:translate-x-0 md:flex md:h-screen ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-            <div className="flex items-center gap-3 px-6 py-7 border-b border-slate-800">
-                <div className="bg-blue-600 rounded-xl p-3">
-                    <ShieldCheck size={26} />
-                </div>
 
-                <div>
-                    <h1 className="text-2xl font-bold">
-                        FocusGuardAI
-                    </h1>
+            {/* Sidebar */}
 
-                    <p className="text-sm text-slate-400">
-                        {t(
-                            "super_admin",
-                            "Super Admin"
-                        )}
-                    </p>
-                </div>
-            </div>
+            <aside
+                className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col bg-slate-950 text-white shadow-2xl transition-transform duration-300 ease-in-out md:sticky md:top-0 md:translate-x-0 ${
+                    isOpen
+                        ? "translate-x-0"
+                        : "-translate-x-full"
+                }`}
+            >
+                {/* Header */}
 
-            <nav className="flex-1 px-4 py-6 space-y-2">
-                {menus.map((menu) => {
-                    const Icon = menu.icon;
+                <div className="flex items-center justify-between border-b border-slate-800 px-6 py-6">
 
-                    return (
-                        <NavLink
-                            key={menu.path}
-                            to={menu.path}
-                            className={({ isActive }) =>
-                                `flex items-center gap-4 px-5 py-3 rounded-xl transition-all duration-200 ${
-                                    isActive
-                                        ? "bg-blue-600 shadow-lg"
-                                        : "hover:bg-slate-800"
-                                }`
-                            }
-                        >
-                            <Icon size={20} />
+                    <div className="flex items-center gap-4">
 
-                            <span className="font-medium">
-                                {menu.title}
-                            </span>
-                        </NavLink>
-                    );
-                })}
-            </nav>
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 shadow-lg">
 
-            <div className="border-t border-slate-800 p-5">
-                <div className="flex items-center justify-between mb-5">
-                    <div>
-                        <p className="font-semibold">
-                            {t(
-                                "super_admin",
-                                "Super Admin"
-                            )}
-                        </p>
+                            <ShieldCheck size={28} />
 
-                        <p className="text-sm text-slate-400">
-                            admin@focusguard.ai
-                        </p>
+                        </div>
+
+                        <div>
+
+                            <h1 className="text-2xl font-bold tracking-tight">
+
+                                <span className="text-white">
+                                    Focus
+                                </span>
+
+                                <span className="text-blue-500">
+                                    Guard
+                                </span>
+
+                            </h1>
+
+                            <p className="mt-1 text-xs text-slate-400">
+
+                                {t(
+                                    "super_admin",
+                                    "Super Admin"
+                                )}
+
+                            </p>
+
+                        </div>
+
                     </div>
+
+                    <button
+                        onClick={onClose}
+                        className="rounded-lg p-2 text-slate-300 transition hover:bg-slate-800 hover:text-white md:hidden"
+                    >
+                        <X size={20} />
+                    </button>
+
                 </div>
 
-                <button
-                    className="flex items-center gap-3 w-full bg-red-500 hover:bg-red-600 transition rounded-xl px-5 py-3"
-                    onClick={() => {
-                        localStorage.clear();
-                        window.location.href = "/login";
-                    }}
-                >
-                    <LogOut size={20} />
-                    {t(
-                        "logout",
-                        "Logout"
-                    )}
-                </button>
-            </div>
-        </aside>
+                {/* Navigation */}
+
+                <nav className="flex-1 overflow-y-auto px-3 py-5">
+
+                    <div className="space-y-2">
+
+                        {menus.map((menu) => {
+                            const Icon = menu.icon;
+
+                            return (
+                                <NavLink
+                                    key={menu.path}
+                                    to={menu.path}
+                                    onClick={() => {
+                                        if (
+                                            window.innerWidth <
+                                            768
+                                        ) {
+                                            onClose();
+                                        }
+                                    }}
+                                    className={({ isActive }) =>
+                                        `group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                                            isActive
+                                                ? "bg-blue-600 text-white shadow-lg"
+                                                : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                                        }`
+                                    }
+                                >
+                                    <Icon
+                                        size={22}
+                                        className="shrink-0"
+                                    />
+
+                                    <span className="truncate">
+                                        {menu.title}
+                                    </span>
+                                </NavLink>
+                            );
+                        })}
+
+                    </div>
+
+                </nav>
+
+                {/* Footer */}
+
+                <div className="border-t border-slate-800 p-5">
+
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4 shadow-sm">
+
+                        <div className="flex items-center gap-3">
+
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 text-lg font-bold text-white">
+
+                                S
+
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+
+                                <h3 className="truncate font-semibold text-white">
+
+                                    {t(
+                                        "super_admin",
+                                        "Super Admin"
+                                    )}
+
+                                </h3>
+
+                                <p className="truncate text-xs text-slate-400">
+
+                                    admin@focusguard.ai
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <button
+                        onClick={() => {
+                            localStorage.clear();
+                            window.location.href =
+                                "/login";
+                        }}
+                        className="mt-5 flex w-full items-center justify-center gap-3 rounded-xl bg-red-500 px-5 py-3 font-semibold text-white transition-all duration-200 hover:bg-red-600 active:scale-[0.98]"
+                    >
+
+                        <LogOut size={20} />
+
+                        {t("logout", "Logout")}
+
+                    </button>
+
+                </div>
+
+            </aside>
         </>
     );
 }

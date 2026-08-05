@@ -26,11 +26,16 @@ function TopPerformers({ employees = [] }) {
                 return t("rank_2", "🥈 Rank 2");
             case 2:
                 return t("rank_3", "🥉 Rank 3");
-            default:
-                return t(
+            default: {
+                const label = t(
                     "rank_number",
                     "Rank {number}"
-                ).replace("{number}", index + 1);
+                );
+
+                return label
+                    .replace("{number}", index + 1)
+                    .replace("{rank}", index + 1);
+            }
         }
     };
 

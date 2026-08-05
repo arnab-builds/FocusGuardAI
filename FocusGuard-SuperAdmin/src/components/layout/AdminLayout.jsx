@@ -3,35 +3,69 @@ import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 
 function AdminLayout({ children }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    const mql = window.matchMedia("(min-width: 768px)");
-    setIsSidebarOpen(mql.matches);
+    useEffect(() => {
+        const mql = window.matchMedia("(min-width: 768px)");
 
-    const handler = (event) => setIsSidebarOpen(event.matches);
-    mql.addEventListener?.("change", handler);
-    return () => mql.removeEventListener?.("change", handler);
-  }, []);
+        setIsSidebarOpen(mql.matches);
 
-  return (
-    <div className="flex min-h-screen h-screen bg-slate-100">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        const handler = (event) =>
+            setIsSidebarOpen(event.matches);
 
-      <div className="flex-1 flex flex-col min-h-screen">
+        if (mql.addEventListener) {
+            mql.addEventListener(
+                "change",
+                handler
+            );
+        } else {
+            mql.addListener(handler);
+        }
 
-        <Navbar onToggleSidebar={() => setIsSidebarOpen((s) => !s)} />
+        return () => {
+            if (mql.removeEventListener) {
+                mql.removeEventListener(
+                    "change",
+                    handler
+                );
+            } else {
+                mql.removeListener(handler);
+            }
+        };
+    }, []);
 
-        <main className="flex-1 overflow-y-auto px-4 py-4 sm:px-8 sm:py-5">
+    return (
+        <div className="flex min-h-screen bg-slate-100">
+            <Sidebar
+                isOpen={isSidebarOpen}
+                onClose={() =>
+                    setIsSidebarOpen(false)
+                }
+            />
 
-          {children}
+            <div className="flex min-w-0 flex-1 flex-col overflow-hidden transition-all duration-300">
 
-        </main>
+                <Navbar
+                    onToggleSidebar={() =>
+                        setIsSidebarOpen(
+                            (prev) => !prev
+                        )
+                    }
+                />
 
-      </div>
+                <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 py-4 sm:px-6 md:px-8 lg:px-10 xl:px-12">
 
-    </div>
-  );
+                    <div className="mx-auto w-full max-w-screen-2xl">
+
+                        {children}
+
+                    </div>
+
+                </main>
+
+            </div>
+        </div>
+    );
 }
 
 export default AdminLayout;

@@ -40,6 +40,20 @@ const COLORS = [
 function Dashboard() {
     const { t } = useLanguage();
 
+    const [isMobile, setIsMobile] = useState(
+        typeof window !== "undefined" && window.innerWidth < 640
+    );
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 640);
+        };
+
+        window.addEventListener("resize", handleResize);
+
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
     const [dashboard, setDashboard] = useState({
         stats: {
             organizations: 0,
@@ -96,23 +110,32 @@ function Dashboard() {
         },
     ];
 
+    const totalEmployees = employeeData.reduce(
+        (sum, entry) => sum + entry.value,
+        0
+    );
+
     return (
         <AdminLayout>
-            <div className="space-y-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-800">
-                        {t("dashboard", "Dashboard")}
-                    </h1>
+            <div className="space-y-6 sm:space-y-8 lg:space-y-10 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
+                {/* Page Header */}
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900">
+                            {t("dashboard", "Dashboard")}
+                        </h1>
 
-                    <p className="text-slate-500 mt-2">
-                        {t(
-                            "manage_organizations_monitor_platform_health",
-                            "Manage organizations and monitor platform health."
-                        )}
-                    </p>
+                        <p className="text-sm sm:text-base text-slate-500 mt-2 max-w-2xl">
+                            {t(
+                                "manage_organizations_monitor_platform_health",
+                                "Manage organizations and monitor platform health."
+                            )}
+                        </p>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-6">
+                {/* Stat Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 [&>*]:h-full [&>*]:rounded-2xl [&>*]:sm:rounded-3xl [&>*]:shadow-sm [&>*]:hover:shadow-xl [&>*]:hover:-translate-y-0.5 [&>*]:transition-all [&>*]:duration-300">
                     <StatCard
                         title={t("organizations", "Organizations")}
                         value={dashboard.stats.organizations}
@@ -148,73 +171,179 @@ function Dashboard() {
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-semibold">
-                                {t(
-                                    "organization_growth",
-                                    "Organization Growth"
-                                )}
+                {/* Charts */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+                    <div className="rounded-2xl sm:rounded-3xl border border-slate-100 bg-white p-5 sm:p-6 lg:p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <div className="flex justify-between items-center mb-5 sm:mb-6">
+                            <h2 className="text-base sm:text-lg font-semibold text-slate-900">
+                                {t("organization_growth", "Organization Growth")}
                             </h2>
 
-                            <span className="text-sm text-gray-500">
-                                {t(
-                                    "organizations",
-                                    "Organizations"
-                                )}
+                            <span className="text-xs sm:text-sm font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full">
+                                {t("organizations", "Organizations")}
                             </span>
                         </div>
 
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={dashboard.organization_growth}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" />
-                                <YAxis />
-                                <Tooltip />
-                                <Line
-                                    type="monotone"
-                                    dataKey="employees"
-                                    stroke="#2563EB"
-                                    strokeWidth={3}
-                                />
-                            </LineChart>
-                        </ResponsiveContainer>
+                        <div className="w-full h-[250px] sm:h-[300px] lg:h-[340px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart
+                                    data={dashboard.organization_growth}
+                                    margin={{
+                                        top: 5,
+                                        right: 10,
+                                        left: 0,
+                                        bottom: isMobile ? 24 : 5,
+                                    }}
+                                >
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        stroke="#F1F5F9"
+                                        vertical={false}
+                                    />
+                                    <XAxis
+                                        dataKey="name"
+                                        tick={{
+                                            fill: "#94A3B8",
+                                            fontSize: isMobile ? 10 : 12,
+                                        }}
+                                        axisLine={{ stroke: "#E2E8F0" }}
+                                        tickLine={false}
+                                        interval="preserveStartEnd"
+                                        angle={isMobile ? -35 : 0}
+                                        textAnchor={isMobile ? "end" : "middle"}
+                                        height={isMobile ? 40 : 30}
+                                        tickMargin={isMobile ? 8 : 10}
+                                    />
+                                    <YAxis
+                                        tick={{
+                                            fill: "#94A3B8",
+                                            fontSize: isMobile ? 10 : 12,
+                                        }}
+                                        axisLine={false}
+                                        tickLine={false}
+                                        width={32}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            borderRadius: "12px",
+                                            border: "1px solid #E2E8F0",
+                                            boxShadow:
+                                                "0 10px 25px -5px rgba(0,0,0,0.1)",
+                                        }}
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="employees"
+                                        stroke="#2563EB"
+                                        strokeWidth={3}
+                                        dot={{ r: 4, fill: "#2563EB" }}
+                                        activeDot={{ r: 6 }}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <h2 className="text-xl font-semibold mb-6">
-                            {t(
-                                "employee_distribution",
-                                "Employee Distribution"
-                            )}
+                    <div className="rounded-2xl sm:rounded-3xl border border-slate-100 bg-white p-5 sm:p-6 lg:p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <h2 className="text-base sm:text-lg font-semibold text-slate-900 mb-5 sm:mb-6">
+                            {t("employee_distribution", "Employee Distribution")}
                         </h2>
 
-                        <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
-                                <Pie
-                                    data={employeeData}
-                                    dataKey="value"
-                                    outerRadius={100}
-                                    label
-                                >
-                                    {employeeData.map((entry, index) => (
-                                        <Cell
-                                            key={index}
-                                            fill={COLORS[index]}
+                        {totalEmployees === 0 ? (
+                            <div className="flex flex-col items-center justify-center text-center h-[250px] sm:h-[300px] lg:h-[340px]">
+                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-300 mb-4">
+                                    <Users size={28} strokeWidth={1.5} />
+                                </div>
+
+                                <p className="text-sm font-medium text-slate-500">
+                                    {t(
+                                        "no_employee_data",
+                                        "No employee data yet."
+                                    )}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="relative w-full h-[250px] sm:h-[300px] lg:h-[340px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart
+                                        margin={{
+                                            top: 5,
+                                            right: 5,
+                                            left: 5,
+                                            bottom: 5,
+                                        }}
+                                    >
+                                        <Pie
+                                            data={employeeData}
+                                            dataKey="value"
+                                            cx="50%"
+                                            cy={isMobile ? "42%" : "45%"}
+                                            innerRadius={isMobile ? "42%" : "50%"}
+                                            outerRadius={isMobile ? "62%" : "72%"}
+                                            paddingAngle={3}
+                                            cornerRadius={4}
+                                            labelLine={false}
+                                            label={({ percent }) =>
+                                                percent > 0.05
+                                                    ? `${(percent * 100).toFixed(0)}%`
+                                                    : ""
+                                            }
+                                        >
+                                            {employeeData.map((entry, index) => (
+                                                <Cell
+                                                    key={index}
+                                                    fill={COLORS[index]}
+                                                />
+                                            ))}
+                                        </Pie>
+
+                                        <Tooltip
+                                            contentStyle={{
+                                                borderRadius: "12px",
+                                                border: "1px solid #E2E8F0",
+                                                boxShadow:
+                                                    "0 10px 25px -5px rgba(0,0,0,0.1)",
+                                            }}
                                         />
-                                    ))}
-                                </Pie>
 
-                                <Tooltip />
+                                        <Legend
+                                            layout="horizontal"
+                                            verticalAlign="bottom"
+                                            align="center"
+                                            iconType="circle"
+                                            iconSize={8}
+                                            wrapperStyle={{
+                                                fontSize: isMobile
+                                                    ? "11px"
+                                                    : "13px",
+                                                color: "#64748B",
+                                                paddingTop: "8px",
+                                            }}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
 
-                                <Legend />
-                            </PieChart>
-                        </ResponsiveContainer>
+                                <div
+                                    className="pointer-events-none absolute left-1/2 flex flex-col items-center"
+                                    style={{
+                                        top: isMobile ? "42%" : "45%",
+                                        transform: "translate(-50%, -50%)",
+                                    }}
+                                >
+                                    <span className="text-xl sm:text-2xl font-bold text-slate-900 tabular-nums leading-tight">
+                                        {totalEmployees}
+                                    </span>
+                                    <span className="text-[10px] sm:text-xs font-medium text-slate-400 leading-tight">
+                                        {t("employees", "Employees")}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                {/* Bottom Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
                     <RecentOrganizations
                         organizations={dashboard.recent_organizations}
                     />

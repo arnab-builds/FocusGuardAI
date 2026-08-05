@@ -5,6 +5,7 @@ import {
     Settings,
     UserCircle2,
     Languages,
+    Menu,
 } from "lucide-react";
 
 import { useLanguage } from "../../context/useLanguage";
@@ -35,13 +36,24 @@ const getGreeting = (t) => {
 };
 
 function Navbar({ onToggleSidebar }) {
-    const { currentLanguageCode, languages, setLanguageById, t } = useLanguage();
+    const {
+        currentLanguageCode,
+        languages,
+        setLanguageById,
+        t,
+    } = useLanguage();
 
-    const [notifications, setNotifications] = useState([]);
-    const [unreadCount, setUnreadCount] = useState(0);
+    const [notifications, setNotifications] =
+        useState([]);
+
+    const [unreadCount, setUnreadCount] =
+        useState(0);
+
     const [showNotifications, setShowNotifications] =
         useState(false);
-    const [languageSaving, setLanguageSaving] = useState(false);
+
+    const [languageSaving, setLanguageSaving] =
+        useState(false);
 
     const notificationRef = useRef(null);
 
@@ -50,8 +62,13 @@ function Navbar({ onToggleSidebar }) {
             const { data } =
                 await getAdminNotifications();
 
-            setNotifications(data.notifications);
-            setUnreadCount(data.unread_count);
+            setNotifications(
+                data?.notifications || []
+            );
+
+            setUnreadCount(
+                data?.unread_count || 0
+            );
         } catch (err) {
             console.error(err);
         }
@@ -60,15 +77,18 @@ function Navbar({ onToggleSidebar }) {
     useEffect(() => {
         loadNotifications();
 
-        const interval = setInterval(() => {
-            loadNotifications();
-        }, 30000);
+        const interval = setInterval(
+            loadNotifications,
+            30000
+        );
 
         return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
+        const handleClickOutside = (
+            event
+        ) => {
             if (
                 notificationRef.current &&
                 !notificationRef.current.contains(
@@ -91,260 +111,359 @@ function Navbar({ onToggleSidebar }) {
             );
     }, []);
 
-    const handleNotificationClick = async (
-        notification
-    ) => {
-        if (notification.is_read) return;
+    const handleNotificationClick =
+        async (notification) => {
+            if (notification.is_read) return;
 
-        try {
-            await markNotificationRead(notification.id);
-            await loadNotifications();
-        } catch (err) {
-            console.error(err);
-        }
-    };
+            try {
+                await markNotificationRead(
+                    notification.id
+                );
+
+                await loadNotifications();
+            } catch (err) {
+                console.error(err);
+            }
+        };
 
     const handleMarkAllRead = async () => {
         try {
             await markAllNotificationsRead();
+
             await loadNotifications();
         } catch (err) {
             console.error(err);
         }
     };
 
-    const handleLanguageChange = async (event) => {
-        const languageId = event.target.value;
-        if (!languageId || languageSaving) return;
+    const handleLanguageChange =
+        async (event) => {
+            const languageId =
+                event.target.value;
 
-        try {
-            setLanguageSaving(true);
-            await updatePreferredLanguage(languageId);
-            await setLanguageById(languageId);
-            window.location.reload();
-        } catch (error) {
-            console.error("Preferred language could not be updated:", error);
-        } finally {
-            setLanguageSaving(false);
-        }
-    };
+            if (
+                !languageId ||
+                languageSaving
+            )
+                return;
+
+            try {
+                setLanguageSaving(true);
+
+                await updatePreferredLanguage(
+                    languageId
+                );
+
+                await setLanguageById(
+                    languageId
+                );
+
+                window.location.reload();
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLanguageSaving(false);
+            }
+        };
 
     return (
-        <header className="bg-white px-4 py-4 sm:px-8 sm:py-5 border-b">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <button
-                        onClick={() => onToggleSidebar?.()}
-                        className="inline-flex items-center rounded-md bg-slate-50 p-2 text-slate-700 hover:bg-slate-100 md:hidden"
-                        aria-label="Open menu"
-                    >
-                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
-                    <div>
-                        <h2 className="text-3xl font-bold text-slate-800">
-                            {getGreeting(t)},{" "}
-                            {t(
-                                "super_admin",
-                                "Super Admin"
-                            )}{" "}
-                            👋
-                        </h2>
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-4 shadow-sm backdrop-blur-md sm:px-6 md:px-8 lg:px-10 xl:px-12">
 
-                        <p className="text-slate-500 mt-1">
-                            {t(
-                                "manage_organizations_monitor_platform",
-                                "Manage organizations and monitor your platform."
-                            )}
-                        </p>
-                    </div>
-                </div>
+    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
-                <div className="flex flex-wrap items-center justify-end gap-3">
-                <label className="flex h-12 min-w-[180px] w-full max-w-sm items-center rounded-xl border border-gray-200 bg-slate-50 px-3 text-slate-600 transition focus-within:border-blue-500 focus-within:bg-white">
-                    <Languages size={18} className="mr-2 text-blue-600" aria-hidden="true" />
-                    <span className="sr-only">{t("preferred_language", "Preferred Language")}</span>
-                    <select
-                        value={languages.find((language) => language.language_code === currentLanguageCode)?.id ?? ""}
-                        onChange={handleLanguageChange}
-                        disabled={languageSaving || !languages.length}
-                        className="w-full bg-transparent text-sm font-medium outline-none disabled:cursor-wait"
-                        aria-label={t("preferred_language", "Preferred Language")}
-                    >
-                        {languages.map((language) => (
-                            <option key={language.id} value={language.id}>
-                                {language.native_name || language.language_name}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                <div className="relative">
-                    <Search
-                        size={18}
-                        className="absolute left-4 top-3.5 text-gray-400"
-                    />
+        {/* Left Section */}
 
-                    <input
-                        type="text"
-                        placeholder={t(
-                            "search",
-                            "Search..."
-                        )}
-                        className="pl-11 pr-5 h-12 w-full max-w-xs sm:w-80 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                </div>
+        <div className="flex items-start gap-4">
 
-                <div
-                    className="relative"
-                    ref={notificationRef}
+            <button
+                onClick={() => onToggleSidebar?.()}
+                className="mt-1 flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white transition hover:bg-slate-100 md:hidden"
+            >
+                <Menu size={22} />
+            </button>
+
+            <div>
+
+                <div>
+
+    <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+
+        {t(
+            "platform_dashboard",
+            "Platform Dashboard"
+        )}
+
+    </h1>
+
+    <div className="mt-2 flex items-center gap-2">
+
+        <span className="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+
+        <p className="text-sm font-medium text-slate-600">
+
+            {t(
+                "welcome_super_admin",
+                "Welcome back, Super Admin"
+            )}
+
+        </p>
+
+    </div>
+
+</div>
+
+            </div>
+
+        </div>
+
+        {/* Right Section */}
+
+        <div className="flex flex-wrap items-center justify-end gap-3">
+
+            {/* Language */}
+
+            <label className="flex h-12 min-w-[180px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 shadow-sm transition focus-within:border-blue-500 focus-within:bg-white">
+
+                <Languages
+                    size={18}
+                    className="mr-2 shrink-0 text-blue-600"
+                />
+
+                <select
+                    value={
+                        languages.find(
+                            (language) =>
+                                language.language_code ===
+                                currentLanguageCode
+                        )?.id ?? ""
+                    }
+                    onChange={handleLanguageChange}
+                    disabled={
+                        languageSaving ||
+                        !languages.length
+                    }
+                    className="w-full bg-transparent text-sm font-medium outline-none"
                 >
-                    <button
-                        onClick={() =>
-                            setShowNotifications(
-                                !showNotifications
-                            )
-                        }
-                        className="relative w-12 h-12 rounded-xl border flex items-center justify-center hover:bg-slate-100"
-                    >
-                        <Bell size={20} />
+                    {languages.map(
+                        (language) => (
+                            <option
+                                key={language.id}
+                                value={
+                                    language.id
+                                }
+                            >
+                                {language.native_name ||
+                                    language.language_name}
+                            </option>
+                        )
+                    )}
+                </select>
 
-                        {unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
-                                {unreadCount > 99
-                                    ? "99+"
-                                    : unreadCount}
-                            </span>
-                        )}
-                    </button>
+            </label>
 
-                    {showNotifications && (
-                        <div className="absolute right-0 mt-3 w-96 rounded-2xl border bg-white shadow-xl z-50">
-                            <div className="flex items-center justify-between border-b p-4">
-                                <h3 className="font-semibold text-lg">
-                                    {t(
-                                        "notifications",
-                                        "Notifications"
-                                    )}
-                                </h3>
+            {/* Search */}
 
-                                {unreadCount > 0 && (
-                                    <button
-                                        onClick={
-                                            handleMarkAllRead
-                                        }
-                                        className="text-sm text-blue-600 hover:underline"
-                                    >
-                                        {t(
-                                            "mark_all_read",
-                                            "Mark all read"
-                                        )}
-                                    </button>
+            <div className="relative w-full sm:w-80">
+
+                <Search
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                    type="text"
+                    placeholder={t(
+                        "search",
+                        "Search..."
+                    )}
+                    className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                />
+
+            </div>
+
+            {/* Notification */}
+
+            <div
+                className="relative"
+                ref={notificationRef}
+            >
+
+                <button
+                    onClick={() =>
+                        setShowNotifications(
+                            !showNotifications
+                        )
+                    }
+                    className="relative flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-white transition hover:bg-slate-100"
+                >
+
+                    <Bell size={20} />
+
+                    {unreadCount > 0 && (
+
+                        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
+
+                            {unreadCount > 99
+                                ? "99+"
+                                : unreadCount}
+
+                        </span>
+
+                    )}
+
+                </button>
+                                {/* Notifications Dropdown */}
+
+                {showNotifications && (
+                    <div className="absolute right-0 mt-3 w-[360px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+
+                        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+
+                            <h3 className="text-base font-bold text-slate-800">
+                                {t(
+                                    "notifications",
+                                    "Notifications"
                                 )}
-                            </div>
+                            </h3>
 
-                            <div className="max-h-96 overflow-y-auto">
-                                {notifications.length === 0 ? (
-                                    <div className="p-6 text-center text-gray-500">
-                                        {t(
-                                            "no_notifications_found",
-                                            "No notifications found."
-                                        )}
-                                    </div>
-                                ) : (
-                                    notifications.map(
-                                        (notification) => (
-                                            <div
-                                                key={
-                                                    notification.id
-                                                }
-                                                onClick={() =>
-                                                    handleNotificationClick(
-                                                        notification
-                                                    )
-                                                }
-                                                className={`cursor-pointer border-b p-4 transition hover:bg-slate-50 ${
-                                                    !notification.is_read
-                                                        ? "bg-blue-50"
-                                                        : ""
-                                                }`}
-                                            >
-                                                <div className="flex items-start justify-between">
-                                                    <div>
-                                                        <h4 className="font-semibold text-slate-800">
-                                                            {notification.title}
-                                                        </h4>
-
-                                                        <p className="mt-1 text-sm text-slate-600">
-                                                            {notification.message}
-                                                        </p>
-
-                                                        <p className="mt-2 text-xs text-slate-400">
-                                                            {new Date(
-                                                                notification.created_at
-                                                            ).toLocaleString(
-                                                                currentLanguageCode,
-                                                                {
-                                                                    dateStyle:
-                                                                        "medium",
-                                                                    timeStyle:
-                                                                        "short",
-                                                                }
-                                                            )}
-                                                        </p>
-                                                    </div>
-
-                                                    {!notification.is_read && (
-                                                        <span className="mt-2 h-2 w-2 rounded-full bg-blue-600"></span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )
-                                    )
-                                )}
-                            </div>
-
-                            <div className="border-t p-3">
-                                <button className="w-full rounded-lg py-2 text-sm font-medium text-blue-600 transition hover:bg-slate-100">
+                            {notifications.some(
+                                (notification) =>
+                                    !notification.is_read
+                            ) && (
+                                <button
+                                    onClick={
+                                        handleMarkAllRead
+                                    }
+                                    className="text-sm font-semibold text-blue-600 transition hover:text-blue-700"
+                                >
                                     {t(
-                                        "view_all_notifications",
-                                        "View All Notifications"
+                                        "mark_all_read",
+                                        "Mark All Read"
                                     )}
                                 </button>
-                            </div>
+                            )}
+
                         </div>
-                    )}
-                </div>
 
-                <button className="flex h-12 w-12 items-center justify-center rounded-xl border hover:bg-slate-100">
-                    <Settings size={20} />
-                </button>
+                        <div className="max-h-[380px] overflow-y-auto">
 
-                <div className="flex items-center gap-3">
-                    <UserCircle2
-                        size={42}
-                        className="text-blue-600"
-                    />
+                            {notifications.length === 0 ? (
 
-                    <div>
-                        <h4 className="font-semibold">
-                            {t(
-                                "super_admin",
-                                "Super Admin"
+                                <div className="px-6 py-10 text-center text-sm text-slate-500">
+
+                                    {t(
+                                        "no_notifications",
+                                        "No notifications available."
+                                    )}
+
+                                </div>
+
+                            ) : (
+
+                                notifications.map(
+                                    (notification) => (
+                                        <button
+                                            key={
+                                                notification.id
+                                            }
+                                            onClick={() =>
+                                                handleNotificationClick(
+                                                    notification
+                                                )
+                                            }
+                                            className={`block w-full border-b border-slate-100 px-5 py-4 text-left transition hover:bg-slate-50 ${
+                                                notification.is_read
+                                                    ? ""
+                                                    : "bg-blue-50"
+                                            }`}
+                                        >
+
+                                            <div className="flex items-start justify-between gap-3">
+
+                                                <div>
+
+                                                    <h4 className="font-semibold text-slate-800">
+
+                                                        {notification.title}
+
+                                                    </h4>
+
+                                                    <p className="mt-1 text-sm leading-6 text-slate-500">
+
+                                                        {notification.message}
+
+                                                    </p>
+
+                                                </div>
+
+                                                {!notification.is_read && (
+
+                                                    <span className="mt-1 h-2.5 w-2.5 rounded-full bg-blue-600" />
+
+                                                )}
+
+                                            </div>
+
+                                        </button>
+                                    )
+                                )
+
                             )}
-                        </h4>
 
-                        <p className="text-sm text-slate-500">
-                            {t(
-                                "administrator",
-                                "Administrator"
-                            )}
-                        </p>
+                        </div>
+
                     </div>
+                )}
+
+            </div>
+
+            {/* Settings */}
+
+            <button
+                className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-white transition hover:bg-slate-100"
+            >
+
+                <Settings size={20} />
+
+            </button>
+
+            {/* Profile */}
+
+            <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
+
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-white">
+
+                    <UserCircle2 size={26} />
+
                 </div>
+
+                <div className="hidden sm:block">
+
+                    <p className="font-semibold text-slate-800">
+
+                        {t(
+                            "super_admin",
+                            "Super Admin"
+                        )}
+
+                    </p>
+
+                    <p className="text-xs text-slate-500">
+
+                        admin@focusguard.ai
+
+                    </p>
+
+                </div>
+
             </div>
-            </div>
-        </header>
+
+        </div>
+
+    </div>
+
+</header>
+
     );
 }
 

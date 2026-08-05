@@ -32,16 +32,7 @@ function RecentActivities({ activities = [] }) {
                     </h2>
                 </div>
 
-                <Link
-                    to="/activities"
-                    className="flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
-                >
-                    {t(
-                        "view_all",
-                        "View All"
-                    )}
-                    <ArrowRight size={16} />
-                </Link>
+                
             </div>
 
             <div className="divide-y divide-slate-100">

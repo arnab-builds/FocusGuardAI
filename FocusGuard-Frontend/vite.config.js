@@ -9,11 +9,8 @@ export default defineConfig({
   ],
   server: {
     host: "localhost",
+    // The backend invitation links and CORS configuration use this local URL.
     port: 3000,
     strictPort: true,
-    hmr: {
-      host: "localhost",
-      clientPort: 3000,
-    },
   },
 })

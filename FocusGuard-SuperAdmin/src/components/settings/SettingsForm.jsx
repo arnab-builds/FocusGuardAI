@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { User, KeyRound } from "lucide-react";
 import {
     getSettings,
     updateSettings,
@@ -94,21 +95,39 @@ function SettingsForm() {
         }
     };
 
+    const inputClass =
+        "w-full h-[52px] px-4 border border-slate-200 rounded-xl shadow-sm text-sm text-slate-800 placeholder:text-slate-400 outline-none transition-all duration-300 hover:border-slate-300 focus:ring-4 focus:ring-blue-100 focus:border-blue-400";
+
+    const labelClass =
+        "block font-semibold text-slate-700 text-sm mb-2";
+
     return (
         <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-2xl shadow-sm border p-8 max-w-5xl"
+            className="bg-white rounded-3xl shadow-sm hover:shadow-lg border border-slate-100 p-6 sm:p-8 md:p-10 max-w-5xl mx-auto transition-all duration-300"
         >
-            <h2 className="text-2xl font-bold mb-8">
-                {t(
-                    "profile_settings",
-                    "Profile Settings"
-                )}
-            </h2>
+            <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/70 text-blue-600 ring-1 ring-blue-100">
+                    <User size={18} />
+                </span>
 
-            <div className="grid grid-cols-2 gap-6">
                 <div>
-                    <label className="block font-semibold mb-2">
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                        {t(
+                            "profile_settings",
+                            "Profile Settings"
+                        )}
+                    </h2>
+
+                    <p className="text-sm text-slate-500 mt-0.5">
+                        Update your personal details.
+                    </p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
+                <div>
+                    <label className={labelClass}>
                         {t(
                             "first_name",
                             "First Name"
@@ -123,12 +142,12 @@ function SettingsForm() {
                         onChange={
                             handleChange
                         }
-                        className="w-full border rounded-xl p-3"
+                        className={inputClass}
                     />
                 </div>
 
                 <div>
-                    <label className="block font-semibold mb-2">
+                    <label className={labelClass}>
                         {t(
                             "last_name",
                             "Last Name"
@@ -143,12 +162,12 @@ function SettingsForm() {
                         onChange={
                             handleChange
                         }
-                        className="w-full border rounded-xl p-3"
+                        className={inputClass}
                     />
                 </div>
 
                 <div>
-                    <label className="block font-semibold mb-2">
+                    <label className={labelClass}>
                         {t(
                             "username",
                             "Username"
@@ -163,12 +182,12 @@ function SettingsForm() {
                         onChange={
                             handleChange
                         }
-                        className="w-full border rounded-xl p-3"
+                        className={inputClass}
                     />
                 </div>
 
                 <div>
-                    <label className="block font-semibold mb-2">
+                    <label className={labelClass}>
                         {t(
                             "email",
                             "Email"
@@ -184,24 +203,40 @@ function SettingsForm() {
                         onChange={
                             handleChange
                         }
-                        className="w-full border rounded-xl p-3"
+                        className={inputClass}
                     />
                 </div>
 
             </div>
 
-            <hr className="my-8" />
+            <div className="relative my-10">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-100" />
+                </div>
+            </div>
 
-            <h3 className="text-xl font-semibold mb-6">
-                {t(
-                    "change_password",
-                    "Change Password"
-                )}
-            </h3>
+            <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100/70 text-indigo-600 ring-1 ring-indigo-100">
+                    <KeyRound size={18} />
+                </span>
 
-            <div className="grid grid-cols-1 gap-6">
                 <div>
-                    <label className="block font-semibold mb-2">
+                    <h3 className="text-lg sm:text-xl font-semibold text-slate-900">
+                        {t(
+                            "change_password",
+                            "Change Password"
+                        )}
+                    </h3>
+
+                    <p className="text-sm text-slate-500 mt-0.5">
+                        Leave blank to keep your current password.
+                    </p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
+                <div className="sm:col-span-2">
+                    <label className={labelClass}>
                         {t(
                             "current_password",
                             "Current Password"
@@ -217,12 +252,12 @@ function SettingsForm() {
                         onChange={
                             handleChange
                         }
-                        className="w-full border rounded-xl p-3"
+                        className={inputClass}
                     />
                 </div>
 
                 <div>
-                    <label className="block font-semibold mb-2">
+                    <label className={labelClass}>
                         {t(
                             "new_password",
                             "New Password"
@@ -238,12 +273,12 @@ function SettingsForm() {
                         onChange={
                             handleChange
                         }
-                        className="w-full border rounded-xl p-3"
+                        className={inputClass}
                     />
                 </div>
 
                 <div>
-                    <label className="block font-semibold mb-2">
+                    <label className={labelClass}>
                         {t(
                             "confirm_password",
                             "Confirm Password"
@@ -259,16 +294,16 @@ function SettingsForm() {
                         onChange={
                             handleChange
                         }
-                        className="w-full border rounded-xl p-3"
+                        className={inputClass}
                     />
                 </div>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-10 flex sm:justify-end">
                 <button
                     type="submit"
                     disabled={loading}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-8 py-3 rounded-xl font-semibold transition"
+                    className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-500 disabled:from-blue-400 disabled:to-blue-400 text-white px-8 py-3 rounded-xl font-semibold shadow-md transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5 hover:from-blue-700 hover:to-blue-600 active:scale-95 disabled:hover:translate-y-0 disabled:hover:shadow-md"
                 >
                     {loading
                         ? t(
