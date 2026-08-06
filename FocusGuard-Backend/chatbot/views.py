@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from datetime import timedelta
 
 from rest_framework import status
@@ -19,9 +19,11 @@ from notifications.models import Notification
 from focus.models import FocusGoal
 
 from .serializers import (
+    ChatMessageSerializer,
     ChatRequestSerializer,
     ChatResponseSerializer,
 )
+from .models import ChatMessage
 from .services import (
     ask_chatbot,
     ask_organization_admin_assistant,
@@ -44,6 +46,10 @@ class ChatbotAPIView(TranslatedResponseMixin, APIView):
             "selected_date",
             date.today().isoformat(),
         )
+        selected_date_value = datetime.strptime(
+            selected_date,
+            "%Y-%m-%d",
+        ).date()
 
         analytics = calculate_user_analytics(
             request.user,
@@ -98,6 +104,11 @@ class ChatbotAPIView(TranslatedResponseMixin, APIView):
             language=getattr(request.user.preferred_language, "language_code", "en-IN"),
         )
 
+        ChatMessage.objects.bulk_create([
+            ChatMessage(user=request.user, selected_date=selected_date_value, sender="user", content=question),
+            ChatMessage(user=request.user, selected_date=selected_date_value, sender="ai", content=response),
+        ])
+
         return Response(
             ChatResponseSerializer(
                 {
@@ -106,6 +117,36 @@ class ChatbotAPIView(TranslatedResponseMixin, APIView):
             ).data,
             status=status.HTTP_200_OK,
         )
+
+
+class ChatHistoryAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        selected_date = request.query_params.get(
+            "selected_date",
+            date.today().isoformat(),
+        )
+        messages = ChatMessage.objects.filter(
+            user=request.user,
+            selected_date=selected_date,
+        )
+        return Response(ChatMessageSerializer(messages, many=True).data)
+
+
+class ClearChatHistoryAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        selected_date = request.query_params.get(
+            "selected_date",
+            date.today().isoformat(),
+        )
+        ChatMessage.objects.filter(
+            user=request.user,
+            selected_date=selected_date,
+        ).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
@@ -261,6 +302,25 @@ class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
                 },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
+
+        selected_date_value = datetime.strptime(
+            selected_date,
+            "%Y-%m-%d",
+        ).date()
+        ChatMessage.objects.bulk_create([
+            ChatMessage(
+                user=request.user,
+                selected_date=selected_date_value,
+                sender="user",
+                content=question,
+            ),
+            ChatMessage(
+                user=request.user,
+                selected_date=selected_date_value,
+                sender="ai",
+                content=result["response"],
+            ),
+        ])
 
         return Response(
             {

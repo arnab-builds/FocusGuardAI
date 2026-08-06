@@ -416,7 +416,7 @@ Invitation Code:
 
 To complete your registration, please click the link below:
 
-http://localhost:3001/organization-register
+http://localhost:3000/register?role=organization-admin&invite_code={invitation.invite_code}&email={quote(admin_email, safe='')}
 
 Regards,
 FocusGuardAI Team
@@ -522,7 +522,7 @@ Invitation Code:
 
 To complete your registration, please click the link below:
 
-http://localhost:3001/organization-register
+http://localhost:3000/register?role=organization-admin&invite_code={invitation.invite_code}&email={quote(invitation.email, safe='')}
 
 Regards,
 FocusGuardAI Team
@@ -564,6 +564,56 @@ FocusGuardAI Team
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class InvitationLookupView(TranslatedResponseMixin, APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        invite_code = request.query_params.get("invite_code", "").strip()
+        invitation = Invitation.objects.filter(
+            invite_code=invite_code,
+            role="SUB_ADMIN",
+            is_accepted=False,
+        ).first()
+
+        if not invitation:
+            return Response(
+                {"error": "Invalid or expired invitation code."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response({"email": invitation.email})
+
+
+class OrganizationInvitationListView(TranslatedResponseMixin, APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != "SUB_ADMIN":
+            return Response(
+                {"error": "You are not allowed to view invitations."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        invitations = Invitation.objects.filter(
+            organization=request.user.organization,
+            role="USER",
+        ).order_by("-created_at")
+
+        invitation_data = InvitationSerializer(invitations, many=True).data
+        users_by_email = {
+            user.email: user.username
+            for user in User.objects.filter(
+                organization=request.user.organization,
+                email__in=[invitation.email for invitation in invitations],
+            )
+        }
+
+        for invitation in invitation_data:
+            invitation["username"] = users_by_email.get(invitation["email"])
+
+        return Response(invitation_data)
 from admin_notifications.utils import create_admin_notification
 
 

@@ -13,11 +13,14 @@ export const analyzeRecommendation = async (payload) => {
   return response.data;
 };
 
-export const getAIRecommendations = async (languageCode) => {
+export const getAIRecommendations = async (date, languageCode) => {
   const response = await api.get(
     "/api/recommendations/",
     {
-      params: languageCode ? { language: languageCode } : undefined,
+      params: {
+        ...(date ? { date } : {}),
+        ...(languageCode ? { language: languageCode } : {}),
+      },
     }
   );
 

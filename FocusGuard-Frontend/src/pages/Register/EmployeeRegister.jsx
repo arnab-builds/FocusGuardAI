@@ -143,7 +143,7 @@ function EmployeeRegister() {
         });
       }
 
-      navigate("/", {
+      navigate("/login", {
         replace: true,
         state: isInvitationRegistration
           ? undefined
@@ -337,7 +337,7 @@ function EmployeeRegister() {
           <div className="mt-4 flex flex-col items-center justify-between gap-3 text-center text-sm text-slate-500 sm:flex-row sm:text-left">
             <button
               type="button"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/login")}
               className="font-medium text-indigo-600 transition hover:text-indigo-700"
             >
               {t("already_have_account_login", "Already have an account? Login")}

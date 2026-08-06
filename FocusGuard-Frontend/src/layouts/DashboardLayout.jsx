@@ -83,7 +83,7 @@ export default function DashboardLayout() {
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      <div className="flex flex-1 min-w-0 flex-col overflow-hidden transition-all duration-300">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden transition-all duration-300 md:ml-64">
         <TopNavbar
           profile={dashboardHeader.profile}
           analytics={dashboardHeader.analytics}

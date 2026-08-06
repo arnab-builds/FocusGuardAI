@@ -13,7 +13,11 @@ import { useOutletContext } from "react-router-dom";
 
 import ReactMarkdown from "react-markdown";
 
-import { sendChatMessage } from "../../services/chatbotService";
+import {
+  clearChatHistory,
+  getChatHistory,
+  sendChatMessage,
+} from "../../services/chatbotService";
 import { useLanguage } from "../../context/useLanguage";
 
 const AICoach = () => {
@@ -47,22 +51,60 @@ const AICoach = () => {
     ),
   ];
 
-  const [messages, setMessages] = useState([
+  const getDefaultMessages = () => [
     {
-      id: 1,
+      id: "welcome",
       sender: "ai",
       text: t(
         "ai_welcome_message",
         "👋 Hi! I'm **FocusGuard AI**.\n\nI can answer questions about your productivity, activity logs, analytics, reports and focus sessions.\n\nChoose a suggestion below or ask your own question."
       ),
     },
-  ]);
+  ];
+
+  const [messages, setMessages] = useState(getDefaultMessages);
 
   const [input, setInput] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(true);
 
   const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    const loadChatHistory = async () => {
+      setLoadingHistory(true);
+
+      try {
+        const history = await getChatHistory(
+          selectedDate,
+          currentLanguageCode
+        );
+
+        if (isCurrent) {
+          setMessages(history.length ? history : getDefaultMessages());
+        }
+      } catch (error) {
+        console.error("Chat history error:", error);
+
+        if (isCurrent) {
+          setMessages(getDefaultMessages());
+        }
+      } finally {
+        if (isCurrent) {
+          setLoadingHistory(false);
+        }
+      }
+    };
+
+    loadChatHistory();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [selectedDate, currentLanguageCode]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -127,6 +169,16 @@ const AICoach = () => {
     send(question);
   };
 
+  const handleClearChat = async () => {
+    try {
+      await clearChatHistory(selectedDate);
+      setMessages(getDefaultMessages());
+      setInput("");
+    } catch (error) {
+      console.error("Clear chat error:", error);
+    }
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !loading) {
       handleSend();
@@ -136,8 +188,8 @@ const AICoach = () => {
   const hasUserMessage = messages.some((m) => m.sender === "user");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <div className="flex min-h-[72vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+    <div className="mx-auto flex w-full max-w-6xl flex-col py-2 sm:py-4">
+      <div className="flex min-h-[calc(100vh-10rem)] w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
         {/* Header */}
 
@@ -153,13 +205,22 @@ const AICoach = () => {
             </div>
           </div>
 
-          <div className="text-xs text-slate-600">{selectedDate}</div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleClearChat}
+              disabled={!hasUserMessage || loading || loadingHistory}
+              className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {t("clear_chat", "Clear Chat")}
+            </button>
+            <div className="text-xs text-slate-600">{selectedDate}</div>
+          </div>
         </div>
 
         {/* Chat */}
 
         <div className="flex-1 overflow-y-auto bg-slate-50 px-4 py-6">
-          <div className="mx-auto w-full max-w-3xl flex flex-col gap-4">
+          <div className="mx-auto w-full max-w-4xl flex flex-col gap-4">
 
             {/* Suggestion chips: show only before the first user message */}
             {!hasUserMessage && (
@@ -177,7 +238,11 @@ const AICoach = () => {
               </div>
             )}
 
-            {messages.map((msg) => (
+            {loadingHistory ? (
+              <div className="py-12 text-center text-sm text-slate-500">
+                {t("loading", "Loading...")}
+              </div>
+            ) : messages.map((msg) => (
               <div
                 key={msg.id}
                 className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
@@ -238,7 +303,7 @@ const AICoach = () => {
 
             <button
               onClick={handleSend}
-              disabled={loading}
+              disabled={loading || loadingHistory}
               className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white transition hover:bg-indigo-700 disabled:opacity-60"
               aria-label={t("send", "Send")}
             >

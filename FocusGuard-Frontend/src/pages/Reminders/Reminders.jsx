@@ -79,7 +79,7 @@ const Reminders = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-100">
+      <div className="flex min-h-[320px] items-center justify-center bg-slate-100">
         <div className="rounded-2xl border border-slate-200 bg-white px-10 py-8 shadow-sm">
           <p className="text-lg font-semibold text-slate-700">
             {t(
@@ -93,12 +93,12 @@ const Reminders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-4xl">
+    <div className="w-full bg-slate-100 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl">
 
         {/* Header */}
 
-        <div className="mb-8">
+        <div className="mb-5">
           <h1 className="text-3xl font-bold text-slate-900">
             {t(
               "reminder_settings",
@@ -116,14 +116,14 @@ const Reminders = () => {
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-6"
+          className="grid gap-4 lg:grid-cols-3"
         >
 
           {/* Productive */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
 
-            <div className="mb-5 flex items-center gap-4">
+            <div className="mb-4 flex items-center gap-4">
 
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
 
@@ -160,9 +160,9 @@ const Reminders = () => {
 
           {/* Non Productive */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
 
-            <div className="mb-5 flex items-center gap-4">
+            <div className="mb-4 flex items-center gap-4">
 
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 text-red-600">
 
@@ -198,9 +198,9 @@ const Reminders = () => {
           </div>
                     {/* Idle Threshold */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
 
-            <div className="mb-5 flex items-center gap-4">
+            <div className="mb-4 flex items-center gap-4">
 
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
 
@@ -237,7 +237,7 @@ const Reminders = () => {
 
           {/* Browser Notifications */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md lg:col-span-3">
 
             <div className="flex items-center justify-between gap-6">
 
@@ -289,7 +289,7 @@ const Reminders = () => {
 
           {/* Save Button */}
 
-          <div className="sticky bottom-0 rounded-2xl bg-slate-100/80 py-2 backdrop-blur-sm">
+          <div className="lg:col-span-3">
 
             <button
               type="submit"
@@ -308,7 +308,7 @@ const Reminders = () => {
           {message && (
 
             <div
-              className={`rounded-2xl border p-4 text-center font-medium transition-all ${
+              className={`rounded-2xl border p-4 text-center font-medium transition-all lg:col-span-3 ${
                 message.includes("❌")
                   ? "border-red-200 bg-red-50 text-red-700"
                   : "border-emerald-200 bg-emerald-50 text-emerald-700"

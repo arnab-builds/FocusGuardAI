@@ -13,6 +13,8 @@ from .views import (
     OrganizationMembersView,
 
     InvitationCreateView,
+    InvitationLookupView,
+    OrganizationInvitationListView,
     OrganizationAdminRegisterWithInviteCodeView,
     EmployeeRegisterWithInviteCodeView,
     NormalUserRegisterView,
@@ -145,6 +147,16 @@ urlpatterns = [
         "invitation/create/",
         InvitationCreateView.as_view(),
         name="invitation-create",
+    ),
+    path(
+        "invitation/lookup/",
+        InvitationLookupView.as_view(),
+        name="invitation-lookup",
+    ),
+    path(
+        "organization/invitations/",
+        OrganizationInvitationListView.as_view(),
+        name="organization-invitations",
     ),
 
     # ==========================

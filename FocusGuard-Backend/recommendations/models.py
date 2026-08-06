@@ -24,9 +24,19 @@ class Recommendation(models.Model):
 
     message = models.TextField()
 
+    recommendation_date = models.DateField()
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     is_read = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recommendation_date"],
+                name="unique_recommendation_per_user_date",
+            )
+        ]
 
     def __str__(self):
         return f"{self.user.username} - {self.title}"

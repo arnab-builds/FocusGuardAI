@@ -120,8 +120,8 @@ export default function FocusGoals() {
         </p>
       </div>
 
-      <div className="grid items-start gap-6 xl:grid-cols-[420px_1fr]">
-        <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:p-6 xl:sticky xl:top-24">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(320px,420px)_minmax(0,1fr)]">
+        <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-24 lg:p-6">
           <h2 className="mb-6 text-xl font-semibold text-slate-800">
             {t("add_new_goal", "Add New Goal")}
           </h2>
@@ -207,7 +207,7 @@ export default function FocusGoals() {
           </form>
         </aside>
 
-        <section className="min-w-0 lg:col-span-2">
+        <section className="min-w-0">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-2xl font-semibold text-slate-800">
               {t("your_goals", "Your Goals")}

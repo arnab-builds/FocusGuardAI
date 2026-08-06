@@ -19,9 +19,17 @@ class RecommendationListAPIView(TranslatedResponseMixin, generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Recommendation.objects.filter(
+        queryset = Recommendation.objects.filter(
             user=self.request.user
-        ).order_by("-created_at")
+        )
+        recommendation_date = self.request.query_params.get("date")
+
+        if recommendation_date:
+            queryset = queryset.filter(
+                recommendation_date=recommendation_date
+            )
+
+        return queryset.order_by("-created_at")
 
 class AnalyzeRecommendationAPIView(TranslatedResponseMixin, APIView):
     permission_classes = [IsAuthenticated]

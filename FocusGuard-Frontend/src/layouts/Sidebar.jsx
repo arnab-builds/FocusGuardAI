@@ -96,12 +96,12 @@ export default function Sidebar({ isOpen = true, onClose = () => {} }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-0 left-0 z-50 flex h-screen w-64 flex-col bg-slate-950 text-white shadow-2xl transition-transform duration-300 ease-in-out md:relative md:sticky md:top-0 md:inset-auto md:h-auto md:min-h-screen md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col bg-slate-950 text-white shadow-2xl transition-transform duration-300 ease-in-out md:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-slate-800 px-6 py-6">
+        <div className="flex shrink-0 items-start justify-between border-b border-slate-800 px-6 py-6">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
               <span className="text-white">Focus</span>
@@ -124,42 +124,45 @@ export default function Sidebar({ isOpen = true, onClose = () => {} }) {
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex flex-1 flex-col overflow-y-auto px-3 py-5">
-          <div className="flex flex-1 flex-col space-y-2">
-            {menuItems.map((item) => (
-              <NavLink
-                key={item.labelKey}
-                to={item.path}
-                onClick={() => {
-                  if (window.innerWidth < 768) onClose();
-                }}
-                className={({ isActive }) =>
-  `group flex items-center gap-5 rounded-xl px-4 py-3.5 text-[15px] font-medium transition-all duration-200 ${
-                    isActive
-                      ? "bg-indigo-600 text-white shadow-lg"
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                  }`
-                }
-              >
-                <span className="shrink-0">{item.icon}</span>
-                <span className="truncate">
-                  {t(item.labelKey, item.fallback)}
-                </span>
-              </NavLink>
-            ))}
-          </div>
-        </nav>
+        {/* Scrollable body: nav + logout grouped together, no forced gap */}
+        <div className="flex flex-1 flex-col overflow-y-auto">
+          {/* Navigation */}
+          <nav className="flex-1 px-3 py-5">
+            <div className="flex flex-col space-y-2">
+              {menuItems.map((item) => (
+                <NavLink
+                  key={item.labelKey}
+                  to={item.path}
+                  onClick={() => {
+                    if (window.innerWidth < 768) onClose();
+                  }}
+                  className={({ isActive }) =>
+                    `group flex items-center gap-5 rounded-xl px-4 py-3.5 text-[15px] font-medium transition-all duration-200 ${
+                      isActive
+                        ? "bg-indigo-600 text-white shadow-lg"
+                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }`
+                  }
+                >
+                  <span className="shrink-0">{item.icon}</span>
+                  <span className="truncate">
+                    {t(item.labelKey, item.fallback)}
+                  </span>
+                </NavLink>
+              ))}
+            </div>
+          </nav>
 
-        {/* Footer */}
-        <div className="mt-auto border-t border-slate-800 p-4">
-          <button
-            onClick={handleLogout}
-            className="flex w-full items-center justify-center gap-3 rounded-xl bg-red-500 px-4 py-3 text-sm font-semibold transition-all duration-200 hover:bg-red-600 active:scale-[0.98]"
-          >
-            <FiLogOut size={18} />
-            {t("logout", "Logout")}
-          </button>
+          {/* Logout — sits immediately after nav, not pinned to viewport bottom */}
+          <div className="border-t border-slate-800 px-4 py-4">
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center justify-center gap-3 rounded-xl bg-red-500 px-4 py-3 text-sm font-semibold transition-all duration-200 hover:bg-red-600 active:scale-[0.98]"
+            >
+              <FiLogOut size={18} />
+              {t("logout", "Logout")}
+            </button>
+          </div>
         </div>
       </aside>
     </>

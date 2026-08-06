@@ -13,3 +13,13 @@ export const sendChatMessage = async (
 
   return response.data;
 };
+
+export const getChatHistory = async (selectedDate, languageCode) => {
+  const response = await api.get("/api/chatbot/history/", {
+    params: { selected_date: selectedDate, ...(languageCode ? { language: languageCode } : {}) },
+  });
+  return response.data;
+};
+
+export const clearChatHistory = async (selectedDate) =>
+  api.delete("/api/chatbot/history/clear/", { params: { selected_date: selectedDate } });

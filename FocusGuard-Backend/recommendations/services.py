@@ -96,11 +96,15 @@ def generate_ai_recommendation(user, start_date, end_date, language="en-IN"):
     activities = analytics["activities"]
     # Add this block here
     if not activities.exists():
-     Recommendation.objects.filter(user=user).delete()
+     Recommendation.objects.filter(
+        user=user,
+        recommendation_date=start_date,
+     ).delete()
 
      return Recommendation.objects.create(
         user=user,
         recommendation_type="PRODUCTIVITY",
+        recommendation_date=start_date,
         title=translate_text("No Activity Found", language),
         message=translate_text(
             "No browsing activity was found for the selected date range.",
@@ -229,12 +233,14 @@ Message:
             message = parts[1].strip()
 
         Recommendation.objects.filter(
-            user=user
+            user=user,
+            recommendation_date=start_date,
         ).delete()
 
         recommendation = Recommendation.objects.create(
             user=user,
             recommendation_type="PRODUCTIVITY",
+            recommendation_date=start_date,
             title=title,
             message=message,
         )

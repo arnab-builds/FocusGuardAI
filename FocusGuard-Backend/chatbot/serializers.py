@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from .models import ChatMessage
 
 
 class ChatRequestSerializer(serializers.Serializer):
@@ -10,3 +11,11 @@ class ChatRequestSerializer(serializers.Serializer):
 
 class ChatResponseSerializer(serializers.Serializer):
     response = serializers.CharField()
+
+
+class ChatMessageSerializer(serializers.ModelSerializer):
+    text = serializers.CharField(source="content")
+
+    class Meta:
+        model = ChatMessage
+        fields = ["id", "sender", "text", "created_at"]

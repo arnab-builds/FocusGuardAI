@@ -74,11 +74,24 @@ function Login() {
         data.refresh
       );
 
+      localStorage.setItem(
+        "user",
+        JSON.stringify(data.user)
+      );
+
       await setLanguageFromPreference(
         data.user?.preferred_language
       );
 
-      navigate("/dashboard");
+      const dashboardByRole = {
+        SUPER_ADMIN: "/super-admin/dashboard",
+        SUB_ADMIN: "/organization-admin/dashboard",
+        EMPLOYEE: "/dashboard",
+        NORMAL_USER: "/dashboard",
+        USER: "/dashboard",
+      };
+
+      navigate(dashboardByRole[data.user?.role] || "/dashboard");
     } catch (err) {
       console.error(err);
 
@@ -340,7 +353,7 @@ function Login() {
             <button
               type="button"
               onClick={() =>
-                navigate("/employee-register")
+                navigate("/register")
               }
               className="font-semibold text-indigo-600 transition hover:text-indigo-700"
             >

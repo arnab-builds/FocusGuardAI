@@ -11,8 +11,8 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/useLanguage";
 import { updatePreferredLanguage } from "../services/settingsService";
 
-const getGreetingKey = () => {
-  const hour = new Date().getHours();
+const getGreetingKey = (now = new Date()) => {
+  const hour = now.getHours();
 
   if (hour >= 5 && hour < 12) {
     return ["good_morning", "Good Morning"];
@@ -89,10 +89,11 @@ export default function TopNavbar({
   const [languageSaving, setLanguageSaving] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [currentTime, setCurrentTime] = useState(() => new Date());
   const navigate = useNavigate();
 
   const username = profile?.username || "";
-  const [greetingKey, greetingFallback] = getGreetingKey();
+  const [greetingKey, greetingFallback] = getGreetingKey(currentTime);
   const greeting = t(greetingKey, greetingFallback);
   const numberFormatter = new Intl.NumberFormat(
     currentLanguageCode || undefined
@@ -116,6 +117,13 @@ export default function TopNavbar({
       setLanguageSaving(false);
     }
   };
+
+  useEffect(() => {
+    const updateGreeting = () => setCurrentTime(new Date());
+    const interval = setInterval(updateGreeting, 60_000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const loadNotifications = async () => {

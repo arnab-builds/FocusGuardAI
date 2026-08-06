@@ -6,7 +6,10 @@ import RecentActivity from "../../components/dashboard/RecentActivity";
 import { getActivityHistory } from "../../services/activityService";
 import StatsCards from "../../components/dashboard/StatsCards";
 import AISummary from "../../components/dashboard/AISummary";
-import { analyzeRecommendation } from "../../services/aiRecommendationService";
+import {
+  analyzeRecommendation,
+  getAIRecommendations,
+} from "../../services/aiRecommendationService";
 import { getDashboardTrend } from "../../services/dashboardService";
 import { useLanguage } from "../../context/useLanguage";
 
@@ -39,6 +42,34 @@ function Dashboard() {
       setLoadingRecommendation(false);
     }
   };
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    const loadRecommendation = async () => {
+      try {
+        const recommendations = await getAIRecommendations(
+          selectedDate,
+          currentLanguageCode
+        );
+
+        if (isCurrent) {
+          setRecommendation(recommendations[0] || null);
+        }
+      } catch (error) {
+        if (isCurrent) {
+          console.error("Recommendation API Error:", error);
+          setRecommendation(null);
+        }
+      }
+    };
+
+    loadRecommendation();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [selectedDate, currentLanguageCode]);
 
   useEffect(() => {
     const controller = new AbortController();
