@@ -1,631 +1,1261 @@
-import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import {
-  FiArrowRight,
-  FiTrendingUp,
-  FiUsers,
-  FiShield,
-  FiCpu,
-  FiMail,
-  FiLayers,
-  FiBarChart2,
-  FiGlobe,
-  FiMenu,
-  FiX,
-} from "react-icons/fi";
+  ArrowRight,
+  Menu,
+  X,
+  Shield,
+  Brain,
+  BarChart3,
+  Users,
+  Activity,
+  Globe,
+  Sparkles,
+  CheckCircle2,
+  ChevronRight,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 
-/* ================================================================== */
-/*  DESIGN TOKENS                                                      */
-/*  Light, cinematic — retinted to match the FocusGuard login screen's */
-/*  indigo → violet → blue gradient identity, on a cool paper-white    */
-/*  base instead of flat dark chrome.                                  */
-/*  Base       #F5F7FE     Ink        #12141A                          */
-/*  Surface    #FFFFFF     Muted      #5B5F6B                          */
-/*  Line       rgba(15,23,42,.08)                                      */
-/*  Indigo     #5B4FE5  (signature accent, "active tab" / primary CTA) */
-/*  Violet     #7C4FE0  (gradient partner to indigo, buttons + text)   */
-/*  Blue       #2F6FED  (data / secondary accent)                      */
-/*  Violet-lt  #7C6FE0  (ambient aurora only, not UI)                  */
-/* ================================================================== */
-
-/* ------------------------------------------------------------------ */
-/*  Scroll reveal                                                       */
-/* ------------------------------------------------------------------ */
-function Reveal({ children, className = "", delay = 0, as: Tag = "div" }) {
-  const ref = useRef(null);
-  const [shown, setShown] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setShown(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.15 }
-    );
-    io.observe(node);
-    return () => io.disconnect();
-  }, []);
-
-  return (
-    <Tag
-      ref={ref}
-      style={{ transitionDelay: shown ? `${delay}ms` : "0ms" }}
-      className={`transform transition-all duration-700 ease-out motion-reduce:transition-none motion-reduce:transform-none ${
-        shown ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.98]"
-      } ${className}`}
-    >
-      {children}
-    </Tag>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Typewriter — cycles through what the platform reveals. Respects    */
-/*  prefers-reduced-motion by simply showing the first phrase.         */
-/* ------------------------------------------------------------------ */
-function Typewriter({ words, typeSpeed = 55, deleteSpeed = 30, holdMs = 1400 }) {
-  const [text, setText] = useState("");
-  const [wordIndex, setWordIndex] = useState(0);
-  const [deleting, setDeleting] = useState(false);
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-  }, []);
-
-  useEffect(() => {
-    if (reduced) {
-      setText(words[0]);
-      return;
-    }
-    const current = words[wordIndex % words.length];
-    let timeout;
-
-    if (!deleting && text.length < current.length) {
-      timeout = setTimeout(() => setText(current.slice(0, text.length + 1)), typeSpeed);
-    } else if (!deleting && text.length === current.length) {
-      timeout = setTimeout(() => setDeleting(true), holdMs);
-    } else if (deleting && text.length > 0) {
-      timeout = setTimeout(() => setText(current.slice(0, text.length - 1)), deleteSpeed);
-    } else if (deleting && text.length === 0) {
-      setDeleting(false);
-      setWordIndex((i) => (i + 1) % words.length);
-    }
-
-    return () => clearTimeout(timeout);
-  }, [text, deleting, wordIndex, words, typeSpeed, deleteSpeed, holdMs, reduced]);
-
-  return (
-    <span className="relative inline-block">
-      <span className="bg-gradient-to-r from-[#5B4FE5] via-[#7C4FE0] to-[#2F6FED] bg-clip-text text-transparent">
-        {text}
-      </span>
-      <span
-        aria-hidden="true"
-        className={`ml-1 inline-block h-[0.85em] w-[3px] translate-y-[3px] bg-[#5B4FE5] ${
-          reduced ? "opacity-0" : "animate-[caret_1s_steps(1)_infinite]"
-        }`}
-      />
-    </span>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Data — grounded strictly in the actual product capabilities        */
-/* ------------------------------------------------------------------ */
-const features = [
+const stats = [
   {
-    icon: FiGlobe,
-    title: "Browser activity tracking",
-    description:
-      "The Chrome extension logs websites, active tabs, tab switches, and browsing duration as work happens — no manual timers.",
+    title: "Browser Tracking",
+    value: "Real-time",
   },
   {
-    icon: FiBarChart2,
-    title: "Productivity analytics",
-    description:
-      "Productive time, non-productive time, website usage, and inactivity, laid out in a dashboard that's easy to read at a glance.",
+    title: "AI Insights",
+    value: "Smart",
   },
   {
-    icon: FiCpu,
-    title: "AI productivity coach",
-    description:
-      "Personalized recommendations generated from activity logs and analytics — practical suggestions, not generic tips.",
+    title: "Organizations",
+    value: "Multi-role",
   },
   {
-    icon: FiTrendingUp,
-    title: "Smart reports",
-    description:
-      "Daily, weekly, and monthly reports with insights and website summaries, ready to review or share with a manager.",
-  },
-  {
-    icon: FiMail,
-    title: "Invitation-based onboarding",
-    description:
-      "Organization admins invite employees by secure email. Registration happens through the invite — there's no open sign-up.",
-  },
-  {
-    icon: FiUsers,
-    title: "Multi-role platform",
-    description:
-      "Purpose-built access for Super Admins, Organization Admins, Employees, and standalone users, each with their own dashboard.",
-  },
-  {
-    icon: FiLayers,
-    title: "Organization management",
-    description:
-      "Manage organizations, employees, activity, permissions, and analytics from one place instead of stitching tools together.",
-  },
-  {
-    icon: FiShield,
-    title: "Privacy & security",
-    description:
-      "JWT authentication, role-based access, and protected APIs keep every organization's data separate and secure.",
+    title: "Reports",
+    value: "Daily",
   },
 ];
 
-const workflow = [
-  "Organization created",
-  "Organization admin invited",
-  "Employees invited",
-  "Employee registration",
-  "Chrome extension login",
-  "Activity tracking begins",
-  "Analytics generated",
-  "AI recommendations",
-  "Reports & insights",
+const navLinks = [
+  {
+    name: "Features",
+    href: "#features",
+  },
+  {
+    name: "Workflow",
+    href: "#workflow",
+  },
+  {
+    name: "Dashboard",
+    href: "#dashboard",
+  },
+  {
+    name: "About",
+    href: "#about",
+  },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  Navbar                                                              */
-/* ------------------------------------------------------------------ */
-function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const navLinks = [
-    { href: "#features", label: "Features" },
-    { href: "#about", label: "About" },
-    { href: "#contact", label: "Contact" },
-  ];
+export default function Landing() {
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled ? "border-b border-black/[0.06] bg-white/75 backdrop-blur-xl shadow-[0_1px_0_0_rgba(15,23,42,0.04)]" : "border-b border-transparent bg-transparent"
-      }`}
-    >
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <a href="#top" className="flex items-center gap-2.5">
-          <span className="font-[General_Sans,ui-sans-serif] text-[17px] font-semibold tracking-tight text-[#12141A]">
-            FocusGuard<span className="text-[#5B4FE5]">AI</span>
-          </span>
-        </a>
+    <main id="top" className="overflow-hidden bg-white text-slate-900">
 
-        <div className="hidden items-center gap-8 md:flex">
-          {navLinks.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="text-sm text-[#5B5F6B] transition-colors hover:text-[#12141A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5B4FE5]"
-            >
-              {l.label}
-            </a>
-          ))}
-        </div>
+      {/* ====================================================== */}
+      {/* Background */}
+      {/* ====================================================== */}
 
-        <div className="hidden items-center gap-2 md:flex">
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+
+        <div className="absolute left-[-120px] top-[-120px] h-[420px] w-[420px] rounded-full bg-blue-200 blur-[140px]" />
+
+        <div className="absolute right-[-80px] top-[180px] h-[350px] w-[350px] rounded-full bg-cyan-200 blur-[130px]" />
+
+        <div className="absolute bottom-[-120px] left-1/2 h-[380px] w-[380px] -translate-x-1/2 rounded-full bg-indigo-100 blur-[150px]" />
+
+      </div>
+
+      {/* ====================================================== */}
+      {/* Navbar */}
+      {/* ====================================================== */}
+
+      <header className="sticky top-0 z-50 border-b border-blue-100/70 bg-white/70 backdrop-blur-xl">
+
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+
           <Link
-            to="/login"
-            className="rounded-lg px-4 py-2 text-sm font-medium text-[#12141A]/80 transition hover:bg-black/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B4FE5]"
+            to="/"
+            className="flex items-center gap-3"
           >
-            Login
-          </Link>
-          <Link
-            to="/register"
-            className="rounded-lg bg-gradient-to-r from-[#5B4FE5] to-[#7C4FE0] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B4FE5]"
-          >
-            Register
-          </Link>
-        </div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg">
 
-        <button
-          aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((v) => !v)}
-          className="rounded-lg p-2 text-[#12141A]/80 hover:bg-black/[0.05] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5B4FE5] md:hidden"
-        >
-          {open ? <FiX className="h-5 w-5" /> : <FiMenu className="h-5 w-5" />}
-        </button>
-      </nav>
+              <Shield size={22} />
 
-      {open && (
-        <div className="border-t border-black/[0.06] bg-white/95 px-6 py-5 backdrop-blur-xl md:hidden">
-          <div className="flex flex-col gap-1">
-            {navLinks.map((l) => (
+            </div>
+
+            <div>
+
+              <h1 className="text-2xl font-black tracking-tight">
+
+                FocusGuard
+
+                <span className="text-blue-600">
+                  AI
+                </span>
+
+              </h1>
+
+              <p className="text-xs text-slate-500">
+
+                Employee Productivity Platform
+
+              </p>
+
+            </div>
+
+          </Link>
+
+          <nav className="hidden items-center gap-10 lg:flex">
+
+            {navLinks.map((item) => (
+
               <a
-                key={l.href}
-                href={l.href}
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm text-[#5B5F6B] hover:bg-black/[0.04] hover:text-[#12141A]"
+                key={item.name}
+                href={item.href}
+                className="font-medium text-slate-600 transition hover:text-blue-600"
               >
-                {l.label}
+                {item.name}
               </a>
+
             ))}
-          </div>
-          <div className="mt-4 flex flex-col gap-2 border-t border-black/[0.06] pt-4">
-            <Link to="/login" className="rounded-lg border border-black/10 px-4 py-2.5 text-center text-sm font-medium text-[#12141A]/85">
+
+          </nav>
+
+          <div className="hidden items-center gap-4 lg:flex">
+
+            <Link
+              to="/login"
+              className="rounded-xl px-5 py-3 font-semibold text-slate-700 transition hover:bg-blue-50"
+            >
               Login
             </Link>
-            <Link to="/register" className="rounded-lg bg-gradient-to-r from-[#5B4FE5] to-[#7C4FE0] px-4 py-2.5 text-center text-sm font-semibold text-white">
+
+            <Link
+              to="/register"
+              className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-[1.03]"
+            >
               Register
             </Link>
-          </div>
-        </div>
-      )}
-    </header>
-  );
-}
 
-/* ------------------------------------------------------------------ */
-/*  BrowserMock — light-glass dashboard, browser-tab motif preserved   */
-/* ------------------------------------------------------------------ */
-function BrowserMock() {
-  const bars = [34, 58, 42, 76, 52, 68, 88];
-  return (
-    <div className="overflow-hidden rounded-2xl border border-black/[0.07] bg-white/80 shadow-[0_50px_100px_-30px_rgba(30,20,60,0.28)] backdrop-blur-2xl">
-      <div className="flex items-center gap-2 border-b border-black/[0.06] bg-black/[0.02] px-3 pt-2.5">
-        <div className="mb-2 flex items-center gap-1.5 pr-1">
-          <span className="h-2.5 w-2.5 rounded-full bg-black/10" />
-          <span className="h-2.5 w-2.5 rounded-full bg-black/10" />
-          <span className="h-2.5 w-2.5 rounded-full bg-black/10" />
-        </div>
-        <div className="flex flex-1 items-end gap-1 overflow-hidden">
-          {["Docs", "FocusGuardAI", "Mail"].map((t, i) => (
-            <div
-              key={t}
-              className={`flex items-center gap-1.5 rounded-t-lg px-3 py-2 text-[11px] font-medium ${
-                i === 1 ? "bg-white text-[#5B4FE5]" : "text-black/35"
-              }`}
-              style={i === 1 ? { boxShadow: "inset 0 2px 0 0 #5B4FE5" } : {}}
-            >
-              <span className={`h-1.5 w-1.5 rounded-full ${i === 1 ? "bg-[#5B4FE5]" : "bg-black/20"}`} />
-              {t}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-3 bg-white p-4">
-        <div className="grid grid-cols-5 gap-3">
-          <div className="col-span-2 rounded-xl border border-black/[0.06] bg-gradient-to-br from-[#EEF0FE] to-white p-3.5">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-black/35">Productivity score</p>
-            <div className="mt-3 flex items-end justify-between">
-              <span className="font-[General_Sans,ui-sans-serif] text-3xl font-bold text-[#12141A]">86</span>
-              <span className="font-mono text-[11px] text-[#2F6FED]">+4.2%</span>
-            </div>
-            <div className="mt-3 h-1.5 w-full rounded-full bg-black/[0.06]">
-              <div className="h-1.5 w-[86%] rounded-full bg-gradient-to-r from-[#5B4FE5] to-[#2F6FED]" />
-            </div>
           </div>
 
-          <div className="col-span-3 rounded-xl border border-black/[0.06] bg-white p-3.5">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-black/35">Weekly activity</p>
-            <div className="mt-3 flex h-16 items-end gap-1.5">
-              {bars.map((h, i) => (
-                <div key={i} className="flex-1 rounded-t-sm bg-gradient-to-t from-[#2F6FED]/70 to-[#2F6FED]/15" style={{ height: `${h}%` }} />
+          <button
+            onClick={() =>
+              setMobileOpen(!mobileOpen)
+            }
+            className="lg:hidden"
+          >
+            {mobileOpen ? (
+              <X />
+            ) : (
+              <Menu />
+            )}
+          </button>
+
+        </div>
+
+        {mobileOpen && (
+
+          <div className="border-t bg-white lg:hidden">
+
+            <div className="space-y-2 p-6">
+
+              {navLinks.map((item) => (
+
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="block rounded-lg px-4 py-3 hover:bg-slate-100"
+                >
+                  {item.name}
+                </a>
+
               ))}
-            </div>
-          </div>
-        </div>
 
-        <div className="flex items-start gap-3 rounded-xl border border-[#5B4FE5]/25 bg-[#EEF0FE] p-3.5">
-          <div className="mt-0.5 rounded-md bg-[#5B4FE5]/15 p-1.5">
-            <FiCpu className="h-3.5 w-3.5 text-[#5B4FE5]" />
+              <Link
+                to="/login"
+                className="block rounded-lg bg-slate-100 px-4 py-3"
+              >
+                Login
+              </Link>
+
+              <Link
+                to="/register"
+                className="block rounded-lg bg-blue-600 px-4 py-3 text-white"
+              >
+                Register
+              </Link>
+
+            </div>
+
           </div>
+
+        )}
+
+      </header>
+
+      {/* ====================================================== */}
+      {/* Hero */}
+      {/* ====================================================== */}
+
+      <section className="relative">
+
+        <div className="mx-auto grid max-w-7xl items-center gap-20 px-6 py-24 lg:grid-cols-2">
+
+          {/* Left */}
+
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-wider text-[#4A3FD1]">AI recommendation</p>
-            <p className="mt-1 text-xs leading-5 text-black/60">
-              Tab switches spike after 2pm. A 15-minute focus block before your next meeting could help.
-            </p>
-          </div>
-        </div>
 
-        <div className="rounded-xl border border-black/[0.06] bg-white p-3.5">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-black/35">Website tracking</p>
-          <div className="mt-2.5 space-y-2">
-            {[
-              ["docs.google.com", "Productive", "1h 20m"],
-              ["github.com", "Productive", "48m"],
-              ["youtube.com", "Non-productive", "12m"],
-            ].map(([site, tag, time]) => (
-              <div key={site} className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2 text-black/65">
-                  <span className={`h-1.5 w-1.5 rounded-full ${tag === "Productive" ? "bg-[#2F6FED]" : "bg-black/20"}`} />
-                  {site}
-                </div>
-                <span className="text-black/35">{time}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
 
-/* ------------------------------------------------------------------ */
-/*  Page                                                                */
-/* ------------------------------------------------------------------ */
-export default function Landing() {
-  return (
-    <main id="top" className="bg-[#F5F7FE] font-[General_Sans,ui-sans-serif,system-ui]">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=General+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
-        html { scroll-behavior: smooth; }
-        .font-display { font-family: 'General Sans', ui-sans-serif, system-ui; }
-        .font-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
-        @keyframes caret { 0%,45% { opacity: 1; } 46%,100% { opacity: 0; } }
-        @keyframes drift-a { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-24px) scale(1.06); } }
-        @keyframes drift-b { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-36px,26px) scale(1.08); } }
-        @keyframes drift-c { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(18px,20px) scale(0.94); } }
-        @keyframes float-y { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-14px) rotate(4deg); } }
-        .blob-a { animation: drift-a 15s ease-in-out infinite; }
-        .blob-b { animation: drift-b 19s ease-in-out infinite; }
-        .blob-c { animation: drift-c 17s ease-in-out infinite; }
-        .floaty { animation: float-y 6s ease-in-out infinite; }
-        .floaty-slow { animation: float-y 9s ease-in-out infinite; animation-delay: -3s; }
-        @media (prefers-reduced-motion: reduce) {
-          .blob-a, .blob-b, .blob-c, .floaty, .floaty-slow { animation: none; }
-        }
-      `}</style>
+              <Sparkles size={16} />
 
-      <Navbar />
+              AI Powered Productivity Platform
 
-      {/* ---------------------------------------------------------- */}
-      {/* HERO — cinematic aurora mesh, glass panel, typewriter        */}
-      {/* ---------------------------------------------------------- */}
-      <section className="relative isolate overflow-hidden pt-40 pb-24">
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,#FFFFFF_0%,#F5F7FE_55%)]" />
-        <div className="blob-a pointer-events-none absolute -left-28 top-8 -z-10 h-[26rem] w-[26rem] rounded-full bg-[#5B4FE5]/20 blur-[110px]" />
-        <div className="blob-b pointer-events-none absolute right-[-8rem] top-24 -z-10 h-[26rem] w-[26rem] rounded-full bg-[#2F6FED]/20 blur-[110px]" />
-        <div className="blob-c pointer-events-none absolute bottom-[-8rem] left-1/3 -z-10 h-[22rem] w-[22rem] rounded-full bg-[#7C6FE0]/[0.16] blur-[110px]" />
+            </div>
 
-        {/* floating abstract shapes */}
-        <div className="floaty pointer-events-none absolute left-[8%] top-32 -z-10 hidden h-14 w-14 rounded-2xl border border-black/[0.06] bg-white/60 shadow-lg backdrop-blur-md lg:block" />
-        <div className="floaty-slow pointer-events-none absolute right-[14%] top-[26rem] -z-10 hidden h-10 w-10 rounded-full border border-black/[0.06] bg-white/60 shadow-lg backdrop-blur-md lg:block" />
+            <h1 className="mt-8 text-5xl font-black leading-tight md:text-7xl">
 
-        <div className="mx-auto grid max-w-6xl items-center gap-16 px-6 md:grid-cols-[1.05fr_0.95fr]">
-          <Reveal>
-            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white/70 px-3.5 py-1.5 font-mono text-[11px] text-[#5B5F6B] shadow-sm backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#5B4FE5]" />
-              now tracking, in real time
-            </p>
-            <h1 className="font-display min-h-[3.6em] text-[2.6rem] font-bold leading-[1.1] tracking-tight text-[#12141A] sm:min-h-[3.2em] sm:text-6xl">
-              See where the
-              <br />
-              <Typewriter
-                words={["workday goes.", "hours disappear.", "focus breaks.", "team's time goes."]}
-              />
+              Build Better
+
+              <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+
+                Focus
+
+              </span>
+
+              Together.
+
             </h1>
-            <p className="mt-6 max-w-lg text-lg leading-8 text-[#5B5F6B]">
-              FocusGuardAI tracks browser activity, turns it into clear productivity analytics, and coaches your team
-              toward better focus — all from one platform for employees, organizations, and admins.
+
+            <p className="mt-8 max-w-xl text-xl leading-9 text-slate-600">
+
+              FocusGuardAI helps organizations and individuals understand browser activity, improve productivity, receive AI-powered insights, and manage work more effectively from one intelligent platform.
+
             </p>
-            <div className="mt-9 flex flex-wrap items-center gap-4">
+
+            <div className="mt-10 flex flex-wrap gap-5">
+
               <Link
                 to="/register"
-                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#5B4FE5] to-[#7C4FE0] px-6 py-3.5 font-semibold text-white shadow-[0_16px_40px_-14px_rgba(91,79,229,0.5)] transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B4FE5]"
+                className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 font-semibold text-white shadow-xl transition hover:scale-[1.03]"
               >
-                <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-                Get started
-                <FiArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                Get Started
+
+                <ArrowRight
+                  size={18}
+                />
+
               </Link>
+
               <Link
                 to="/login"
-                className="rounded-xl border border-black/10 bg-white/70 px-6 py-3.5 font-semibold text-[#12141A]/90 backdrop-blur transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B4FE5]"
+                className="rounded-2xl border border-slate-300 bg-white px-8 py-4 font-semibold transition hover:border-blue-600 hover:text-blue-600"
               >
                 Login
               </Link>
+
             </div>
-          </Reveal>
 
-          <Reveal delay={150} className="hidden md:block">
-            <BrowserMock />
-          </Reveal>
-        </div>
-      </section>
+            {/* Highlights */}
 
-      {/* ---------------------------------------------------------- */}
-      {/* FEATURES                                                    */}
-      {/* ---------------------------------------------------------- */}
-      <section id="features" className="relative border-t border-black/[0.05] bg-white py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <Reveal className="max-w-xl">
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#5B4FE5]">Features</p>
-            <h2 className="font-display mt-3 text-3xl font-bold tracking-tight text-[#12141A] sm:text-4xl">
-              What the platform actually does.
-            </h2>
-          </Reveal>
+            <div className="mt-12 grid gap-5 sm:grid-cols-2">
 
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((f, i) => (
-              <Reveal key={f.title} delay={(i % 4) * 80}>
-                <article className="group h-full rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-[#5B4FE5]/30 hover:shadow-xl hover:shadow-[#5B4FE5]/[0.08]">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-black/[0.06] bg-[#F5F7FE] text-[#5B4FE5] transition-colors group-hover:bg-[#EEF0FE]">
-                    <f.icon className="h-4.5 w-4.5" />
-                  </div>
-                  <h3 className="mt-4 font-display text-[15px] font-semibold text-[#12141A]">{f.title}</h3>
-                  <p className="mt-2 text-[13.5px] leading-6 text-[#5B5F6B]">{f.description}</p>
-                </article>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+              <div className="flex items-center gap-3">
 
-      {/* ---------------------------------------------------------- */}
-      {/* WORKFLOW                                                    */}
-      {/* ---------------------------------------------------------- */}
-      <section className="relative border-t border-black/[0.05] bg-[#F5F7FE] py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <Reveal className="max-w-xl">
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#2F6FED]">How it flows</p>
-            <h2 className="font-display mt-3 text-3xl font-bold tracking-tight text-[#12141A] sm:text-4xl">
-              From org setup to insight.
-            </h2>
-          </Reveal>
+                <CheckCircle2 className="text-blue-600" />
 
-          <div className="mt-14 overflow-x-auto">
-            <div className="flex min-w-[820px] items-start gap-0 px-1 lg:min-w-0">
-              {workflow.map((step, i) => (
-                <Reveal key={step} delay={i * 60} className="flex flex-1 flex-col items-center text-center">
-                  <div className="flex w-full items-center">
-                    <div className={`h-px flex-1 ${i === 0 ? "bg-transparent" : "bg-black/10"}`} />
-                    <div className="mx-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white font-mono text-[11px] text-[#5B4FE5] shadow-sm">
-                      {String(i + 1).padStart(2, "0")}
-                    </div>
-                    <div className={`h-px flex-1 ${i === workflow.length - 1 ? "bg-transparent" : "bg-black/10"}`} />
-                  </div>
-                  <p className="mt-3 px-2 text-xs leading-5 text-[#5B5F6B]">{step}</p>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+                <span>
 
-      {/* ---------------------------------------------------------- */}
-      {/* DASHBOARD PREVIEW                                           */}
-      {/* ---------------------------------------------------------- */}
-      <section className="relative overflow-hidden border-t border-black/[0.05] bg-white py-24">
-        <div className="blob-a pointer-events-none absolute -left-24 top-10 -z-10 h-72 w-72 rounded-full bg-[#5B4FE5]/[0.10] blur-[100px]" />
-        <div className="blob-b pointer-events-none absolute right-[-6rem] bottom-0 -z-10 h-72 w-72 rounded-full bg-[#2F6FED]/[0.10] blur-[100px]" />
-        <div className="mx-auto max-w-6xl px-6">
-          <Reveal className="mx-auto max-w-xl text-center">
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#5B4FE5]">Dashboard</p>
-            <h2 className="font-display mt-3 text-3xl font-bold tracking-tight text-[#12141A] sm:text-4xl">
-              One workspace, every signal.
-            </h2>
-            <p className="mt-3 text-[#5B5F6B]">Representative UI — analytics, AI coach, and activity in one glanceable view.</p>
-          </Reveal>
+                  AI Productivity Recommendations
 
-          <Reveal delay={150} className="mx-auto mt-14 max-w-3xl">
-            <BrowserMock />
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ---------------------------------------------------------- */}
-      {/* ABOUT                                                       */}
-      {/* ---------------------------------------------------------- */}
-      <section id="about" className="relative border-t border-black/[0.05] bg-[#F5F7FE] py-24">
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <Reveal>
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#2F6FED]">About</p>
-            <h2 className="font-display mt-3 text-3xl font-bold tracking-tight text-[#12141A] sm:text-4xl">
-              What FocusGuardAI is for.
-            </h2>
-            <p className="mt-5 text-[15px] leading-7 text-[#5B5F6B]">
-              FocusGuardAI helps organizations and individuals understand how work actually happens. A lightweight
-              Chrome extension tracks browser activity, the platform turns that activity into analytics and reports,
-              and an AI coach translates the data into recommendations people can act on — all inside role-based
-              dashboards for admins, organizations, and employees.
-            </p>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ---------------------------------------------------------- */}
-      {/* CTA — cinematic gradient close                              */}
-      {/* ---------------------------------------------------------- */}
-      <section className="relative overflow-hidden border-t border-black/[0.05] py-24">
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-[#EEF0FE] via-[#F5F7FE] to-[#E7EEFE]" />
-        <div className="blob-a pointer-events-none absolute left-[10%] top-0 -z-10 h-72 w-72 rounded-full bg-[#5B4FE5]/[0.18] blur-[100px]" />
-        <div className="blob-b pointer-events-none absolute right-[10%] bottom-0 -z-10 h-72 w-72 rounded-full bg-[#2F6FED]/[0.18] blur-[100px]" />
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <Reveal>
-            <h2 className="font-display text-3xl font-bold tracking-tight text-[#12141A] sm:text-4xl">
-              Ready to improve your team's productivity?
-            </h2>
-            <p className="mt-3 text-[#5B5F6B]">Set up your organization and invite your first employees today.</p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <Link
-                to="/register"
-                className="rounded-xl bg-gradient-to-r from-[#5B4FE5] to-[#7C4FE0] px-6 py-3.5 font-semibold text-white shadow-[0_16px_40px_-14px_rgba(91,79,229,0.5)] transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B4FE5]"
-              >
-                Get started
-              </Link>
-              <Link
-                to="/login"
-                className="rounded-xl border border-black/10 bg-white/80 px-6 py-3.5 font-semibold text-[#12141A]/90 backdrop-blur transition hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B4FE5]"
-              >
-                Login
-              </Link>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ---------------------------------------------------------- */}
-      {/* FOOTER                                                      */}
-      {/* ---------------------------------------------------------- */}
-      <footer id="contact" className="border-t border-black/[0.06] bg-white py-14">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <a href="#top" className="flex items-center gap-2.5">
-                <span className="font-display text-[15px] font-semibold text-[#12141A]">
-                  FocusGuard<span className="text-[#5B4FE5]">AI</span>
                 </span>
-              </a>
-              <p className="mt-3 text-sm leading-6 text-[#5B5F6B]">
-                Browser activity tracking, analytics, and AI-powered productivity insights for teams and individuals.
-              </p>
+
+              </div>
+
+              <div className="flex items-center gap-3">
+
+                <CheckCircle2 className="text-blue-600" />
+
+                <span>
+
+                  Browser Activity Tracking
+
+                </span>
+
+              </div>
+
+              <div className="flex items-center gap-3">
+
+                <CheckCircle2 className="text-blue-600" />
+
+                <span>
+
+                  Organization Management
+
+                </span>
+
+              </div>
+
+              <div className="flex items-center gap-3">
+
+                <CheckCircle2 className="text-blue-600" />
+
+                <span>
+
+                  Smart Analytics & Reports
+
+                </span>
+
+              </div>
+
             </div>
 
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-wider text-black/35">About</p>
-              <p className="mt-3 text-sm leading-6 text-[#5B5F6B]">
-                Contact your FocusGuardAI administrator for support or organization access.
-              </p>
-            </div>
-
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-wider text-black/35">Quick links</p>
-              <ul className="mt-3 space-y-2 text-sm text-[#5B5F6B]">
-                <li><a href="#features" className="transition hover:text-[#12141A]">Features</a></li>
-                <li><a href="#about" className="transition hover:text-[#12141A]">About</a></li>
-                <li><Link to="/login" className="transition hover:text-[#12141A]">Login</Link></li>
-                <li><Link to="/register" className="transition hover:text-[#12141A]">Register</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-wider text-black/35">Contact</p>
-              <ul className="mt-3 space-y-2 text-sm text-[#5B5F6B]">
-                <li><a href="#contact" className="transition hover:text-[#12141A]">Reach the team</a></li>
-              </ul>
-            </div>
           </div>
 
-          <div className="mt-12 border-t border-black/[0.06] pt-6 text-center text-xs text-black/35">
-            &copy; {new Date().getFullYear()} FocusGuardAI. All rights reserved.
+          {/* Right */}
+
+          <div className="relative">
+
+            <div className="absolute -right-10 -top-10 h-56 w-56 rounded-full bg-blue-200 blur-[90px]" />
+
+            <div className="absolute -bottom-10 left-10 h-48 w-48 rounded-full bg-cyan-200 blur-[80px]" />
+
+            <div className="relative rounded-[36px] border border-white/70 bg-white/80 p-8 shadow-[0_40px_90px_rgba(37,99,235,0.18)] backdrop-blur-xl">
+
+              {/* Header */}
+
+              <div className="flex items-center justify-between">
+
+                <div>
+
+                  <p className="text-sm text-slate-500">
+
+                    Productivity Score
+
+                  </p>
+
+                  <h2 className="mt-2 text-5xl font-black text-blue-600">
+
+                    92%
+
+                  </h2>
+
+                </div>
+
+                <div className="rounded-2xl bg-blue-100 p-4">
+
+                  <BarChart3
+                    className="text-blue-600"
+                    size={32}
+                  />
+
+                </div>
+
+              </div>
+
+              <div className="mt-8 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+
+                <div className="flex items-center gap-3">
+
+                  <Brain />
+
+                  <h3 className="font-bold">
+
+                    AI Recommendation
+
+                  </h3>
+
+                </div>
+
+                <p className="mt-4 leading-7 text-blue-50">
+
+                  Your productivity is highest during morning hours. Schedule deep work before noon and reduce context switching for better focus.
+
+                </p>
+
+              </div>
+
+              <div className="mt-8 space-y-5">
+
+                <div className="flex items-center justify-between rounded-xl bg-slate-50 p-4">
+
+                  <div className="flex items-center gap-3">
+
+                    <Globe className="text-blue-600" />
+
+                    Browser Tracking
+
+                  </div>
+
+                  <span className="font-semibold text-blue-600">
+
+                    Active
+
+                  </span>
+
+                </div>
+
+                <div className="flex items-center justify-between rounded-xl bg-slate-50 p-4">
+
+                  <div className="flex items-center gap-3">
+
+                    <Users className="text-indigo-600" />
+
+                    Organizations
+
+                  </div>
+
+                  <ChevronRight />
+
+                </div>
+
+                <div className="flex items-center justify-between rounded-xl bg-slate-50 p-4">
+
+                  <div className="flex items-center gap-3">
+
+                    <Activity className="text-cyan-600" />
+
+                    Analytics
+
+                  </div>
+
+                  <ChevronRight />
+
+                </div>
+
+              </div>
+
+            </div>
+
           </div>
+
         </div>
-      </footer>
-    </main>
+
+      </section>
+
+      {/* ====================================================== */}
+      {/* Stats */}
+      {/* ====================================================== */}
+
+      <section className="pb-20">
+
+        <div className="mx-auto grid max-w-7xl gap-6 px-6 sm:grid-cols-2 lg:grid-cols-4">
+
+          {stats.map((item) => (
+
+            <div
+              key={item.title}
+              className="rounded-3xl border border-blue-100 bg-white/80 p-8 shadow-lg backdrop-blur-xl transition hover:-translate-y-2 hover:shadow-xl"
+            >
+
+              <h3 className="text-4xl font-black text-blue-600">
+
+                {item.value}
+
+              </h3>
+
+              <p className="mt-3 text-slate-600">
+
+                {item.title}
+
+              </p>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      </section>
+            {/* ====================================================== */}
+      {/* Features */}
+      {/* ====================================================== */}
+
+      <section
+        id="features"
+        className="relative py-24"
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50/40 via-white to-cyan-50/40" />
+
+        <div className="relative mx-auto max-w-7xl px-6">
+
+          <div className="text-center">
+
+            <span className="rounded-full bg-blue-100 px-5 py-2 text-sm font-semibold text-blue-700">
+
+              Everything you need
+
+            </span>
+
+            <h2 className="mt-6 text-5xl font-black tracking-tight">
+
+              Built for modern teams.
+
+            </h2>
+
+            <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600">
+
+              From secure onboarding to browser activity tracking and AI-powered
+              recommendations, FocusGuardAI provides organizations with a single,
+              intelligent productivity platform.
+
+            </p>
+
+          </div>
+
+          {/* Bento Grid */}
+
+          <div className="mt-20 grid gap-8 lg:grid-cols-3">
+
+            {/* AI CARD */}
+
+            <div className="group relative overflow-hidden rounded-[36px] bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan-500 p-10 text-white shadow-2xl transition duration-500 hover:-translate-y-3 lg:col-span-2">
+
+              <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+
+              <div className="absolute bottom-0 left-0 h-40 w-40 rounded-full bg-cyan-300/20 blur-3xl" />
+
+              <Brain size={48} />
+
+              <h3 className="mt-8 text-4xl font-black">
+
+                AI Productivity Coach
+
+              </h3>
+
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-blue-50">
+
+                Receive personalized productivity recommendations based on
+                browsing behavior, work patterns, focus sessions and activity
+                trends to help improve daily efficiency.
+
+              </p>
+
+              <div className="mt-10 flex flex-wrap gap-3">
+
+                {[
+                  "Personalized Insights",
+                  "Smart Suggestions",
+                  "Daily Analysis",
+                  "Work Pattern Detection",
+                ].map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-full bg-white/20 px-4 py-2 text-sm"
+                  >
+                    {item}
+                  </span>
+                ))}
+
+              </div>
+
+            </div>
+
+            {/* Browser Tracking */}
+
+            <div className="group rounded-[30px] border border-blue-100 bg-white p-8 shadow-xl transition duration-300 hover:-translate-y-3 hover:border-blue-300">
+
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100">
+
+                <Globe className="text-blue-600" size={30} />
+
+              </div>
+
+              <h3 className="mt-8 text-2xl font-bold">
+
+                Browser Activity Tracking
+
+              </h3>
+
+              <p className="mt-5 leading-7 text-slate-600">
+
+                Track productive and non-productive website usage while providing
+                organizations with meaningful activity insights.
+
+              </p>
+
+            </div>
+
+            {/* Analytics */}
+
+            <div className="group rounded-[30px] border border-blue-100 bg-white p-8 shadow-xl transition hover:-translate-y-3">
+
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-100">
+
+                <BarChart3
+                  className="text-cyan-600"
+                  size={30}
+                />
+
+              </div>
+
+              <h3 className="mt-8 text-2xl font-bold">
+
+                Productivity Analytics
+
+              </h3>
+
+              <p className="mt-5 leading-7 text-slate-600">
+
+                Visualize productivity trends, work efficiency and browsing
+                patterns through intuitive dashboards.
+
+              </p>
+
+            </div>
+
+            {/* Reports */}
+
+            <div className="group rounded-[30px] border border-blue-100 bg-gradient-to-br from-blue-50 to-cyan-50 p-8 shadow-xl transition hover:-translate-y-3">
+
+              <Activity
+                size={34}
+                className="text-blue-600"
+              />
+
+              <h3 className="mt-8 text-2xl font-bold">
+
+                Smart Reports
+
+              </h3>
+
+              <p className="mt-5 leading-7 text-slate-600">
+
+                Generate detailed productivity reports for organizations and
+                employees with meaningful summaries.
+
+              </p>
+
+            </div>
+
+            {/* Invitation */}
+
+            <div className="group rounded-[30px] border border-blue-100 bg-white p-8 shadow-xl transition hover:-translate-y-3">
+
+              <Users
+                className="text-indigo-600"
+                size={34}
+              />
+
+              <h3 className="mt-8 text-2xl font-bold">
+
+                Employee Invitations
+
+              </h3>
+
+              <p className="mt-5 leading-7 text-slate-600">
+
+                Secure invitation-based onboarding allows employees to register
+                safely through organization-issued invitation links.
+
+              </p>
+
+            </div>
+
+            {/* Secure */}
+
+            <div className="group rounded-[30px] border border-blue-100 bg-gradient-to-br from-indigo-50 to-blue-50 p-8 shadow-xl transition hover:-translate-y-3">
+
+              <Shield
+                className="text-indigo-600"
+                size={34}
+              />
+
+              <h3 className="mt-8 text-2xl font-bold">
+
+                Secure Authentication
+
+              </h3>
+
+              <p className="mt-5 leading-7 text-slate-600">
+
+                Multiple user roles with secure authentication and protected
+                access for every organization.
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* ====================================================== */}
+      {/* Workflow */}
+      {/* ====================================================== */}
+
+      <section
+        id="workflow"
+        className="py-24"
+      >
+
+        <div className="mx-auto max-w-7xl px-6">
+
+          <div className="text-center">
+
+            <span className="rounded-full bg-cyan-100 px-5 py-2 text-sm font-semibold text-cyan-700">
+
+              Simple Workflow
+
+            </span>
+
+            <h2 className="mt-6 text-5xl font-black">
+
+              How FocusGuardAI Works
+
+            </h2>
+
+            <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600">
+
+              From organization setup to AI-driven productivity insights,
+              everything follows a simple and secure workflow.
+
+            </p>
+
+          </div>
+
+          <div className="relative mt-24">
+
+            <div className="absolute left-1/2 top-10 hidden h-[80%] w-1 -translate-x-1/2 rounded-full bg-gradient-to-b from-blue-500 via-indigo-500 to-cyan-400 lg:block" />
+
+            <div className="space-y-16">
+
+              {[
+                {
+                  number: "01",
+                  title: "Create Organization",
+                  desc: "A Super Admin creates an organization and assigns an Organization Admin.",
+                },
+                {
+                  number: "02",
+                  title: "Invite Employees",
+                  desc: "Organization Admin securely invites employees using email invitations.",
+                },
+                {
+                  number: "03",
+                  title: "Track Browser Activity",
+                  desc: "Employees work normally while browser activity is monitored for productivity insights.",
+                },
+                {
+                  number: "04",
+                  title: "Receive AI Recommendations",
+                  desc: "FocusGuardAI analyzes productivity patterns and generates personalized recommendations.",
+                },
+              ].map((step, index) => (
+
+                <div
+                  key={step.number}
+                  className={`flex flex-col items-center gap-8 lg:flex-row ${
+                    index % 2 ? "lg:flex-row-reverse" : ""
+                  }`}
+                >
+
+                  <div className="flex-1">
+
+                    <div className="rounded-[30px] border border-blue-100 bg-white p-10 shadow-xl transition hover:-translate-y-2">
+
+                      <span className="text-5xl font-black text-blue-600">
+
+                        {step.number}
+
+                      </span>
+
+                      <h3 className="mt-6 text-3xl font-bold">
+
+                        {step.title}
+
+                      </h3>
+
+                      <p className="mt-5 text-lg leading-8 text-slate-600">
+
+                        {step.desc}
+
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-3xl font-black text-white shadow-2xl">
+
+                    {step.number}
+
+                  </div>
+
+                  <div className="hidden flex-1 lg:block" />
+
+                </div>
+
+              ))}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+            {/* ====================================================== */}
+      {/* Dashboard Showcase */}
+      {/* ====================================================== */}
+
+      <section
+        id="dashboard"
+        className="relative overflow-hidden py-28"
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-blue-50/50 to-white" />
+
+        <div className="absolute left-0 top-20 h-72 w-72 rounded-full bg-blue-200/40 blur-[120px]" />
+
+        <div className="absolute right-0 bottom-10 h-72 w-72 rounded-full bg-cyan-200/40 blur-[120px]" />
+
+        <div className="relative mx-auto max-w-7xl px-6">
+
+          <div className="text-center">
+
+            <span className="rounded-full bg-blue-100 px-5 py-2 text-sm font-semibold text-blue-700">
+
+              Platform Preview
+
+            </span>
+
+            <h2 className="mt-6 text-5xl font-black">
+
+              Everything in one dashboard
+
+            </h2>
+
+            <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600">
+
+              Monitor productivity, analyze browser activity, manage
+              organizations and receive AI-powered recommendations from a
+              single intelligent workspace.
+
+            </p>
+
+          </div>
+
+          <div className="mt-20">
+
+            <div className="rounded-[40px] border border-white bg-white/80 p-8 shadow-[0_40px_80px_rgba(37,99,235,.12)] backdrop-blur-xl">
+
+              {/* Top */}
+
+              <div className="flex flex-wrap items-center justify-between gap-5 border-b pb-6">
+
+                <div>
+
+                  <h3 className="text-2xl font-bold">
+
+                    FocusGuard Dashboard
+
+                  </h3>
+
+                  <p className="mt-2 text-slate-500">
+
+                    Productivity Overview
+
+                  </p>
+
+                </div>
+
+                <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-white shadow-lg">
+
+                  Live Monitoring
+
+                </div>
+
+              </div>
+
+              {/* Grid */}
+
+              <div className="mt-8 grid gap-6 lg:grid-cols-3">
+
+                {/* Analytics */}
+
+                <div className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-600 p-7 text-white">
+
+                  <p className="text-blue-100">
+
+                    Productivity Score
+
+                  </p>
+
+                  <h2 className="mt-3 text-6xl font-black">
+
+                    92%
+
+                  </h2>
+
+                  <div className="mt-8 h-3 rounded-full bg-white/20">
+
+                    <div className="h-full w-[92%] rounded-full bg-white" />
+
+                  </div>
+
+                </div>
+
+                {/* Browser */}
+
+                <div className="rounded-3xl border p-7">
+
+                  <div className="flex items-center justify-between">
+
+                    <h4 className="font-bold">
+
+                      Browser Usage
+
+                    </h4>
+
+                    <Globe className="text-blue-600" />
+
+                  </div>
+
+                  <div className="mt-8 space-y-5">
+
+                    <div>
+
+                      <div className="flex justify-between">
+
+                        <span>Productive</span>
+
+                        <span>78%</span>
+
+                      </div>
+
+                      <div className="mt-2 h-2 rounded-full bg-slate-100">
+
+                        <div className="h-full w-[78%] rounded-full bg-green-500" />
+
+                      </div>
+
+                    </div>
+
+                    <div>
+
+                      <div className="flex justify-between">
+
+                        <span>Neutral</span>
+
+                        <span>14%</span>
+
+                      </div>
+
+                      <div className="mt-2 h-2 rounded-full bg-slate-100">
+
+                        <div className="h-full w-[14%] rounded-full bg-yellow-400" />
+
+                      </div>
+
+                    </div>
+
+                    <div>
+
+                      <div className="flex justify-between">
+
+                        <span>Unproductive</span>
+
+                        <span>8%</span>
+
+                      </div>
+
+                      <div className="mt-2 h-2 rounded-full bg-slate-100">
+
+                        <div className="h-full w-[8%] rounded-full bg-red-500" />
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+                {/* Recommendation */}
+
+                <div className="rounded-3xl bg-gradient-to-br from-cyan-500 to-blue-500 p-7 text-white">
+
+                  <Brain size={34} />
+
+                  <h3 className="mt-6 text-2xl font-bold">
+
+                    AI Recommendation
+
+                  </h3>
+
+                  <p className="mt-4 leading-7 text-blue-50">
+
+                    Schedule focused work during your most productive hours
+                    and minimize frequent context switching.
+
+                  </p>
+
+                </div>
+
+              </div>
+
+              {/* Bottom Cards */}
+
+              <div className="mt-8 grid gap-6 md:grid-cols-3">
+
+                <div className="rounded-2xl bg-blue-50 p-6">
+
+                  <Users className="text-blue-600" />
+
+                  <h3 className="mt-5 font-bold">
+
+                    Organizations
+
+                  </h3>
+
+                  <p className="mt-2 text-slate-600">
+
+                    Manage employees and departments effortlessly.
+
+                  </p>
+
+                </div>
+
+                <div className="rounded-2xl bg-cyan-50 p-6">
+
+                  <Activity className="text-cyan-600" />
+
+                  <h3 className="mt-5 font-bold">
+
+                    Activity Timeline
+
+                  </h3>
+
+                  <p className="mt-2 text-slate-600">
+
+                    View browser activity with intelligent analytics.
+
+                  </p>
+
+                </div>
+
+                <div className="rounded-2xl bg-indigo-50 p-6">
+
+                  <Shield className="text-indigo-600" />
+
+                  <h3 className="mt-5 font-bold">
+
+                    Secure Access
+
+                  </h3>
+
+                  <p className="mt-2 text-slate-600">
+
+                    Protected authentication across every user role.
+
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* ====================================================== */}
+      {/* About */}
+      {/* ====================================================== */}
+
+      <section
+        id="about"
+        className="py-28"
+      >
+
+        <div className="mx-auto grid max-w-7xl items-center gap-20 px-6 lg:grid-cols-2">
+
+          <div>
+
+            <span className="rounded-full bg-blue-100 px-5 py-2 text-sm font-semibold text-blue-700">
+
+              About FocusGuardAI
+
+            </span>
+
+            <h2 className="mt-8 text-5xl font-black">
+
+              Helping teams work smarter.
+
+            </h2>
+
+            <p className="mt-8 text-lg leading-9 text-slate-600">
+
+              FocusGuardAI enables organizations to understand productivity,
+              improve employee focus and make informed decisions through
+              analytics, AI recommendations and browser activity insights.
+
+            </p>
+
+            <div className="mt-10 flex flex-wrap gap-4">
+
+              <div className="rounded-full bg-blue-100 px-5 py-3 font-semibold text-blue-700">
+
+                Secure
+
+              </div>
+
+              <div className="rounded-full bg-cyan-100 px-5 py-3 font-semibold text-cyan-700">
+
+                Intelligent
+
+              </div>
+
+              <div className="rounded-full bg-indigo-100 px-5 py-3 font-semibold text-indigo-700">
+
+                Scalable
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2">
+                {[
+                  {
+                    icon: Brain,
+                    title: "AI Productivity Coach",
+                    description: "Personalized recommendations generated from real activity data and analytics.",
+                  },
+                  {
+                    icon: Globe,
+                    title: "Browser Activity Tracking",
+                    description: "Automatic logging of sites, tabs, and focus time as work happens.",
+                  },
+                  {
+                    icon: Users,
+                    title: "Organization Management",
+                    description: "Manage employees, permissions, and analytics from one console.",
+                  },
+                  {
+                    icon: Shield,
+                    title: "Secure Authentication",
+                    description: "JWT-based auth and role-based access keep every organization's data separate.",
+                  },
+                ].map((card) => (
+                  <div key={card.title}>
+                    <div className="group relative h-full overflow-hidden rounded-2xl border border-white/60 bg-gradient-to-br from-white/80 to-[#EAF0FE]/80 p-6 shadow-[0_16px_40px_-28px_rgba(79,70,229,0.35)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#4F46E5]/25 hover:shadow-[0_24px_55px_-24px_rgba(79,70,229,0.4)]">
+                      <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[#4F46E5]/[0.08] blur-2xl transition-transform duration-500 group-hover:scale-110" />
+                      <div className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F46E5] to-[#2F8FF0] text-white shadow-[0_10px_20px_-8px_rgba(79,70,229,0.5)]">
+                        <card.icon className="h-5 w-5" />
+                      </div>
+                      <h3 className="font-display relative mt-5 text-[15.5px] font-semibold tracking-tight text-[#12141F]">
+                        {card.title}
+                      </h3>
+                      <p className="relative mt-2 text-[13px] leading-6 text-[#5B6072]">{card.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+        </section>
+
+        {/* ============================================================ */}
+        {/* FINAL CTA — large rounded gradient glass container             */}
+        {/* ============================================================ */}
+        <section className="relative border-t border-black/[0.04] bg-[#F6F8FF] py-28">
+          <div className="mx-auto max-w-6xl px-6">
+              <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#4F46E5] via-[#6C4FF0] to-[#2F8FF0] px-8 py-20 text-center shadow-[0_40px_90px_-30px_rgba(79,70,229,0.55)] sm:px-16">
+                <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle,white_1px,transparent_1px)] [background-size:26px_26px]" />
+                <div className="blob-a pointer-events-none absolute left-[8%] top-0 h-72 w-72 rounded-full bg-white/[0.12] blur-[100px]" />
+                <div className="blob-b pointer-events-none absolute right-[8%] bottom-0 h-72 w-72 rounded-full bg-white/[0.10] blur-[100px]" />
+                <div className="blob-c pointer-events-none absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.08] blur-[90px]" />
+
+                <div className="relative mx-auto max-w-2xl">
+                  <h2 className="font-display text-3xl font-bold tracking-tight text-white sm:text-5xl">
+                    Ready to improve your team's productivity?
+                  </h2>
+                  <p className="mt-4 text-white/75">
+                    Set up your organization and invite your first employees today.
+                  </p>
+                  <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
+                    <Link
+                      to="/register"
+                      className="rounded-xl bg-white px-7 py-4 text-[15px] font-semibold text-[#4F46E5] shadow-[0_20px_50px_-14px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    >
+                      Get Started
+                    </Link>
+                    <Link
+                      to="/login"
+                      className="rounded-xl border border-white/40 bg-white/10 px-7 py-4 text-[15px] font-semibold text-white backdrop-blur transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    >
+                      Login
+                    </Link>
+                  </div>
+                </div>
+              </div>
+          </div>
+        </section>
+
+        {/* ============================================================ */}
+        {/* FOOTER — light                                                 */}
+        {/* ============================================================ */}
+        <footer id="contact" className="border-t border-black/[0.06] bg-white py-16">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <a href="#top" className="flex items-center gap-2.5">
+                  <span className="font-display text-[19px] font-bold text-[#12141F]">
+                    FocusGuard
+                    <span className="bg-gradient-to-r from-[#4F46E5] to-[#2F8FF0] bg-clip-text text-transparent">AI</span>
+                  </span>
+                </a>
+                <p className="mt-3 text-sm leading-6 text-[#5B6072]">
+                  Browser activity tracking, analytics, and AI-powered productivity insights for teams and individuals.
+                </p>
+              </div>
+
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-wider text-black/30">About</p>
+                <p className="mt-3 text-sm leading-6 text-[#5B6072]">
+                  Contact your FocusGuardAI administrator for support or organization access.
+                </p>
+              </div>
+
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-wider text-black/30">Quick links</p>
+                <ul className="mt-3 space-y-2 text-sm text-[#5B6072]">
+                  <li><a href="#features" className="transition hover:text-[#4F46E5]">Features</a></li>
+                  <li><a href="#workflow" className="transition hover:text-[#4F46E5]">How it works</a></li>
+                  <li><a href="#about" className="transition hover:text-[#4F46E5]">About</a></li>
+                  <li><Link to="/login" className="transition hover:text-[#4F46E5]">Login</Link></li>
+                  <li><Link to="/register" className="transition hover:text-[#4F46E5]">Register</Link></li>
+                </ul>
+              </div>
+
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-wider text-black/30">Contact</p>
+                <ul className="mt-3 space-y-2 text-sm text-[#5B6072]">
+                  <li><a href="#contact" className="transition hover:text-[#4F46E5]">Reach the team</a></li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-12 border-t border-black/[0.06] pt-6 text-center text-xs text-black/30">
+              &copy; {new Date().getFullYear()} FocusGuardAI. All rights reserved.
+            </div>
+          </div>
+        </footer>
+      </main>
   );
 }
