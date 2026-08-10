@@ -80,7 +80,7 @@ function InviteEmployeeForm({ onInvitationSent }) {
 
     return (
         <div className="w-full">
-            <div className="w-full bg-white rounded-3xl border border-slate-200 shadow-lg p-5 sm:p-6 xl:p-7">
+            <div className="w-full rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-lg p-5 sm:p-6 xl:p-7">
                 {/* Hero */}
                 <div className="flex flex-col items-center text-center gap-2.5 mb-6">
                     <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center ring-1 ring-indigo-200">

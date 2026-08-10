@@ -21,6 +21,7 @@ function DashboardLayout({ children }) {
     return () => {
       if (mql.removeEventListener) {
         mql.removeEventListener("change", handler);
+
       } else {
         mql.removeListener(handler);
       }
@@ -28,7 +29,7 @@ function DashboardLayout({ children }) {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100">
+    <div className="flex min-h-screen bg-[#F3F7FF]">
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}

@@ -28,7 +28,7 @@ function AttentionEmployees({ employees = [] }) {
         .slice(0, 5);
 
     return (
-        <div className="h-full rounded-[18px] border border-slate-200 bg-white shadow-sm">
+        <div className="h-full rounded-[18px] border border-rose-100/50 bg-gradient-to-br from-rose-50/70 to-white shadow-sm transition-all duration-200 hover:shadow-md">
             <div className="flex items-start justify-between border-b border-slate-100 px-6 py-5">
                 <div>
                     <p className="text-xs font-bold uppercase text-slate-500">

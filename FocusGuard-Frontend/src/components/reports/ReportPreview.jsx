@@ -46,54 +46,61 @@ export default function ReportPreview({ report }) {
       title: t("productive_time", "Productive Time"),
       value: formatTime(report.productive_time, t),
       icon: <FiClock className="h-6 w-6" />,
-      color: "from-emerald-500 to-green-600",
+      iconBg: "bg-emerald-100/50 text-emerald-600 shadow-sm shadow-emerald-500/10",
+      cardTint: "bg-gradient-to-br from-emerald-50/70 to-white hover:bg-emerald-50/50 border-emerald-100/50 border-t-[3px] border-t-emerald-500",
     },
     {
       title: t("non_productive", "Non Productive"),
       value: formatTime(report.non_productive_time, t),
       icon: <FiTrendingDown className="h-6 w-6" />,
-      color: "from-red-500 to-rose-600",
+      iconBg: "bg-rose-100/50 text-rose-600 shadow-sm shadow-rose-500/10",
+      cardTint: "bg-gradient-to-br from-rose-50/70 to-white hover:bg-rose-50/50 border-rose-100/50 border-t-[3px] border-t-rose-500",
     },
     {
       title: t("neutral", "Neutral"),
       value: formatTime(report.neutral_time, t),
       icon: <FiMoon className="h-6 w-6" />,
-      color: "from-slate-500 to-slate-700",
+      iconBg: "bg-slate-100/50 text-slate-600 shadow-sm shadow-slate-500/10",
+      cardTint: "bg-gradient-to-br from-slate-50/70 to-white hover:bg-slate-50/50 border-slate-200 border-t-[3px] border-t-slate-500",
     },
     {
       title: t("idle", "Idle"),
       value: formatTime(report.idle_time, t),
       icon: <FiClock className="h-6 w-6" />,
-      color: "from-amber-500 to-yellow-600",
+      iconBg: "bg-amber-100/50 text-amber-600 shadow-sm shadow-amber-500/10",
+      cardTint: "bg-gradient-to-br from-amber-50/70 to-white hover:bg-amber-50/50 border-amber-100/50 border-t-[3px] border-t-amber-500",
     },
     {
       title: t("websites", "Websites"),
       value: report.websites_visited,
       icon: <FiGlobe className="h-6 w-6" />,
-      color: "from-blue-500 to-indigo-600",
+      iconBg: "bg-blue-100/50 text-blue-600 shadow-sm shadow-blue-500/10",
+      cardTint: "bg-gradient-to-br from-blue-50/70 to-white hover:bg-blue-50/50 border-blue-100/50 border-t-[3px] border-t-blue-500",
     },
     {
       title: t("tab_switches", "Tab Switches"),
       value: report.tab_switches,
       icon: <FiRepeat className="h-6 w-6" />,
-      color: "from-orange-500 to-amber-600",
+      iconBg: "bg-indigo-100/50 text-indigo-600 shadow-sm shadow-indigo-500/10",
+      cardTint: "bg-gradient-to-br from-indigo-50/70 to-white hover:bg-indigo-50/50 border-indigo-100/50 border-t-[3px] border-t-indigo-500",
     },
     {
       title: t("focus_score", "Focus Score"),
       value: `${report.productivity_percentage}%`,
       icon: <FiTarget className="h-6 w-6" />,
-      color: "from-violet-500 to-purple-600",
+      iconBg: "bg-cyan-100/50 text-cyan-600 shadow-sm shadow-cyan-500/10",
+      cardTint: "bg-gradient-to-br from-cyan-50/70 to-white hover:bg-cyan-50/50 border-cyan-100/50 border-t-[3px] border-t-cyan-500",
     },
   ];
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md">
+    <section className="rounded-2xl border border-blue-100/50 bg-gradient-to-br from-blue-50/30 to-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-900">
           {t("report_preview", "Report Preview")}
         </h2>
 
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           {t(
             "report_preview_description",
             "Overview of the generated productivity report."
@@ -105,11 +112,11 @@ export default function ReportPreview({ report }) {
         {items.map((item) => (
           <div
             key={item.title}
-            className="flex min-h-[150px] flex-col justify-between rounded-2xl border border-slate-200 bg-slate-50 p-5 transition-all duration-300 hover:border-indigo-200 hover:bg-white hover:shadow-md"
+            className={`flex min-h-[150px] flex-col justify-between rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md ${item.cardTint}`}
           >
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">
                   {item.title}
                 </p>
 
@@ -119,7 +126,7 @@ export default function ReportPreview({ report }) {
               </div>
 
               <div
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${item.color} text-white shadow-md`}
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 ${item.iconBg}`}
               >
                 {item.icon}
               </div>

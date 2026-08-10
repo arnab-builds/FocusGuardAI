@@ -92,7 +92,7 @@ export default function ActivityLog() {
             {t("activity_history", "Activity History")}
           </h1>
 
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-600">
             {t(
               "browse_website_activity",
               "Browse your website activity."
@@ -114,10 +114,10 @@ export default function ActivityLog() {
         </div>
 
         {/* Activity List */}
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-2xl border border-cyan-100/50 bg-gradient-to-br from-cyan-50/30 to-white shadow-sm">
 
           {/* Desktop Header */}
-          <div className="hidden bg-slate-50 px-6 py-4 text-sm font-semibold text-slate-600 lg:grid lg:grid-cols-5">
+          <div className="hidden border-b border-cyan-100/50 bg-cyan-50/50 px-6 py-4 text-sm font-semibold text-cyan-800 lg:grid lg:grid-cols-5">
             <div>{t("website", "Website")}</div>
             <div>{t("category", "Category")}</div>
             <div>{t("duration", "Duration")}</div>
@@ -130,10 +130,16 @@ export default function ActivityLog() {
               {t("loading", "Loading...")}
             </div>
           ) : (
-            filtered.map((activity) => (
+            filtered.map((activity) => {
+              let rowHover = "hover:bg-slate-50";
+              if (activity.productivity_type === "PRODUCTIVE") rowHover = "hover:bg-emerald-50/50";
+              else if (activity.productivity_type === "NON_PRODUCTIVE") rowHover = "hover:bg-rose-50/50";
+              else if (activity.productivity_type === "NEUTRAL") rowHover = "hover:bg-cyan-50/30";
+
+              return (
               <div
                 key={activity.id}
-                className="border-b border-slate-100 p-5 transition hover:bg-slate-50"
+                className={`border-b border-slate-100 p-5 transition-all duration-200 ${rowHover}`}
               >
                 <div className="grid gap-4 lg:grid-cols-5 lg:items-center">
 
@@ -151,7 +157,7 @@ export default function ActivityLog() {
                       </a>
                     </div>
 
-                    <p className="mt-1 truncate text-xs text-slate-500">
+                    <p className="mt-1 truncate text-xs text-slate-600">
                       {activity.tab_title}
                     </p>
                   </div>
@@ -192,7 +198,7 @@ export default function ActivityLog() {
                     )}
                   </div>
 
-                  <div className="text-sm text-slate-500">
+                  <div className="text-sm text-slate-600 font-medium">
                     {formatDate(
                       activity.start_time,
                       currentLanguageCode
@@ -201,7 +207,8 @@ export default function ActivityLog() {
 
                 </div>
               </div>
-            ))
+            );
+            })
           )}
         </section>
 

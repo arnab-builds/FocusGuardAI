@@ -30,25 +30,29 @@ export default function ReportStats({ report }) {
       title: t("focus_score", "Focus Score"),
       value: `${report.productivity_percentage}%`,
       icon: <FiTarget className="h-6 w-6" />,
-      color: "from-emerald-500 to-green-600",
+      iconBg: "bg-emerald-100/50 text-emerald-600 shadow-sm shadow-emerald-500/10",
+      cardTint: "bg-gradient-to-br from-emerald-50/70 to-white border-emerald-100/50 border-t-[3px] border-t-emerald-500",
     },
     {
       title: t("websites", "Websites"),
       value: report.websites_visited,
       icon: <FiGlobe className="h-6 w-6" />,
-      color: "from-blue-500 to-indigo-600",
+      iconBg: "bg-blue-100/50 text-blue-600 shadow-sm shadow-blue-500/10",
+      cardTint: "bg-gradient-to-br from-blue-50/70 to-white border-blue-100/50 border-t-[3px] border-t-blue-500",
     },
     {
       title: t("tab_switches", "Tab Switches"),
       value: report.tab_switches,
       icon: <FiRepeat className="h-6 w-6" />,
-      color: "from-orange-500 to-amber-600",
+      iconBg: "bg-amber-100/50 text-amber-600 shadow-sm shadow-amber-500/10",
+      cardTint: "bg-gradient-to-br from-amber-50/70 to-white border-amber-100/50 border-t-[3px] border-t-amber-500",
     },
     {
       title: t("productive_time", "Productive Time"),
       value: formatTime(report.productive_time, t),
       icon: <FiClock className="h-6 w-6" />,
-      color: "from-violet-500 to-purple-600",
+      iconBg: "bg-indigo-100/50 text-indigo-600 shadow-sm shadow-indigo-500/10",
+      cardTint: "bg-gradient-to-br from-indigo-50/70 to-white border-indigo-100/50 border-t-[3px] border-t-indigo-500",
     },
   ];
 
@@ -57,11 +61,11 @@ export default function ReportStats({ report }) {
       {cards.map((card) => (
         <div
           key={card.title}
-          className="flex min-h-[170px] flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+          className={`flex min-h-[170px] flex-col justify-between rounded-2xl border p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md ${card.cardTint}`}
         >
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">
                 {card.title}
               </p>
 
@@ -71,14 +75,14 @@ export default function ReportStats({ report }) {
             </div>
 
             <div
-              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${card.color} text-white shadow-md`}
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 ${card.iconBg}`}
             >
               {card.icon}
             </div>
           </div>
 
-          <div className="mt-5 border-t border-slate-100 pt-4">
-            <span className="text-xs font-medium text-slate-500">
+          <div className="mt-5 border-t border-slate-100/80 pt-4">
+            <span className="text-xs font-medium text-slate-600">
               {t("report_summary", "Report Summary")}
             </span>
           </div>

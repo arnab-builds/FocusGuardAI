@@ -175,7 +175,7 @@ function RequestTable() {
     };
 
     return (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
+        <div className="rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
             {error && (
                 <div className="flex items-start gap-3 border-b border-red-200 bg-red-50 px-6 py-4">
                     <span className="text-xl leading-none mt-0.5">
@@ -212,7 +212,7 @@ function RequestTable() {
                     {/* Desktop / tablet table */}
                     <div className="hidden md:block overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-slate-50">
+                            <thead className="bg-indigo-50/50">
                                 <tr>
                                     <th className="px-6 py-5 text-left text-sm uppercase tracking-wider font-bold text-slate-700">
                                         {t(
@@ -356,7 +356,7 @@ function RequestTable() {
                         {requests.map((request) => (
                             <div
                                 key={request.id}
-                                className="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col gap-4"
+                                className="rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col gap-4"
                             >
                                 <div className="flex items-center gap-2.5 min-w-0">
                                     <span className="text-lg leading-none shrink-0">

@@ -84,7 +84,7 @@ function TopWebsites({ websites = [] }) {
         .slice(0, 5);
 
     return (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+        <div className="rounded-3xl border border-cyan-100/50 bg-gradient-to-br from-cyan-50/70 to-white shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
             <div className="p-6 sm:p-7 border-b border-slate-100">
                 <div className="flex items-start gap-3">
                     <span className="text-2xl leading-none mt-0.5">
@@ -114,7 +114,7 @@ function TopWebsites({ websites = [] }) {
                     {/* Desktop / tablet table */}
                     <div className="hidden md:block overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-slate-50">
+                            <thead className="bg-cyan-50/50">
                                 <tr>
                                     <th className="text-left px-6 py-4 text-sm uppercase tracking-wide font-bold text-slate-700">
                                         {t(
@@ -200,7 +200,7 @@ function TopWebsites({ websites = [] }) {
                         {topWebsites.map((site, index) => (
                             <div
                                 key={site.id || index}
-                                className="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-5 flex flex-col gap-3"
+                                className="rounded-2xl border border-cyan-100/50 bg-gradient-to-br from-cyan-50/70 to-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-5 flex flex-col gap-3"
                             >
                                 <div className="flex items-center gap-2.5 min-w-0">
                                     <span className="text-lg leading-none shrink-0">

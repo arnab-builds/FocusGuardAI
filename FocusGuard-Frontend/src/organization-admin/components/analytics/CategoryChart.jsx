@@ -40,7 +40,7 @@ function CategoryChart({ data = [] }) {
     );
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 h-[460px] overflow-hidden">
+        <div className="rounded-[18px] border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-sm transition-all duration-200 hover:shadow-md p-6 h-[460px] overflow-hidden">
             <h2 className="text-lg font-semibold mb-4">
                 {t(
                     "category_distribution",

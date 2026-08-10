@@ -167,7 +167,7 @@ function Navbar({ onToggleSidebar }) {
         };
 
     return (
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-4 shadow-sm backdrop-blur-md sm:px-6 md:px-8 lg:px-10 xl:px-12">
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-gradient-to-r from-blue-50/70 to-indigo-50/40 px-4 py-4 shadow-sm backdrop-blur-md sm:px-6 md:px-8 lg:px-10 xl:px-12">
 
     <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
@@ -388,7 +388,7 @@ function Navbar({ onToggleSidebar }) {
 
                                                     </h4>
 
-                                                    <p className="mt-1 text-sm leading-6 text-slate-500">
+                                                    <p className="mt-1 text-sm leading-6 text-slate-600">
 
                                                         {notification.message}
 
@@ -448,7 +448,7 @@ function Navbar({ onToggleSidebar }) {
 
                     </p>
 
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-600">
 
                         admin@focusguard.ai
 

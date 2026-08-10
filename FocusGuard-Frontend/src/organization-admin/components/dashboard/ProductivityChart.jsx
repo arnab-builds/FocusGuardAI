@@ -26,7 +26,7 @@ function ProductivityChart({
 
     return (
 
-        <Card className="rounded-2xl shadow-sm border border-slate-200">
+        <Card className="rounded-[18px] border border-blue-100/50 bg-gradient-to-br from-blue-50/70 to-white shadow-sm transition-all duration-200 hover:shadow-md" elevation={0}>
 
             <CardContent>
 

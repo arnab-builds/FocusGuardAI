@@ -207,7 +207,7 @@ function ChatWindow() {
     const hasUserMessage = messages.some((item) => item.sender === "user");
 
     return (
-        <div className="w-full max-w-full min-h-[70vh] bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-col">
+        <div className="w-full max-w-full min-h-[70vh] rounded-3xl border border-violet-100/50 bg-gradient-to-br from-violet-50/70 to-white shadow-xl overflow-hidden flex flex-col">
             <div className="bg-gradient-to-r from-indigo-700 via-violet-600 to-blue-600 px-5 sm:px-8 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <div className="h-14 w-14 shrink-0 rounded-2xl bg-white/20 flex items-center justify-center">
@@ -255,7 +255,7 @@ function ChatWindow() {
 
             <div
                 ref={scrollRef}
-                className="flex-1 overflow-y-auto scroll-smooth bg-slate-50 px-4 sm:px-8 py-6 sm:py-8 space-y-6"
+                className="flex-1 overflow-y-auto scroll-smooth bg-transparent px-4 sm:px-8 py-6 sm:py-8 space-y-6"
             >
                 {loadingHistory ? (
                     <p className="py-10 text-center text-sm text-slate-500">{t("loading", "Loading...")}</p>

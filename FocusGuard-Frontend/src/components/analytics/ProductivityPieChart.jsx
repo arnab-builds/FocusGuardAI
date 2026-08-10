@@ -45,14 +45,14 @@ export default function ProductivityPieChart({ analytics }) {
   ];
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md">
+    <section className="overflow-hidden rounded-2xl border border-blue-100/50 bg-blue-50/30 p-5 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
           {t("productivity_breakdown", "Productivity Breakdown")}
         </h2>
 
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           {t(
             "visual_distribution_of_productivity",
             "Visual distribution of your productivity."

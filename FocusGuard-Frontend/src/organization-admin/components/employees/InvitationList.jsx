@@ -17,7 +17,7 @@ const StatusIcon = ({ status }) => {
 
 function InvitationList({ invitations, loading }) {
     return (
-        <section className="flex min-h-[360px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg lg:max-h-[calc(100vh-15rem)]">
+        <section className="flex min-h-[360px] flex-col overflow-hidden rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-lg lg:max-h-[calc(100vh-15rem)]">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-5 sm:px-6">
                 <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600"><UsersRound size={21} /></div>

@@ -83,7 +83,7 @@ function AnalyticsCharts() {
     return (
         <div className="space-y-6 sm:space-y-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-gradient-to-br from-white to-blue-50/30 rounded-3xl shadow-sm border border-slate-100 p-6 flex items-center gap-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <div className="rounded-3xl border border-blue-100/50 border-t-[3px] border-t-blue-500 bg-gradient-to-br from-blue-50/70 to-white shadow-sm p-6 flex items-center gap-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/70 text-blue-600 ring-1 ring-blue-100">
                         <Building2 size={26} />
                     </div>
@@ -102,7 +102,7 @@ function AnalyticsCharts() {
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-white to-indigo-50/30 rounded-3xl shadow-sm border border-slate-100 p-6 flex items-center gap-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <div className="rounded-3xl border border-indigo-100/50 border-t-[3px] border-t-indigo-500 bg-gradient-to-br from-indigo-50/70 to-white shadow-sm p-6 flex items-center gap-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100/70 text-indigo-600 ring-1 ring-indigo-100">
                         <Users size={26} />
                     </div>
@@ -121,7 +121,7 @@ function AnalyticsCharts() {
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-white to-emerald-50/30 rounded-3xl shadow-sm border border-slate-100 p-6 flex items-center gap-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <div className="rounded-3xl border border-emerald-100/50 border-t-[3px] border-t-emerald-500 bg-gradient-to-br from-emerald-50/70 to-white shadow-sm p-6 flex items-center gap-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/70 text-emerald-600 ring-1 ring-emerald-100">
                         <TrendingUp size={26} />
                     </div>
@@ -140,7 +140,7 @@ function AnalyticsCharts() {
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-white to-red-50/30 rounded-3xl shadow-sm border border-slate-100 p-6 flex items-center gap-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <div className="rounded-3xl border border-red-100/50 border-t-[3px] border-t-red-500 bg-gradient-to-br from-red-50/70 to-white shadow-sm p-6 flex items-center gap-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div className="p-4 rounded-2xl bg-gradient-to-br from-red-50 to-red-100/70 text-red-600 ring-1 ring-red-100">
                         <TrendingDown size={26} />
                     </div>
@@ -161,7 +161,7 @@ function AnalyticsCharts() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-lg">
+                <div className="rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-sm p-6 sm:p-8 transition-all duration-300 hover:shadow-lg">
                     <h2 className="font-semibold text-lg sm:text-xl text-slate-900 mb-6">
                         {t(
                             "employees_per_organization",
@@ -199,7 +199,7 @@ function AnalyticsCharts() {
                     </ResponsiveContainer>
                 </div>
 
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8 transition-all duration-300 hover:shadow-lg">
+                <div className="rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-sm p-6 sm:p-8 transition-all duration-300 hover:shadow-lg">
                     <h2 className="font-semibold text-lg sm:text-xl text-slate-900 mb-6">
                         {t(
                             "organization_productivity",
@@ -237,7 +237,7 @@ function AnalyticsCharts() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden transition-all duration-300 hover:shadow-lg">
+            <div className="rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg">
                 <div className="p-6 sm:p-8 pb-0">
                     <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-2">
                         {t(
@@ -263,7 +263,7 @@ function AnalyticsCharts() {
                         <div className="hidden md:block overflow-x-auto p-6 sm:p-8 pt-4">
                             <table className="w-full border-collapse">
                                 <thead>
-                                    <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500 bg-gradient-to-r from-slate-50 via-blue-50/50 to-slate-50 border-b border-slate-200">
+                                    <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500 bg-indigo-50/50 border-b border-indigo-100">
                                         <th className="p-4 text-left rounded-l-xl">
                                             {t(
                                                 "organization",

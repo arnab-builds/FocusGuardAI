@@ -103,7 +103,7 @@ function Sidebar({ isOpen = true, onClose = () => {} }) {
 
                             </h1>
 
-                            <p className="mt-1 text-xs text-slate-400">
+                            <p className="mt-1 text-xs text-slate-300">
 
                                 {t(
                                     "super_admin",
@@ -150,7 +150,7 @@ function Sidebar({ isOpen = true, onClose = () => {} }) {
                                         `group flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
                                             isActive
                                                 ? "bg-blue-600 text-white shadow-lg"
-                                                : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                                                : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
                                         }`
                                     }
                                 >
@@ -195,7 +195,7 @@ function Sidebar({ isOpen = true, onClose = () => {} }) {
 
                                 </h3>
 
-                                <p className="truncate text-xs text-slate-400">
+                                <p className="truncate text-xs text-slate-300">
 
                                     admin@focusguard.ai
 

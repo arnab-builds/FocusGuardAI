@@ -102,7 +102,7 @@ function SettingsForm() {
     };
     return (
     <div className="grid items-start gap-6 xl:grid-cols-2">
-        <section className="h-full bg-white rounded-3xl border border-slate-200 shadow-md hover:shadow-lg transition-all duration-300 p-5 sm:p-6">
+        <section className="h-full rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-md hover:shadow-lg transition-all duration-300 p-5 sm:p-6">
             <div className="space-y-5">
                 <div className="flex items-start gap-3">
                     <span className="text-2xl leading-none mt-0.5">
@@ -229,7 +229,7 @@ function SettingsForm() {
 
         <form
             onSubmit={handleDeactivationSubmit}
-            className="h-full bg-white rounded-3xl border border-red-200 shadow-md hover:shadow-lg transition-all duration-300 p-5 sm:p-6"
+            className="h-full rounded-3xl border border-red-100/50 bg-gradient-to-br from-red-50/70 to-white shadow-md hover:shadow-lg transition-all duration-300 p-5 sm:p-6"
         >
             <div className="space-y-4">
                 <div className="flex items-start gap-3">

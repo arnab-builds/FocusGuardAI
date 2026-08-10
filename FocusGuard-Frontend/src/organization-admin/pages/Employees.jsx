@@ -120,7 +120,7 @@ function Employees() {
         "Manage employees, monitor activity, and view productivity insights."
     )}
                     action={
-                        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-sm">
+                        <div className="flex items-center gap-3 rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white px-5 py-3 shadow-sm">
                       <div className="rounded-xl bg-indigo-100 p-3">
                       <Users
                      size={20}
@@ -142,7 +142,7 @@ function Employees() {
                     }
                 />
 
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                <div className="rounded-2xl border border-blue-100/50 bg-gradient-to-br from-blue-50/70 to-white shadow-sm p-5">
                     <SearchBar
                         value={search}
                         onChange={(e) => {

@@ -104,7 +104,7 @@ function SettingsForm() {
     return (
         <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-3xl shadow-sm hover:shadow-lg border border-slate-100 p-6 sm:p-8 md:p-10 max-w-5xl mx-auto transition-all duration-300"
+            className="rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-md hover:shadow-lg p-6 sm:p-8 md:p-10 max-w-5xl mx-auto transition-all duration-300"
         >
             <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/70 text-blue-600 ring-1 ring-blue-100">

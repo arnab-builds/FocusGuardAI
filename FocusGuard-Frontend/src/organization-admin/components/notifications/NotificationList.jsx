@@ -190,7 +190,7 @@ function NotificationList() {
                     {[0, 1, 2, 3].map((skeleton) => (
                         <div
                             key={skeleton}
-                            className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 animate-pulse"
+                            className="rounded-3xl border border-blue-100/50 bg-gradient-to-br from-blue-50/70 to-white shadow-sm p-6 animate-pulse"
                         >
                             <div className="flex gap-4">
                                 <div className="h-14 w-14 rounded-2xl bg-slate-200 shrink-0" />
@@ -213,7 +213,7 @@ function NotificationList() {
                                 key={
                                     notification.id
                                 }
-                                className="bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-6 sm:p-7 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-5 animate-[fadeIn_0.3s_ease-out]"
+                                className="rounded-3xl border border-blue-100/50 bg-gradient-to-br from-blue-50/70 to-white shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-6 sm:p-7 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-5 animate-[fadeIn_0.3s_ease-out]"
                             >
                                 <div className="flex gap-4 min-w-0">
                                     <div className="h-14 w-14 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center shadow-sm">
@@ -326,7 +326,7 @@ function NotificationList() {
                     )}
                 </div>
             ) : (
-                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-14 flex flex-col items-center justify-center gap-3 text-center">
+                <div className="rounded-3xl border border-blue-100/50 bg-gradient-to-br from-blue-50/70 to-white shadow-sm p-14 flex flex-col items-center justify-center gap-3 text-center">
                     <div className="h-16 w-16 rounded-2xl bg-indigo-50 flex items-center justify-center">
                         <Bell
                             className="text-indigo-400"

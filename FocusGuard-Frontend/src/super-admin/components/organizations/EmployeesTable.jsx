@@ -8,7 +8,7 @@ function EmployeesTable({
     const { t } = useLanguage();
 
     return (
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md ring-1 ring-slate-50 overflow-hidden transition-all duration-300">
+        <div className="rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
             <div className="flex items-center gap-3 p-6 sm:p-8 pb-4 sm:pb-6">
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/60 text-blue-600 ring-1 ring-blue-100">
                     <Users size={20} strokeWidth={2} />
@@ -41,7 +41,7 @@ function EmployeesTable({
                     <div className="hidden md:block overflow-x-auto px-2 sm:px-4 pb-4">
                         <table className="w-full border-collapse">
                             <thead>
-                                <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500 bg-gradient-to-r from-slate-50 via-blue-50/40 to-slate-50 rounded-xl">
+                                <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500 bg-indigo-50/50 border-b border-indigo-100">
                                     <th className="py-4 px-4 rounded-l-xl">
                                         {t(
                                             "employee",

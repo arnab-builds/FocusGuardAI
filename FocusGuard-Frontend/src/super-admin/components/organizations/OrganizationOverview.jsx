@@ -33,25 +33,25 @@ const cardThemes = {
         iconWrap:
             "bg-gradient-to-br from-blue-50 to-blue-100/70 text-blue-600 ring-1 ring-blue-100",
         cardBg:
-            "bg-gradient-to-br from-white to-blue-50/30",
+            "bg-gradient-to-br from-blue-50/70 to-white border-t-[3px] border-t-blue-500 border-blue-100/50",
     },
     emerald: {
         iconWrap:
             "bg-gradient-to-br from-emerald-50 to-emerald-100/70 text-emerald-600 ring-1 ring-emerald-100",
         cardBg:
-            "bg-gradient-to-br from-white to-emerald-50/30",
+            "bg-gradient-to-br from-emerald-50/70 to-white border-t-[3px] border-t-emerald-500 border-emerald-100/50",
     },
     red: {
         iconWrap:
             "bg-gradient-to-br from-red-50 to-red-100/70 text-red-600 ring-1 ring-red-100",
         cardBg:
-            "bg-gradient-to-br from-white to-red-50/30",
+            "bg-gradient-to-br from-red-50/70 to-white border-t-[3px] border-t-red-500 border-red-100/50",
     },
     indigo: {
         iconWrap:
             "bg-gradient-to-br from-indigo-50 to-indigo-100/70 text-indigo-600 ring-1 ring-indigo-100",
         cardBg:
-            "bg-gradient-to-br from-white to-indigo-50/30",
+            "bg-gradient-to-br from-indigo-50/70 to-white border-t-[3px] border-t-indigo-500 border-indigo-100/50",
     },
 };
 
@@ -61,7 +61,7 @@ function Card({ icon, title, value, theme = "blue" }) {
 
     return (
         <div
-            className={`${cardBg} rounded-3xl shadow-sm border border-slate-100 p-6 flex items-center gap-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}
+            className={`${cardBg} rounded-3xl shadow-sm border p-6 flex items-center gap-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}
         >
             <div
                 className={`${iconWrap} p-4 rounded-2xl [&>svg]:h-7 [&>svg]:w-7`}
@@ -153,7 +153,7 @@ function OrganizationOverview({
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 sm:p-8 transition-all duration-300 hover:shadow-md">
+                <div className="rounded-3xl border border-emerald-100/50 bg-gradient-to-br from-emerald-50/70 to-white shadow-sm p-6 sm:p-8 transition-all duration-300 hover:shadow-md">
                     <div className="flex items-center gap-3">
                         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/70 text-emerald-600 ring-1 ring-emerald-100">
                             <UserCheck size={18} />
@@ -173,7 +173,7 @@ function OrganizationOverview({
                     />
                 </div>
 
-                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 sm:p-8 transition-all duration-300 hover:shadow-md">
+                <div className="rounded-3xl border border-red-100/50 bg-gradient-to-br from-red-50/70 to-white shadow-sm p-6 sm:p-8 transition-all duration-300 hover:shadow-md">
                     <div className="flex items-center gap-3">
                         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-50 to-red-100/70 text-red-600 ring-1 ring-red-100">
                             <UserX size={18} />

@@ -22,7 +22,7 @@ function PendingInvitations({
     };
 
     return (
-        <div className="bg-white rounded-3xl shadow-sm hover:shadow-md border border-slate-100 p-5 sm:p-6 lg:p-7 transition-all duration-300">
+        <div className="rounded-3xl shadow-sm hover:shadow-md border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white p-5 sm:p-6 lg:p-7 transition-all duration-300">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-5 sm:mb-6">
                 <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
                     {t(

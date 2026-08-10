@@ -112,7 +112,7 @@ export default function FocusGoals() {
         <h1 className="text-3xl font-bold text-slate-800">
           {t("focus_goals", "Focus Goals")}
         </h1>
-        <p className="mt-2 text-slate-500">
+        <p className="mt-2 text-slate-600">
           {t(
             "create_productivity_goals_ai_strategy",
             "Create productivity goals and let AI build a personalized execution strategy."
@@ -121,8 +121,8 @@ export default function FocusGoals() {
       </div>
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(320px,420px)_minmax(0,1fr)]">
-        <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-24 lg:p-6">
-          <h2 className="mb-6 text-xl font-semibold text-slate-800">
+        <aside className="rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-[2px] lg:sticky lg:top-24 lg:p-6">
+          <h2 className="mb-6 text-xl font-semibold text-indigo-700">
             {t("add_new_goal", "Add New Goal")}
           </h2>
           <form onSubmit={handleCreateGoal} className="space-y-4">
@@ -212,7 +212,7 @@ export default function FocusGoals() {
             <h2 className="text-2xl font-semibold text-slate-800">
               {t("your_goals", "Your Goals")}
             </h2>
-            <span className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-600">
+            <span className="rounded-full bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700">
               {goals.length} {t("goals", "Goals")}
             </span>
           </div>
@@ -233,12 +233,19 @@ export default function FocusGoals() {
               <div className="grid gap-4">
                 {goals.map((goal) => {
                   const progress = Math.min(100, Math.max(0, Number(goal.progress) || 0));
+                  
+                  let statusGradient = "bg-gradient-to-br from-indigo-50/70 to-white border-indigo-100/50 border-t-[3px] border-t-indigo-500";
+                  if (goal.status === "Completed") statusGradient = "bg-gradient-to-br from-emerald-50/70 to-white border-emerald-100/50 border-t-[3px] border-t-emerald-500";
+                  else if (goal.status === "At Risk" || goal.status === "Pending") statusGradient = "bg-gradient-to-br from-amber-50/70 to-white border-amber-100/50 border-t-[3px] border-t-amber-500";
+                  else if (goal.status === "Failed" || goal.status === "Overdue") statusGradient = "bg-gradient-to-br from-rose-50/70 to-white border-rose-100/50 border-t-[3px] border-t-rose-500";
+                  else statusGradient = "bg-gradient-to-br from-indigo-50/70 to-white border-indigo-100/50 border-t-[3px] border-t-indigo-500";
+
                   return (
-                    <article key={goal.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-transform duration-200 hover:-translate-y-1">
+                    <article key={goal.id} className={`rounded-2xl border p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-[2px] ${statusGradient}`}>
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
-                          <h3 className="text-lg font-semibold text-slate-800 break-words">{goal.goal_metric}</h3>
-                          <p className="mt-1 text-sm text-slate-500">{t("target", "Target")}: <span className="font-medium text-slate-700">{goal.target_value}</span></p>
+                          <h3 className="text-lg font-semibold text-slate-900 break-words">{goal.goal_metric}</h3>
+                          <p className="mt-1 text-sm text-slate-600">{t("target", "Target")}: <span className="font-medium text-slate-800">{goal.target_value}</span></p>
                         </div>
 
                         <div className="flex items-center gap-3">

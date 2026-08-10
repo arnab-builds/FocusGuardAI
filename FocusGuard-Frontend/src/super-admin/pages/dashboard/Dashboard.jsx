@@ -141,6 +141,7 @@ function Dashboard() {
                         value={dashboard.stats.organizations}
                         icon={<Building2 size={28} />}
                         color="bg-blue-600"
+                        cardClasses="border-blue-100/50 border-t-blue-500 from-blue-50/70 to-white"
                     />
 
                     <StatCard
@@ -151,6 +152,7 @@ function Dashboard() {
                         value={dashboard.stats.organization_admins}
                         icon={<UserCog size={28} />}
                         color="bg-indigo-600"
+                        cardClasses="border-indigo-100/50 border-t-indigo-500 from-indigo-50/70 to-white"
                     />
 
                     <StatCard
@@ -158,6 +160,7 @@ function Dashboard() {
                         value={dashboard.stats.employees}
                         icon={<Users size={28} />}
                         color="bg-green-600"
+                        cardClasses="border-green-100/50 border-t-green-500 from-green-50/70 to-white"
                     />
 
                     <StatCard
@@ -168,12 +171,13 @@ function Dashboard() {
                         value={dashboard.stats.pending_requests}
                         icon={<FileClock size={28} />}
                         color="bg-red-500"
+                        cardClasses="border-red-100/50 border-t-red-500 from-red-50/70 to-white"
                     />
                 </div>
 
                 {/* Charts */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
-                    <div className="rounded-2xl sm:rounded-3xl border border-slate-100 bg-white p-5 sm:p-6 lg:p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <div className="rounded-2xl sm:rounded-3xl border border-blue-100/50 bg-gradient-to-br from-blue-50/70 to-white p-5 sm:p-6 lg:p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
                         <div className="flex justify-between items-center mb-5 sm:mb-6">
                             <h2 className="text-base sm:text-lg font-semibold text-slate-900">
                                 {t("organization_growth", "Organization Growth")}
@@ -244,7 +248,7 @@ function Dashboard() {
                         </div>
                     </div>
 
-                    <div className="rounded-2xl sm:rounded-3xl border border-slate-100 bg-white p-5 sm:p-6 lg:p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <div className="rounded-2xl sm:rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white p-5 sm:p-6 lg:p-7 shadow-sm hover:shadow-md transition-shadow duration-300">
                         <h2 className="text-base sm:text-lg font-semibold text-slate-900 mb-5 sm:mb-6">
                             {t("employee_distribution", "Employee Distribution")}
                         </h2>

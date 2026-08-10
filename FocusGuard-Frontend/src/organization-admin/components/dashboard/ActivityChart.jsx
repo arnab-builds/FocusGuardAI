@@ -68,12 +68,8 @@ function ActivityChart({ data = [] }) {
     return (
         <Card
             elevation={0}
-            sx={{
-                height: "100%",
-                borderRadius: "18px",
-                border: "1px solid #E2E8F0",
-                boxShadow: "0 12px 30px rgba(15,23,42,.06)",
-            }}
+            className="rounded-[18px] border border-blue-100/50 bg-gradient-to-br from-blue-50/70 to-white shadow-sm transition-all duration-200 hover:shadow-md"
+            sx={{ height: "100%" }}
         >
             <CardContent sx={{ p: 3.5 }}>
                 <div className="mb-8 flex items-start justify-between">

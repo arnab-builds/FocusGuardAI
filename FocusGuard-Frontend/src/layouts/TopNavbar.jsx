@@ -139,7 +139,7 @@ export default function TopNavbar({
   }, [currentLanguageCode]);
 
   return (
-    <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-8 sm:py-5">
+    <header className="border-b border-indigo-100 bg-gradient-to-r from-blue-50 to-indigo-50/80 px-4 py-4 sm:px-8 sm:py-5 shadow-sm">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex flex-col gap-4 min-w-0">
           <div className="flex items-start gap-3">

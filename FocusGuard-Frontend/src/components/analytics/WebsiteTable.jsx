@@ -48,14 +48,14 @@ export default function WebsiteTable({ analytics }) {
     .sort((a, b) => b.seconds - a.seconds);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md">
+    <section className="overflow-hidden rounded-2xl border border-cyan-100/50 bg-cyan-50/30 p-5 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
+        <h2 className="text-xl font-bold text-cyan-600 sm:text-2xl">
           {t("top_websites", "Top Websites")}
         </h2>
 
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           {t(
             "website_usage_statistics",
             "Website usage statistics based on your activity."
@@ -64,7 +64,7 @@ export default function WebsiteTable({ analytics }) {
       </div>
 
       {websites.length === 0 ? (
-        <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center text-sm text-slate-500">
+        <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center text-sm text-slate-600">
           {t(
             "no_website_activity_available",
             "No website activity available."
@@ -75,15 +75,15 @@ export default function WebsiteTable({ analytics }) {
           <table className="min-w-full">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
                   {t("website", "Website")}
                 </th>
 
-                <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-600">
                   {t("visits", "Visits")}
                 </th>
 
-                <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-600">
                   {t("time", "Time")}
                 </th>
               </tr>
@@ -93,7 +93,7 @@ export default function WebsiteTable({ analytics }) {
               {websites.map((site, index) => (
                 <tr
                   key={site.name}
-                  className={`transition-colors hover:bg-slate-50 ${
+                  className={`transition-all duration-200 hover:bg-cyan-50/50 hover:shadow-sm ${
                     index !== websites.length - 1
                       ? "border-b border-slate-100"
                       : ""

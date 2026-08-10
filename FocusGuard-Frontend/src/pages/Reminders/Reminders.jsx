@@ -93,7 +93,7 @@ const Reminders = () => {
   }
 
   return (
-    <div className="w-full bg-slate-100 px-4 py-3 sm:px-6 lg:px-8">
+    <div className="w-full px-4 py-3 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
 
         {/* Header */}
@@ -106,7 +106,7 @@ const Reminders = () => {
             )}
           </h1>
 
-          <p className="mt-2 text-slate-500">
+          <p className="mt-2 text-slate-600">
             {t(
               "configure_reminders",
               "Configure productivity reminders and notification preferences."
@@ -121,11 +121,11 @@ const Reminders = () => {
 
           {/* Productive */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+          <div className="rounded-2xl border border-emerald-100/50 bg-gradient-to-br from-emerald-50/70 to-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
 
             <div className="mb-4 flex items-center gap-4">
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100/50 text-emerald-600 shadow-sm shadow-emerald-500/10">
 
                 <FiCheckCircle size={24} />
 
@@ -140,7 +140,7 @@ const Reminders = () => {
                   )}
                 </h2>
 
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-600">
                   Minutes before productivity reminders.
                 </p>
 
@@ -160,11 +160,11 @@ const Reminders = () => {
 
           {/* Non Productive */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+          <div className="rounded-2xl border border-rose-100/50 bg-gradient-to-br from-rose-50/70 to-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
 
             <div className="mb-4 flex items-center gap-4">
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 text-red-600">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-100/50 text-rose-600 shadow-sm shadow-rose-500/10">
 
                 <FiActivity size={24} />
 
@@ -179,7 +179,7 @@ const Reminders = () => {
                   )}
                 </h2>
 
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-600">
                   Minutes before distraction reminders.
                 </p>
 
@@ -198,11 +198,11 @@ const Reminders = () => {
           </div>
                     {/* Idle Threshold */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+          <div className="rounded-2xl border border-amber-100/50 bg-gradient-to-br from-amber-50/70 to-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
 
             <div className="mb-4 flex items-center gap-4">
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100/50 text-amber-600 shadow-sm shadow-amber-500/10">
 
                 <FiClock size={24} />
 
@@ -217,7 +217,7 @@ const Reminders = () => {
                   )}
                 </h2>
 
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-600">
                   Minutes before idle reminders.
                 </p>
 
@@ -237,13 +237,13 @@ const Reminders = () => {
 
           {/* Browser Notifications */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md lg:col-span-3">
+          <div className="rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md lg:col-span-3">
 
             <div className="flex items-center justify-between gap-6">
 
               <div className="flex items-center gap-4">
 
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100/50 text-indigo-600 shadow-sm shadow-indigo-500/10">
 
                   <FiBell size={24} />
 
@@ -258,7 +258,7 @@ const Reminders = () => {
                     )}
                   </h2>
 
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-slate-600">
                     {t(
                       "receive_reminder_popups",
                       "Receive reminder popups while browsing."

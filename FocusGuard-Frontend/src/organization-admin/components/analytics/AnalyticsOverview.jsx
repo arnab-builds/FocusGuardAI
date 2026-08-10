@@ -25,6 +25,7 @@ function AnalyticsOverview({ analytics }) {
             ),
             icon: Users,
             color: "text-indigo-600 bg-indigo-50",
+            cardClasses: "border-indigo-100/50 border-t-indigo-500 from-indigo-50/70 to-white",
         },
         {
             title: t(
@@ -41,6 +42,7 @@ function AnalyticsOverview({ analytics }) {
             ),
             icon: TrendingUp,
             color: "text-green-600 bg-green-50",
+            cardClasses: "border-green-100/50 border-t-green-500 from-green-50/70 to-white",
         },
         {
             title: t(
@@ -56,6 +58,7 @@ function AnalyticsOverview({ analytics }) {
             ),
             icon: Clock3,
             color: "text-amber-600 bg-amber-50",
+            cardClasses: "border-amber-100/50 border-t-amber-500 from-amber-50/70 to-white",
         },
         {
             title: t(
@@ -71,6 +74,7 @@ function AnalyticsOverview({ analytics }) {
             ),
             icon: Globe,
             color: "text-sky-600 bg-sky-50",
+            cardClasses: "border-sky-100/50 border-t-sky-500 from-sky-50/70 to-white",
         },
     ];
 
@@ -82,7 +86,7 @@ function AnalyticsOverview({ analytics }) {
                 return (
                     <div
                         key={card.title}
-                        className="group relative min-h-[170px] bg-white rounded-3xl border border-slate-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-7 overflow-hidden"
+                        className={`group relative min-h-[170px] rounded-3xl border border-t-[3px] bg-gradient-to-br shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden p-7 ${card.cardClasses}`}
                     >
                         <span className="absolute top-5 right-7 inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-400 ring-1 ring-slate-200">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />

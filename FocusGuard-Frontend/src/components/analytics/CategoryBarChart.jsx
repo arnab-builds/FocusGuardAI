@@ -27,14 +27,14 @@ export default function CategoryBarChart({ analytics }) {
   }));
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md">
+    <section className="overflow-hidden rounded-2xl border border-blue-100/50 bg-blue-50/30 p-5 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
           {t("category_usage", "Category Usage")}
         </h2>
 
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           {t(
             "time_spent_per_category",
             "Time spent across different website categories."
@@ -65,7 +65,7 @@ export default function CategoryBarChart({ analytics }) {
               type="number"
               tick={{
                 fontSize: 12,
-                fill: "#64748B",
+                fill: "#334155",
               }}
               axisLine={false}
               tickLine={false}
@@ -77,7 +77,7 @@ export default function CategoryBarChart({ analytics }) {
               width={120}
               tick={{
                 fontSize: 12,
-                fill: "#475569",
+                fill: "#334155",
               }}
               axisLine={false}
               tickLine={false}

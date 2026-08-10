@@ -19,6 +19,7 @@ function DashboardCards({ analytics }) {
                 "organization_users",
                 "Organization users"
             ),
+            cardClasses: "border-indigo-100/50 border-t-indigo-500 from-indigo-50/70 to-white",
             color: "bg-indigo-50 text-indigo-600",
             icon: (
                 <GroupsRoundedIcon fontSize="small" />
@@ -34,6 +35,7 @@ function DashboardCards({ analytics }) {
                 "active_accounts",
                 "Active accounts"
             ),
+            cardClasses: "border-emerald-100/50 border-t-emerald-500 from-emerald-50/70 to-white",
             color: "bg-emerald-50 text-emerald-600",
             icon: (
                 <PersonRoundedIcon fontSize="small" />
@@ -50,6 +52,7 @@ function DashboardCards({ analytics }) {
                 "inactive_accounts",
                 "Inactive accounts"
             ),
+            cardClasses: "border-rose-100/50 border-t-rose-500 from-rose-50/70 to-white",
             color: "bg-rose-50 text-rose-600",
             icon: (
                 <PersonOffRoundedIcon fontSize="small" />
@@ -67,6 +70,7 @@ function DashboardCards({ analytics }) {
                 "overall_score",
                 "Overall score"
             ),
+            cardClasses: "border-amber-100/50 border-t-amber-500 from-amber-50/70 to-white",
             color: "bg-amber-50 text-amber-600",
             icon: (
                 <TrendingUpRoundedIcon fontSize="small" />
@@ -79,7 +83,7 @@ function DashboardCards({ analytics }) {
             {cards.map((card) => (
                 <div
                     key={card.title}
-                    className="rounded-[18px] border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    className={`rounded-[18px] border border-t-[3px] bg-gradient-to-br p-6 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md ${card.cardClasses}`}
                 >
                     <div className="flex items-start justify-between gap-4">
                         <div>

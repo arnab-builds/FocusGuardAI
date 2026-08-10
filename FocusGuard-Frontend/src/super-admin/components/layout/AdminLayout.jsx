@@ -35,7 +35,7 @@ function AdminLayout({ children }) {
     }, []);
 
     return (
-        <div className="flex min-h-screen bg-slate-100">
+        <div className="flex min-h-screen bg-[#F3F7FF]">
             <Sidebar
                 isOpen={isSidebarOpen}
                 onClose={() =>

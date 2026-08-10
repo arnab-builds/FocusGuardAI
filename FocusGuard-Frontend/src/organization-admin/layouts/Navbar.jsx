@@ -240,7 +240,7 @@ function Navbar({ onToggleSidebar }) {
     }
   };
   return (
-  <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-8">
+  <header className="sticky top-0 z-30 border-b border-slate-200 bg-gradient-to-r from-blue-50/70 to-indigo-50/40 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-8">
     <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
       {/* Left Section */}

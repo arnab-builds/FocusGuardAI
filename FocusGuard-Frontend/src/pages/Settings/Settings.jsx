@@ -43,7 +43,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
 
         {/* Header */}
@@ -53,7 +53,7 @@ export default function Settings() {
             {t("settings", "Settings")}
           </h1>
 
-          <p className="mt-2 text-slate-500">
+          <p className="mt-2 text-slate-600">
             {t(
               "manage_account_preferences",
               "Manage your account and application preferences."

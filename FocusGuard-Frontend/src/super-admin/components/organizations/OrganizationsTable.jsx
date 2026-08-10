@@ -52,8 +52,8 @@ function OrganizationsTable({
 
     return (
         <>
-            <div className="bg-gradient-to-b from-white to-slate-50/40 rounded-3xl shadow-sm hover:shadow-lg ring-1 ring-slate-100 border border-blue-50 overflow-hidden transition-all duration-300">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-5 sm:p-6 border-b border-slate-100 bg-white/60">
+            <div className="rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-5 sm:p-6 border-b border-indigo-100 bg-transparent">
                     <div className="relative w-full sm:w-96">
                         <Search
                             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-500"
@@ -109,7 +109,7 @@ function OrganizationsTable({
                         <div className="hidden md:block overflow-x-auto">
                             <table className="w-full border-collapse">
                                 <thead>
-                                    <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500 bg-gradient-to-r from-slate-50 via-blue-50/50 to-slate-50 border-b border-slate-200">
+                                    <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500 bg-indigo-50/50 border-b border-indigo-100">
                                         <th className="p-5">
                                             {t(
                                                 "organization",

@@ -1,10 +1,10 @@
 import { useLanguage } from "../../context/useLanguage";
 
-function StatCard({ title, value, icon, color }) {
+function StatCard({ title, value, icon, color, cardClasses = "border-slate-100/50 border-t-slate-500 from-slate-50/70 to-white" }) {
     const { t } = useLanguage();
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition">
+        <div className={`rounded-2xl shadow-sm p-6 border border-t-[3px] bg-gradient-to-br hover:shadow-md transition ${cardClasses}`}>
             <div className="flex justify-between items-center">
                 <div>
                     <p className="text-gray-500 text-sm">

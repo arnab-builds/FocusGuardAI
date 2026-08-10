@@ -189,19 +189,19 @@ const AICoach = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col py-2 sm:py-4">
-      <div className="flex min-h-[calc(100vh-10rem)] w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex min-h-[calc(100vh-10rem)] w-full flex-col overflow-hidden rounded-2xl border border-indigo-100/50 bg-white shadow-sm">
 
         {/* Header */}
 
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+        <div className="flex items-center justify-between border-b border-indigo-100/50 bg-gradient-to-r from-indigo-50/80 to-white px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-indigo-50 p-2">
-              <FiCpu className="text-indigo-600" />
+            <div className="rounded-xl bg-indigo-100/50 p-2 shadow-sm shadow-indigo-500/10">
+              <FiCpu className="h-5 w-5 text-indigo-600" />
             </div>
 
             <div>
-              <h2 className="text-lg font-semibold text-slate-800">{t("focusguard_ai", "FocusGuard AI")}</h2>
-              <div className="text-xs text-slate-500">{t("productivity_assistant", "Productivity Assistant")}</div>
+              <h2 className="text-lg font-semibold text-slate-900">{t("focusguard_ai", "FocusGuard AI")}</h2>
+              <div className="text-xs text-slate-600">{t("productivity_assistant", "Productivity Assistant")}</div>
             </div>
           </div>
 
@@ -219,7 +219,7 @@ const AICoach = () => {
 
         {/* Chat */}
 
-        <div className="flex-1 overflow-y-auto bg-slate-50 px-4 py-6">
+        <div className="flex-1 overflow-y-auto bg-indigo-50/20 px-4 py-6">
           <div className="mx-auto w-full max-w-4xl flex flex-col gap-4">
 
             {/* Suggestion chips: show only before the first user message */}
@@ -254,10 +254,10 @@ const AICoach = () => {
                 )}
 
                 <div
-                  className={`max-w-[78%] rounded-xl px-4 py-2 ${
+                  className={`max-w-[78%] rounded-xl px-4 py-2 shadow-sm ${
                     msg.sender === "user"
                       ? "rounded-br-md bg-indigo-600 text-white"
-                      : "rounded-bl-md border border-slate-200 bg-white text-slate-800"
+                      : "rounded-bl-md border border-indigo-100/50 bg-white text-slate-800"
                   }`}
                 >
                   <div className="prose prose-sm max-w-none leading-snug">
@@ -272,7 +272,7 @@ const AICoach = () => {
                 <div className="mr-3 mt-1 flex h-8 w-8 items-center justify-center rounded-md bg-indigo-600 text-white">
                   <FiCpu className="text-white" />
                 </div>
-                <div className="rounded-xl rounded-bl-md border bg-white px-4 py-2">
+                <div className="rounded-xl rounded-bl-md border border-indigo-100/50 bg-white px-4 py-2 shadow-sm">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" />
                     <div className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" style={{ animationDelay: ".12s" }} />

@@ -100,7 +100,7 @@ function InvitationsTable({
 
     return (
         <>
-            <div className="bg-white rounded-3xl shadow-sm hover:shadow-md border border-slate-100 overflow-hidden transition-all duration-300">
+            <div className="rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
                 <div className="flex justify-between items-center p-5 sm:p-6 border-b border-slate-100">
                     <div className="relative w-full sm:w-96">
                         <Search
@@ -141,7 +141,7 @@ function InvitationsTable({
                         <div className="hidden md:block overflow-x-auto">
                             <table className="w-full border-collapse">
                                 <thead>
-                                    <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500 bg-gradient-to-r from-slate-50 via-blue-50/50 to-slate-50 border-b border-slate-200">
+                                    <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500 bg-indigo-50/50 border-b border-indigo-100">
                                         <th className="p-5">
                                             {t(
                                                 "organization",

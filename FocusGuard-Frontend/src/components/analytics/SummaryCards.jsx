@@ -62,7 +62,10 @@ export default function SummaryCards({ analytics }) {
         currentLanguageCode
       ),
       icon: <FiClock className="h-6 w-6" />,
-      color: "bg-blue-500",
+      border: "border-t-[3px] border-t-emerald-500",
+      iconBg: "bg-emerald-100/50 text-emerald-600 shadow-sm shadow-emerald-500/10",
+      cardTint: "bg-gradient-to-br from-emerald-50/70 to-white",
+      dividerColor: "border-emerald-100/50",
     },
     {
       title: t("non_productive", "Non Productive"),
@@ -72,7 +75,10 @@ export default function SummaryCards({ analytics }) {
         currentLanguageCode
       ),
       icon: <FiTrendingDown className="h-6 w-6" />,
-      color: "bg-red-500",
+      border: "border-t-[3px] border-t-rose-500",
+      iconBg: "bg-rose-100/50 text-rose-600 shadow-sm shadow-rose-500/10",
+      cardTint: "bg-gradient-to-br from-rose-50/70 to-white",
+      dividerColor: "border-rose-100/50",
     },
     {
       title: t("idle", "Idle"),
@@ -82,7 +88,10 @@ export default function SummaryCards({ analytics }) {
         currentLanguageCode
       ),
       icon: <FiMoon className="h-6 w-6" />,
-      color: "bg-yellow-500",
+      border: "border-t-[3px] border-t-amber-500",
+      iconBg: "bg-amber-100/50 text-amber-600 shadow-sm shadow-amber-500/10",
+      cardTint: "bg-gradient-to-br from-amber-50/70 to-white",
+      dividerColor: "border-amber-100/50",
     },
     {
       title: t("websites", "Websites"),
@@ -90,7 +99,10 @@ export default function SummaryCards({ analytics }) {
         analytics.total_websites_visited
       ),
       icon: <FiGlobe className="h-6 w-6" />,
-      color: "bg-purple-500",
+      border: "border-t-[3px] border-t-cyan-500",
+      iconBg: "bg-cyan-100/50 text-cyan-600 shadow-sm shadow-cyan-500/10",
+      cardTint: "bg-gradient-to-br from-cyan-50/70 to-white",
+      dividerColor: "border-cyan-100/50",
     },
     {
       title: t("tab_switches", "Tab Switches"),
@@ -98,13 +110,19 @@ export default function SummaryCards({ analytics }) {
         analytics.total_tab_switches
       ),
       icon: <FiRepeat className="h-6 w-6" />,
-      color: "bg-orange-500",
+      border: "border-t-[3px] border-t-indigo-500",
+      iconBg: "bg-indigo-100/50 text-indigo-600 shadow-sm shadow-indigo-500/10",
+      cardTint: "bg-gradient-to-br from-indigo-50/70 to-white",
+      dividerColor: "border-indigo-100/50",
     },
     {
       title: t("focus_score", "Focus Score"),
       value: `${numberFormatter.format(focusScore)}%`,
       icon: <FiTarget className="h-6 w-6" />,
-      color: "bg-green-500",
+      border: "border-t-[3px] border-t-blue-500",
+      iconBg: "bg-blue-100/50 text-blue-600 shadow-sm shadow-blue-500/10",
+      cardTint: "bg-gradient-to-br from-blue-50/70 to-white",
+      dividerColor: "border-blue-100/50",
     },
   ];
 
@@ -113,11 +131,11 @@ export default function SummaryCards({ analytics }) {
       {cards.map((card) => (
         <div
           key={card.title}
-          className="flex min-h-[170px] flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+          className={`flex min-h-[170px] flex-col justify-between rounded-2xl border border-slate-200 p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${card.cardTint} ${card.border}`}
         >
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">
                 {card.title}
               </p>
 
@@ -127,14 +145,14 @@ export default function SummaryCards({ analytics }) {
             </div>
 
             <div
-              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-md ${card.color}`}
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 ${card.iconBg}`}
             >
               {card.icon}
             </div>
           </div>
 
-          <div className="mt-5 border-t border-slate-100 pt-4">
-            <span className="text-xs font-medium text-slate-500">
+          <div className={`mt-5 border-t pt-4 ${card.dividerColor}`}>
+            <span className="text-xs font-medium text-slate-600">
               {t("summary", "Summary")}
             </span>
           </div>

@@ -8,13 +8,13 @@ export default function ExtensionCard() {
   const { t } = useLanguage();
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
+    <section className="rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
 
       {/* Header */}
 
       <div className="mb-6 flex items-center gap-4">
 
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-md">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-100/50 text-indigo-600 shadow-sm shadow-indigo-500/10">
 
           <FiMonitor size={28} />
 
@@ -26,7 +26,7 @@ export default function ExtensionCard() {
             {t("browser_extension", "Browser Extension")}
           </h2>
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-600">
             {t(
               "browser_extension_status",
               "Extension connection status"
@@ -55,7 +55,7 @@ export default function ExtensionCard() {
               {t("connected", "Connected")}
             </p>
 
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-600">
               {t(
                 "chrome_extension_active",
                 "Chrome Extension Active"

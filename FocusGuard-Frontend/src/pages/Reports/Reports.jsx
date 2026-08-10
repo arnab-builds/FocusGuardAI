@@ -94,7 +94,7 @@ export default function Reports() {
             {t("reports", "Reports")}
           </h1>
 
-          <p className="mt-2 text-sm text-slate-500 sm:text-base">
+          <p className="mt-2 text-sm text-slate-600 sm:text-base">
             {t(
               "generate_review_reports",
               "Generate and review your productivity reports."
@@ -130,14 +130,14 @@ export default function Reports() {
         </section>
 
         {/* Export */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md">
+        <section className="rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
 
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
+            <h2 className="text-xl font-bold text-indigo-900 sm:text-2xl">
               {t("export_report", "Export Report")}
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-indigo-600/80">
               {t(
                 "download_report_formats",
                 "Download the generated report in your preferred format."

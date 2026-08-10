@@ -30,10 +30,10 @@ function EmployeeTable({
     return (
         <div className="w-full">
             {/* Desktop / tablet: table layout */}
-            <div className="hidden md:block bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="hidden md:block rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-slate-50">
+                        <thead className="bg-indigo-50/50">
                             <tr>
                                 <th className="px-6 py-5 text-left text-base font-bold text-slate-700">
                                     {t(
@@ -218,7 +218,7 @@ function EmployeeTable({
                     return (
                         <div
                             key={employee.id}
-                            className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col gap-4"
+                            className="rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-sm p-5 flex flex-col gap-4"
                         >
                             <div className="flex items-center gap-4">
                                 <div className="h-14 w-14 shrink-0 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center font-bold text-lg text-indigo-700 ring-1 ring-indigo-200">
