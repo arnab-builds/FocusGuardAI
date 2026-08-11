@@ -83,20 +83,20 @@ function Notifications() {
 
   if (loading || loadedLanguageCode !== currentLanguageCode) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
         {t("loading", "Loading...")}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 p-10">
-      <h1 className="text-4xl font-bold mb-8">
+    <div className="min-h-screen bg-slate-100 p-10 dark:bg-slate-900">
+      <h1 className="mb-8 text-4xl font-bold text-slate-900 dark:text-slate-100">
         {t("notifications", "Notifications")}
       </h1>
 
       {notifications.length === 0 ? (
-        <div className="bg-white rounded-xl shadow p-6">
+        <div className="rounded-xl bg-white p-6 text-slate-700 shadow dark:bg-slate-800 dark:text-slate-300">
           {t(
             "no_notifications_available",
             "No notifications available."
@@ -106,7 +106,7 @@ function Notifications() {
         notifications.map((notification) => (
           <div
             key={notification.id}
-            className={`bg-white rounded-xl shadow p-6 mb-5 border-l-4 ${
+            className={`mb-5 rounded-xl border-l-4 bg-white p-6 shadow dark:bg-slate-800 ${
               notification.is_read
                 ? "border-gray-300"
                 : "border-blue-600"
@@ -114,20 +114,20 @@ function Notifications() {
           >
             <div className="flex justify-between items-start gap-4">
               <div>
-                <h2 className="text-xl font-bold">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                   {notification.title}
                 </h2>
 
-                <p className="mt-2 text-gray-700">
+                <p className="mt-2 text-gray-700 dark:text-slate-300">
                   {notification.message}
                 </p>
 
                 <div className="mt-4 flex gap-3">
-                  <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                  <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
                     {notification.notification_type}
                   </span>
 
-                  <span className="text-gray-500 text-sm">
+                  <span className="text-sm text-gray-500 dark:text-slate-400">
                     {new Date(
                       notification.created_at
                     ).toLocaleString(currentLanguageCode || undefined)}
@@ -147,7 +147,7 @@ function Notifications() {
 
                 <button
                   onClick={() => handleDelete(notification.id)}
-                  className="p-2 rounded-full text-red-600 hover:bg-red-100 transition"
+                    className="rounded-full p-2 text-red-600 transition hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-950/50"
                   title={t(
                     "delete_notification",
                     "Delete Notification"
