@@ -90,11 +90,11 @@ export default function Reports() {
 
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 sm:text-4xl">
             {t("reports", "Reports")}
           </h1>
 
-          <p className="mt-2 text-sm text-slate-600 sm:text-base">
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
             {t(
               "generate_review_reports",
               "Generate and review your productivity reports."
@@ -107,8 +107,8 @@ export default function Reports() {
 
         {/* Loading */}
         {loading && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <p className="text-lg font-medium text-slate-600">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-center shadow-sm">
+            <p className="text-lg font-medium text-slate-600 dark:text-slate-400">
               {t(
                 "generating_report",
                 "Generating report..."
@@ -130,14 +130,14 @@ export default function Reports() {
         </section>
 
         {/* Export */}
-        <section className="rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
+        <section className="rounded-2xl border border-indigo-100/50 dark:border-slate-700/50 bg-gradient-to-br from-indigo-50/70 to-white dark:from-indigo-950/30 dark:to-[#111827] p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
 
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-indigo-900 sm:text-2xl">
+            <h2 className="text-xl font-bold text-indigo-900 dark:text-indigo-300 sm:text-2xl">
               {t("export_report", "Export Report")}
             </h2>
 
-            <p className="mt-1 text-sm text-indigo-600/80">
+            <p className="mt-1 text-sm text-indigo-600/80 dark:text-indigo-400">
               {t(
                 "download_report_formats",
                 "Download the generated report in your preferred format."
@@ -176,10 +176,10 @@ export default function Reports() {
           </div>
 
           {report && (
-            <div className="mt-5 rounded-xl bg-slate-50 px-4 py-3">
-              <p className="text-sm text-slate-600">
+            <div className="mt-5 rounded-xl bg-slate-50 dark:bg-slate-800 px-4 py-3">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 {t("current_report", "Current Report")}:
-                <span className="ml-2 font-semibold capitalize text-slate-900">
+                <span className="ml-2 font-semibold capitalize text-slate-900 dark:text-slate-50">
                   {reportType}
                 </span>
               </p>

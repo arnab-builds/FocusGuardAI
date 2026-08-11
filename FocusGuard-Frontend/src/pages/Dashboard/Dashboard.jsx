@@ -101,7 +101,7 @@ function Dashboard() {
 
   if (!profile || !analytics) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center rounded-2xl bg-white text-lg font-medium text-slate-600 shadow-sm">
+      <div className="flex min-h-[60vh] items-center justify-center rounded-2xl bg-white dark:bg-slate-800 text-lg font-medium text-slate-600 dark:text-slate-400 shadow-sm">
         {t("loading", "Loading...")}
       </div>
     );

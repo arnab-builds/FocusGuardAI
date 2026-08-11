@@ -63,9 +63,9 @@ export default function SummaryCards({ analytics }) {
       ),
       icon: <FiClock className="h-6 w-6" />,
       border: "border-t-[3px] border-t-emerald-500",
-      iconBg: "bg-emerald-100/50 text-emerald-600 shadow-sm shadow-emerald-500/10",
-      cardTint: "bg-gradient-to-br from-emerald-50/70 to-white",
-      dividerColor: "border-emerald-100/50",
+      iconBg: "bg-emerald-100/50 text-emerald-600 shadow-sm shadow-emerald-500/10 dark:bg-emerald-900/40 dark:text-emerald-400",
+      cardTint: "bg-gradient-to-br from-emerald-50/70 to-white dark:from-emerald-900/20 dark:to-[#111827]",
+      dividerColor: "border-emerald-100/50 dark:border-emerald-900/30",
     },
     {
       title: t("non_productive", "Non Productive"),
@@ -76,9 +76,9 @@ export default function SummaryCards({ analytics }) {
       ),
       icon: <FiTrendingDown className="h-6 w-6" />,
       border: "border-t-[3px] border-t-rose-500",
-      iconBg: "bg-rose-100/50 text-rose-600 shadow-sm shadow-rose-500/10",
-      cardTint: "bg-gradient-to-br from-rose-50/70 to-white",
-      dividerColor: "border-rose-100/50",
+      iconBg: "bg-rose-100/50 text-rose-600 shadow-sm shadow-rose-500/10 dark:bg-rose-900/40 dark:text-rose-400",
+      cardTint: "bg-gradient-to-br from-rose-50/70 to-white dark:from-rose-900/20 dark:to-[#111827]",
+      dividerColor: "border-rose-100/50 dark:border-rose-900/30",
     },
     {
       title: t("idle", "Idle"),
@@ -89,9 +89,9 @@ export default function SummaryCards({ analytics }) {
       ),
       icon: <FiMoon className="h-6 w-6" />,
       border: "border-t-[3px] border-t-amber-500",
-      iconBg: "bg-amber-100/50 text-amber-600 shadow-sm shadow-amber-500/10",
-      cardTint: "bg-gradient-to-br from-amber-50/70 to-white",
-      dividerColor: "border-amber-100/50",
+      iconBg: "bg-amber-100/50 text-amber-600 shadow-sm shadow-amber-500/10 dark:bg-amber-900/40 dark:text-amber-400",
+      cardTint: "bg-gradient-to-br from-amber-50/70 to-white dark:from-amber-900/20 dark:to-[#111827]",
+      dividerColor: "border-amber-100/50 dark:border-amber-900/30",
     },
     {
       title: t("websites", "Websites"),
@@ -100,9 +100,9 @@ export default function SummaryCards({ analytics }) {
       ),
       icon: <FiGlobe className="h-6 w-6" />,
       border: "border-t-[3px] border-t-cyan-500",
-      iconBg: "bg-cyan-100/50 text-cyan-600 shadow-sm shadow-cyan-500/10",
-      cardTint: "bg-gradient-to-br from-cyan-50/70 to-white",
-      dividerColor: "border-cyan-100/50",
+      iconBg: "bg-cyan-100/50 text-cyan-600 shadow-sm shadow-cyan-500/10 dark:bg-cyan-900/40 dark:text-cyan-400",
+      cardTint: "bg-gradient-to-br from-cyan-50/70 to-white dark:from-cyan-900/20 dark:to-[#111827]",
+      dividerColor: "border-cyan-100/50 dark:border-cyan-900/30",
     },
     {
       title: t("tab_switches", "Tab Switches"),
@@ -111,18 +111,18 @@ export default function SummaryCards({ analytics }) {
       ),
       icon: <FiRepeat className="h-6 w-6" />,
       border: "border-t-[3px] border-t-indigo-500",
-      iconBg: "bg-indigo-100/50 text-indigo-600 shadow-sm shadow-indigo-500/10",
-      cardTint: "bg-gradient-to-br from-indigo-50/70 to-white",
-      dividerColor: "border-indigo-100/50",
+      iconBg: "bg-indigo-100/50 text-indigo-600 shadow-sm shadow-indigo-500/10 dark:bg-indigo-900/40 dark:text-indigo-400",
+      cardTint: "bg-gradient-to-br from-indigo-50/70 to-white dark:from-indigo-900/20 dark:to-[#111827]",
+      dividerColor: "border-indigo-100/50 dark:border-indigo-900/30",
     },
     {
       title: t("focus_score", "Focus Score"),
       value: `${numberFormatter.format(focusScore)}%`,
       icon: <FiTarget className="h-6 w-6" />,
       border: "border-t-[3px] border-t-blue-500",
-      iconBg: "bg-blue-100/50 text-blue-600 shadow-sm shadow-blue-500/10",
-      cardTint: "bg-gradient-to-br from-blue-50/70 to-white",
-      dividerColor: "border-blue-100/50",
+      iconBg: "bg-blue-100/50 text-blue-600 shadow-sm shadow-blue-500/10 dark:bg-blue-900/40 dark:text-blue-400",
+      cardTint: "bg-gradient-to-br from-blue-50/70 to-white dark:from-blue-900/20 dark:to-[#111827]",
+      dividerColor: "border-blue-100/50 dark:border-blue-900/30",
     },
   ];
 
@@ -131,15 +131,15 @@ export default function SummaryCards({ analytics }) {
       {cards.map((card) => (
         <div
           key={card.title}
-          className={`flex min-h-[170px] flex-col justify-between rounded-2xl border border-slate-200 p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${card.cardTint} ${card.border}`}
+          className={`flex min-h-[170px] flex-col justify-between rounded-2xl border border-slate-200 dark:border-slate-700/50 p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${card.cardTint} ${card.border}`}
         >
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                 {card.title}
               </p>
 
-              <h2 className="mt-3 break-words text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
+              <h2 className="mt-3 break-words text-2xl font-bold leading-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
                 {card.value}
               </h2>
             </div>
@@ -152,7 +152,7 @@ export default function SummaryCards({ analytics }) {
           </div>
 
           <div className={`mt-5 border-t pt-4 ${card.dividerColor}`}>
-            <span className="text-xs font-medium text-slate-600">
+            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
               {t("summary", "Summary")}
             </span>
           </div>

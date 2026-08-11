@@ -7,6 +7,7 @@ import {
   Legend,
 } from "recharts";
 import { useLanguage } from "../../context/useLanguage";
+import { useTheme } from "../../context/ThemeContext";
 
 const parseTime = (time) => {
   if (!time) return 0;
@@ -24,6 +25,7 @@ const COLORS = [
 
 export default function ProductivityPieChart({ analytics }) {
   const { t } = useLanguage();
+  const { theme } = useTheme();
 
   const data = [
     {
@@ -44,15 +46,27 @@ export default function ProductivityPieChart({ analytics }) {
     },
   ];
 
+  const tooltipStyle = theme === 'dark' ? {
+    backgroundColor: '#1E293B',
+    borderRadius: "12px",
+    border: "1px solid #334155",
+    color: '#F8FAFC',
+    boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+  } : {
+    borderRadius: "12px",
+    border: "1px solid #E2E8F0",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+  };
+
   return (
-    <section className="overflow-hidden rounded-2xl border border-blue-100/50 bg-blue-50/30 p-5 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
+    <section className="overflow-hidden rounded-2xl border border-blue-100/50 dark:border-slate-700 bg-blue-50/30 dark:bg-slate-800 p-5 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-50 sm:text-2xl">
           {t("productivity_breakdown", "Productivity Breakdown")}
         </h2>
 
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           {t(
             "visual_distribution_of_productivity",
             "Visual distribution of your productivity."
@@ -81,7 +95,7 @@ export default function ProductivityPieChart({ analytics }) {
               ))}
             </Pie>
 
-            <Tooltip />
+            <Tooltip contentStyle={tooltipStyle} />
 
             <Legend
               verticalAlign="bottom"
@@ -90,6 +104,7 @@ export default function ProductivityPieChart({ analytics }) {
               wrapperStyle={{
                 paddingTop: 20,
                 fontSize: 13,
+                color: theme === 'dark' ? '#F8FAFC' : '#334155',
               }}
             />
           </PieChart>

@@ -32,9 +32,9 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-100">
-        <div className="rounded-2xl border border-slate-200 bg-white px-10 py-8 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-700">
+      <div className="flex min-h-screen items-center justify-center bg-slate-100 dark:bg-slate-900/50">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-10 py-8 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-700 dark:text-slate-300">
             {t("loading_settings", "Loading Settings...")}
           </h2>
         </div>
@@ -49,11 +49,11 @@ export default function Settings() {
         {/* Header */}
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
             {t("settings", "Settings")}
           </h1>
 
-          <p className="mt-2 text-slate-600">
+          <p className="mt-2 text-slate-600 dark:text-slate-400">
             {t(
               "manage_account_preferences",
               "Manage your account and application preferences."

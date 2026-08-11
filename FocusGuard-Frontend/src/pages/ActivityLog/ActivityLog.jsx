@@ -88,11 +88,11 @@ export default function ActivityLog() {
 
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 sm:text-4xl">
             {t("activity_history", "Activity History")}
           </h1>
 
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
             {t(
               "browse_website_activity",
               "Browse your website activity."
@@ -102,22 +102,22 @@ export default function ActivityLog() {
 
         {/* Search */}
         <div className="relative">
-          <FiSearch className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+          <FiSearch className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
 
           <input
             type="text"
             placeholder={t("search_website", "Search website...")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-12 pr-4 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-3 pl-12 pr-4 text-slate-900 dark:text-slate-200 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         {/* Activity List */}
-        <section className="overflow-hidden rounded-2xl border border-cyan-100/50 bg-gradient-to-br from-cyan-50/30 to-white shadow-sm">
+        <section className="overflow-hidden rounded-2xl border border-cyan-100/50 dark:border-slate-700/50 bg-gradient-to-br from-cyan-50/30 to-white dark:from-slate-900/50 dark:to-slate-800/50 shadow-sm">
 
           {/* Desktop Header */}
-          <div className="hidden border-b border-cyan-100/50 bg-cyan-50/50 px-6 py-4 text-sm font-semibold text-cyan-800 lg:grid lg:grid-cols-5">
+          <div className="hidden border-b border-cyan-100/50 dark:border-slate-700/50 bg-cyan-50/50 dark:bg-slate-800 px-6 py-4 text-sm font-semibold text-cyan-800 dark:text-cyan-400 lg:grid lg:grid-cols-5">
             <div>{t("website", "Website")}</div>
             <div>{t("category", "Category")}</div>
             <div>{t("duration", "Duration")}</div>
@@ -126,50 +126,50 @@ export default function ActivityLog() {
           </div>
 
           {loading ? (
-            <div className="p-12 text-center text-slate-500">
+            <div className="p-12 text-center text-slate-500 dark:text-slate-400">
               {t("loading", "Loading...")}
             </div>
-          ) : (
+            ) : (
             filtered.map((activity) => {
-              let rowHover = "hover:bg-slate-50";
-              if (activity.productivity_type === "PRODUCTIVE") rowHover = "hover:bg-emerald-50/50";
-              else if (activity.productivity_type === "NON_PRODUCTIVE") rowHover = "hover:bg-rose-50/50";
-              else if (activity.productivity_type === "NEUTRAL") rowHover = "hover:bg-cyan-50/30";
+              let rowHover = "hover:bg-slate-50 dark:hover:bg-slate-800/80";
+              if (activity.productivity_type === "PRODUCTIVE") rowHover = "hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20";
+              else if (activity.productivity_type === "NON_PRODUCTIVE") rowHover = "hover:bg-rose-50/50 dark:hover:bg-rose-950/20";
+              else if (activity.productivity_type === "NEUTRAL") rowHover = "hover:bg-cyan-50/30 dark:hover:bg-cyan-950/20";
 
               return (
               <div
                 key={activity.id}
-                className={`border-b border-slate-100 p-5 transition-all duration-200 ${rowHover}`}
+                className={`border-b border-slate-100 dark:border-slate-700/50 p-5 transition-all duration-200 ${rowHover}`}
               >
                 <div className="grid gap-4 lg:grid-cols-5 lg:items-center">
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 font-semibold">
-                      <FiMonitor className="shrink-0" />
+                      <FiMonitor className="shrink-0 text-slate-700 dark:text-slate-300" />
 
                       <a
                         href={activity.website_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="truncate text-indigo-600 hover:underline"
+                        className="truncate text-indigo-600 dark:text-indigo-400 hover:underline"
                       >
                         {activity.website_name}
                       </a>
                     </div>
 
-                    <p className="mt-1 truncate text-xs text-slate-600">
+                    <p className="mt-1 truncate text-xs text-slate-600 dark:text-slate-400">
                       {activity.tab_title}
                     </p>
                   </div>
 
-                  <div className="text-sm">
+                  <div className="text-sm text-slate-700 dark:text-slate-300">
                     <span className="font-medium lg:hidden">
                       {t("category", "Category")}:{" "}
                     </span>
                     {activity.category}
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                     <FiClock />
 
                     {formatDuration(
@@ -181,24 +181,24 @@ export default function ActivityLog() {
 
                   <div>
                     {activity.productivity_type === "PRODUCTIVE" ? (
-                      <span className="inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+                      <span className="inline-flex items-center gap-2 rounded-full bg-green-100 dark:bg-green-900/40 px-3 py-1 text-sm font-medium text-green-700 dark:text-green-400">
                         <FiCheckCircle />
                         {t("productive", "Productive")}
                       </span>
                     ) : activity.productivity_type === "NEUTRAL" ? (
-                      <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+                      <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800/80 px-3 py-1 text-sm font-medium text-slate-700 dark:text-slate-300">
                         <FiClock />
                         {t("neutral", "Neutral")}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
+                      <span className="inline-flex items-center gap-2 rounded-full bg-red-100 dark:bg-red-900/40 px-3 py-1 text-sm font-medium text-red-700 dark:text-red-400">
                         <FiXCircle />
                         {t("non_productive", "Non Productive")}
                       </span>
                     )}
                   </div>
 
-                  <div className="text-sm text-slate-600 font-medium">
+                  <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
                     {formatDate(
                       activity.start_time,
                       currentLanguageCode
@@ -218,19 +218,19 @@ export default function ActivityLog() {
           <button
             disabled={!pagination.previous}
             onClick={() => setPage((p) => p - 1)}
-            className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-medium text-white transition hover:bg-indigo-700 disabled:bg-slate-300 sm:w-auto"
+            className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-medium text-white transition hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-700/50 dark:disabled:text-slate-500 sm:w-auto"
           >
             {t("previous", "Previous")}
           </button>
 
-          <span className="font-semibold text-slate-700">
+          <span className="font-semibold text-slate-700 dark:text-slate-300">
             {t("page", "Page")} {numberFormatter.format(page)}
           </span>
 
           <button
             disabled={!pagination.next}
             onClick={() => setPage((p) => p + 1)}
-            className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-medium text-white transition hover:bg-indigo-700 disabled:bg-slate-300 sm:w-auto"
+            className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-medium text-white transition hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-700/50 dark:disabled:text-slate-500 sm:w-auto"
           >
             {t("next", "Next")}
           </button>

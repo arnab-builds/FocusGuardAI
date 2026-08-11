@@ -17,8 +17,8 @@ export default function ReportCards({ onGenerate }) {
       ),
       type: "daily",
       icon: <FiCalendar className="h-7 w-7" />,
-      iconBg: "bg-blue-100/50 text-blue-600 shadow-sm shadow-blue-500/10",
-      cardTint: "bg-gradient-to-br from-blue-50/70 to-white border-blue-100/50 border-t-[3px] border-t-blue-500",
+      iconBg: "bg-blue-100/50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 shadow-sm shadow-blue-500/10",
+      cardTint: "bg-gradient-to-br from-blue-50/70 to-white dark:from-blue-950/30 dark:to-[#111827] border-blue-100/50 dark:border-slate-700/50 border-t-[3px] border-t-blue-500",
     },
     {
       title: t("weekly_report", "Weekly Report"),
@@ -28,8 +28,8 @@ export default function ReportCards({ onGenerate }) {
       ),
       type: "weekly",
       icon: <FiBarChart2 className="h-7 w-7" />,
-      iconBg: "bg-indigo-100/50 text-indigo-600 shadow-sm shadow-indigo-500/10",
-      cardTint: "bg-gradient-to-br from-indigo-50/70 to-white border-indigo-100/50 border-t-[3px] border-t-indigo-500",
+      iconBg: "bg-indigo-100/50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 shadow-sm shadow-indigo-500/10",
+      cardTint: "bg-gradient-to-br from-indigo-50/70 to-white dark:from-indigo-950/30 dark:to-[#111827] border-indigo-100/50 dark:border-slate-700/50 border-t-[3px] border-t-indigo-500",
     },
     {
       title: t("monthly_report", "Monthly Report"),
@@ -39,8 +39,8 @@ export default function ReportCards({ onGenerate }) {
       ),
       type: "monthly",
       icon: <FiTrendingUp className="h-7 w-7" />,
-      iconBg: "bg-cyan-100/50 text-cyan-600 shadow-sm shadow-cyan-500/10",
-      cardTint: "bg-gradient-to-br from-cyan-50/70 to-white border-cyan-100/50 border-t-[3px] border-t-cyan-500",
+      iconBg: "bg-cyan-100/50 dark:bg-cyan-900/40 text-cyan-600 dark:text-cyan-400 shadow-sm shadow-cyan-500/10",
+      cardTint: "bg-gradient-to-br from-cyan-50/70 to-white dark:from-cyan-950/30 dark:to-[#111827] border-cyan-100/50 dark:border-slate-700/50 border-t-[3px] border-t-cyan-500",
     },
   ];
 
@@ -57,11 +57,11 @@ export default function ReportCards({ onGenerate }) {
             {report.icon}
           </div>
 
-          <h2 className="mt-5 text-xl font-bold text-slate-900">
+          <h2 className="mt-5 text-xl font-bold text-slate-900 dark:text-slate-50">
             {report.title}
           </h2>
 
-          <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">
+          <p className="mt-2 flex-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
             {report.description}
           </p>
 

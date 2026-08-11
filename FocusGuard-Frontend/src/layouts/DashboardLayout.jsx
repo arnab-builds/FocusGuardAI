@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar";
 import TopNavbar from "./TopNavbar";
 import { getProfile } from "../services/profileService";
 import { getAnalytics } from "../services/analyticsService";
+import { ThemeProvider, useTheme } from "../context/ThemeContext";
 
 const getTodayInputValue = () => {
   const today = new Date();
@@ -13,7 +14,7 @@ const getTodayInputValue = () => {
   return localDate.toISOString().slice(0, 10);
 };
 
-export default function DashboardLayout() {
+function DashboardLayoutContent() {
   const [selectedDate, setSelectedDate] = useState(getTodayInputValue());
 
   const [dashboardHeader, setDashboardHeader] = useState({
@@ -21,22 +22,18 @@ export default function DashboardLayout() {
     analytics: null,
   });
 
-  // Sidebar state (closed by default, initialized based on screen size)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 768px)");
-
     setIsSidebarOpen(mql.matches);
-
     const handler = (e) => setIsSidebarOpen(e.matches);
-
     if (mql.addEventListener) {
       mql.addEventListener("change", handler);
     } else {
       mql.addListener(handler);
     }
-
     return () => {
       if (mql.removeEventListener) {
         mql.removeEventListener("change", handler);
@@ -53,16 +50,11 @@ export default function DashboardLayout() {
           getProfile(),
           getAnalytics(selectedDate),
         ]);
-
-        setDashboardHeader({
-          profile,
-          analytics,
-        });
+        setDashboardHeader({ profile, analytics });
       } catch (error) {
         console.error("Header Error:", error);
       }
     };
-
     loadHeader();
   }, [selectedDate]);
 
@@ -77,27 +69,32 @@ export default function DashboardLayout() {
   );
 
   return (
-    <div className="flex min-h-screen bg-[#F3F7FF]">
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-      />
-
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden transition-all duration-300 md:ml-64">
-        <TopNavbar
-          profile={dashboardHeader.profile}
-          analytics={dashboardHeader.analytics}
-          selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
-          onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
-        />
-
-        <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 sm:px-6 md:px-8 lg:px-10 xl:px-12">
-          <div className="mx-auto w-full max-w-screen-2xl">
-            <Outlet context={outletContext} />
-          </div>
-        </main>
+    <div className={theme === "dark" ? "dark" : ""}>
+      <div className="flex min-h-screen bg-[#F3F7FF] dark:bg-[#0B1120] text-slate-900 dark:text-slate-50 selection:bg-indigo-500/30">
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden transition-all duration-300 md:ml-64">
+          <TopNavbar
+            profile={dashboardHeader.profile}
+            analytics={dashboardHeader.analytics}
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+            onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+          />
+          <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 sm:px-6 md:px-8 lg:px-10 xl:px-12">
+            <div className="mx-auto w-full max-w-screen-2xl">
+              <Outlet context={outletContext} />
+            </div>
+          </main>
+        </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardLayout() {
+  return (
+    <ThemeProvider>
+      <DashboardLayoutContent />
+    </ThemeProvider>
   );
 }  

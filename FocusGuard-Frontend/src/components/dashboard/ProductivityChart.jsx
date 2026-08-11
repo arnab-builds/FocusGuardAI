@@ -9,6 +9,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useLanguage } from "../../context/useLanguage";
+import { useTheme } from "../../context/ThemeContext";
 
 const getWeekDates = (selectedDate) => {
   const endDate = new Date(`${selectedDate}T12:00:00`);
@@ -36,6 +37,7 @@ export default function ProductivityChart({
   selectedDate,
 }) {
   const { currentLanguageCode, t } = useLanguage();
+  const { theme } = useTheme();
 
   const numberFormatter = useMemo(
     () => new Intl.NumberFormat(currentLanguageCode || undefined),
@@ -97,27 +99,41 @@ export default function ProductivityChart({
     [numberFormatter, t]
   );
 
+  const tickFill = theme === 'dark' ? '#94A3B8' : '#334155';
+  const gridStroke = theme === 'dark' ? '#334155' : '#E2E8F0';
+  const tooltipStyle = theme === 'dark' ? {
+    backgroundColor: '#1E293B',
+    borderRadius: "12px",
+    border: "1px solid #334155",
+    color: '#F8FAFC',
+    boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+  } : {
+    borderRadius: "12px",
+    border: "1px solid #E2E8F0",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+  };
+
   return (
-    <section className="overflow-hidden rounded-2xl border border-blue-100/50 bg-blue-50/30 p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-[2px]">
+    <section className="overflow-hidden rounded-2xl border border-blue-100/50 dark:border-slate-700 bg-blue-50/30 dark:bg-slate-800 p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-[2px]">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600">
+          <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
             {t("productivity_trend", "Productivity Trend")}
           </p>
 
-          <h2 className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">
+          <h2 className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50 sm:text-2xl">
             {t("weekly_trend", "Weekly Trend")}
           </h2>
         </div>
 
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100/50 text-indigo-600 shadow-sm shadow-indigo-500/10 transition-colors duration-200 hover:bg-indigo-100">
-          <FiBarChart2 className="h-6 w-6 text-slate-700" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100/50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 shadow-sm shadow-indigo-500/10 transition-colors duration-200 hover:bg-indigo-100 dark:hover:bg-indigo-900/60">
+          <FiBarChart2 className="h-6 w-6 text-slate-700 dark:text-indigo-400" />
         </div>
       </div>
 
       <div className="h-[300px] sm:h-[360px] lg:h-[420px]">
         {!hasTrendData ? (
-          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center text-sm text-slate-600">
+          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 px-6 text-center text-sm text-slate-600 dark:text-slate-400">
             {t(
               "no_productivity_data_for_period",
               "No productivity data available for this period."
@@ -138,7 +154,7 @@ export default function ProductivityChart({
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="#E2E8F0"
+                stroke={gridStroke}
               />
 
               <XAxis
@@ -147,18 +163,13 @@ export default function ProductivityChart({
                 axisLine={false}
                 tick={{
                   fontSize: 12,
-                  fill: "#334155",
+                  fill: tickFill,
                 }}
               />
 
               <Tooltip
                 formatter={formatTooltip}
-                contentStyle={{
-                  borderRadius: "12px",
-                  border: "1px solid #E2E8F0",
-                  boxShadow:
-                    "0 10px 25px rgba(0,0,0,0.08)",
-                }}
+                contentStyle={tooltipStyle}
               />
 
               <Bar

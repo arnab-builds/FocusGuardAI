@@ -40,7 +40,7 @@ export default function Analytics() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center rounded-2xl bg-white text-lg font-medium text-slate-600 shadow-sm">
+      <div className="flex min-h-[60vh] items-center justify-center rounded-2xl bg-white dark:bg-slate-800 text-lg font-medium text-slate-600 dark:text-slate-400 shadow-sm">
         {t("loading_analytics", "Loading Analytics...")}
       </div>
     );
@@ -52,11 +52,11 @@ export default function Analytics() {
 
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 sm:text-4xl">
             {t("analytics", "Analytics")}
           </h1>
 
-          <p className="mt-2 text-sm text-slate-500 sm:text-base">
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 sm:text-base">
             {t(
               "detailed_productivity_insights",
               "Detailed productivity insights."

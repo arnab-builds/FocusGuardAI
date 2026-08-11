@@ -139,13 +139,13 @@ export default function TopNavbar({
   }, [currentLanguageCode]);
 
   return (
-    <header className="border-b border-indigo-100 bg-gradient-to-r from-blue-50 to-indigo-50/80 px-4 py-4 sm:px-8 sm:py-5 shadow-sm">
+    <header className="border-b border-indigo-100 dark:border-slate-800 bg-gradient-to-r from-blue-50 to-indigo-50/80 dark:bg-none dark:bg-[#0B1120] px-4 py-4 sm:px-8 sm:py-5 shadow-sm">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex flex-col gap-4 min-w-0">
           <div className="flex items-start gap-3">
             <button
               onClick={() => onToggleSidebar?.()}
-              className="inline-flex items-center rounded-md bg-slate-50 p-2 text-slate-700 hover:bg-slate-100 md:hidden"
+              className="inline-flex items-center rounded-md bg-slate-50 dark:bg-slate-800 p-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 md:hidden"
               aria-label="Open menu"
             >
               <svg
@@ -165,13 +165,13 @@ export default function TopNavbar({
             </button>
 
             <div className="min-w-0">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-900">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-900 dark:text-slate-50">
                 {greeting}
               </p>
             </div>
           </div>
 
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
             {formatSelectedDate(
               selectedDate,
               currentLanguageCode || undefined
@@ -180,7 +180,7 @@ export default function TopNavbar({
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-          <label className="relative flex h-12 min-w-[190px] items-center rounded-2xl border border-slate-200 bg-white px-4 shadow-sm transition hover:shadow-md focus-within:border-indigo-500">
+          <label className="relative flex h-12 min-w-[190px] items-center rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 shadow-sm transition hover:shadow-md focus-within:border-indigo-500 dark:focus-within:border-indigo-400">
             <span className="sr-only">
               {t("preferred_language", "Preferred Language")}
             </span>
@@ -193,11 +193,11 @@ export default function TopNavbar({
               }
               onChange={handleLanguageChange}
               disabled={languageSaving || !languages.length}
-              className="min-w-0 w-full bg-transparent text-sm font-medium outline-none disabled:cursor-wait"
+              className="min-w-0 w-full bg-transparent text-sm font-medium outline-none disabled:cursor-wait text-slate-900 dark:text-slate-100"
               aria-label={t("preferred_language", "Preferred Language")}
             >
               {languages.map((language) => (
-                <option key={language.id} value={language.id}>
+                <option key={language.id} value={language.id} className="dark:bg-slate-800 dark:text-slate-100">
                   {language.native_name || language.language_name}
                 </option>
               ))}
@@ -208,14 +208,14 @@ export default function TopNavbar({
             type="date"
             value={selectedDate || ""}
             onChange={(e) => onDateChange?.(e.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm outline-none transition hover:shadow-md focus:border-indigo-500 sm:w-auto"
+            className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-4 py-3 shadow-sm outline-none transition hover:shadow-md focus:border-indigo-500 dark:focus:border-indigo-400 sm:w-auto"
           />
 
-          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-100 px-6 py-3 shadow-sm">
-            <p className="text-xs font-medium text-emerald-700">
+          <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/30 dark:to-emerald-800/20 px-6 py-3 shadow-sm">
+            <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
               {t("productivity_score", "Productivity Score")}
             </p>
-            <p className="text-xl font-bold text-emerald-700">
+            <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">
               {productivityScore === null
                 ? "--"
                 : `${numberFormatter.format(productivityScore)}%`}
@@ -225,24 +225,24 @@ export default function TopNavbar({
           <div className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              className="relative rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-slate-900 dark:text-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               aria-label={t("notifications", "Notifications")}
             >
               <FiBell size={22} />
               {notifications.some((n) => !n.is_read) && (
-                <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-red-500" />
+                 <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-slate-800 bg-red-500" />
               )}
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 top-full z-50 mt-3 w-[min(100vw-1rem,420px)] max-w-[420px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-                <div className="border-b border-slate-200 px-5 py-4">
+              <div className="absolute right-0 top-full z-50 mt-3 w-[min(100vw-1rem,420px)] max-w-[420px] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl">
+                <div className="border-b border-slate-200 dark:border-slate-700 px-5 py-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">
+                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-50">
                         {t("notifications", "Notifications")}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         {notifications.length} {t("new", "new")}
                       </p>
                     </div>
@@ -255,11 +255,11 @@ export default function TopNavbar({
                       key={item.id}
                       className={`group flex gap-3 rounded-2xl px-4 py-4 transition ${
                         item.is_read
-                          ? "hover:bg-slate-50"
-                          : "bg-slate-50 ring-1 ring-indigo-100"
+                          ? "hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                          : "bg-slate-50 dark:bg-slate-700/50 ring-1 ring-indigo-100 dark:ring-indigo-900"
                       }`}
                     >
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 shadow-sm">
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 shadow-sm">
                         {item.notification_type === "PRODUCTIVE_SESSION" && (
                           <FiCheckCircle className="h-5 w-5 text-emerald-500" />
                         )}
@@ -275,13 +275,13 @@ export default function TopNavbar({
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-900">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                           {item.title}
                         </p>
-                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                           {item.message}
                         </p>
-                        <p className="mt-3 text-xs text-slate-500">
+                        <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
                           {new Date(item.created_at).toLocaleString(
                             currentLanguageCode || undefined
                           )}
@@ -296,7 +296,7 @@ export default function TopNavbar({
                     setShowNotifications(false);
                     navigate("/notifications");
                   }}
-                  className="sticky bottom-0 w-full border-t border-slate-200 bg-white px-5 py-3 text-sm font-medium text-indigo-600 transition hover:bg-slate-50"
+                  className="sticky bottom-0 w-full border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-5 py-3 text-sm font-medium text-indigo-600 dark:text-indigo-400 transition hover:bg-slate-50 dark:hover:bg-slate-700"
                 >
                   {t("view_all_notifications", "View All Notifications")}
                 </button>
@@ -304,19 +304,19 @@ export default function TopNavbar({
             )}
           </div>
 
-          <div className="flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:shadow-md sm:w-auto">
+          <div className="flex w-full items-center gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 shadow-sm transition hover:shadow-md sm:w-auto">
             <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 text-lg font-bold text-white shadow-lg shadow-indigo-500/10">
               <span className="text-base font-semibold">
                 {username.charAt(0).toUpperCase() || "?"}
               </span>
-              <span className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
+              <span className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-slate-800 bg-emerald-500" />
             </div>
 
             <div className="min-w-0">
-              <p className="text-base font-semibold text-slate-900 truncate">
+              <p className="text-base font-semibold text-slate-900 dark:text-slate-50 truncate">
                 {username}
               </p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 {profile?.role === "NORMAL_USER"
                   ? t("user", "User")
                   : t("employee", "Employee")}

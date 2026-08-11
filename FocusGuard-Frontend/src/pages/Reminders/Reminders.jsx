@@ -79,9 +79,9 @@ const Reminders = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-[320px] items-center justify-center bg-slate-100">
-        <div className="rounded-2xl border border-slate-200 bg-white px-10 py-8 shadow-sm">
-          <p className="text-lg font-semibold text-slate-700">
+      <div className="flex min-h-[320px] items-center justify-center bg-slate-100 dark:bg-slate-900/50">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-10 py-8 shadow-sm">
+          <p className="text-lg font-semibold text-slate-700 dark:text-slate-300">
             {t(
               "loading_reminder_settings",
               "Loading Reminder Settings..."
@@ -99,14 +99,14 @@ const Reminders = () => {
         {/* Header */}
 
         <div className="mb-5">
-          <h1 className="text-3xl font-bold text-slate-900">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
             {t(
               "reminder_settings",
               "Reminder Settings"
             )}
           </h1>
 
-          <p className="mt-2 text-slate-600">
+          <p className="mt-2 text-slate-600 dark:text-slate-400">
             {t(
               "configure_reminders",
               "Configure productivity reminders and notification preferences."
@@ -121,11 +121,11 @@ const Reminders = () => {
 
           {/* Productive */}
 
-          <div className="rounded-2xl border border-emerald-100/50 bg-gradient-to-br from-emerald-50/70 to-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
+          <div className="rounded-2xl border border-emerald-100/50 dark:border-slate-700/50 bg-gradient-to-br from-emerald-50/70 to-white dark:from-emerald-950/30 dark:to-[#111827] p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
 
             <div className="mb-4 flex items-center gap-4">
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100/50 text-emerald-600 shadow-sm shadow-emerald-500/10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100/50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 shadow-sm shadow-emerald-500/10">
 
                 <FiCheckCircle size={24} />
 
@@ -133,14 +133,14 @@ const Reminders = () => {
 
               <div>
 
-                <h2 className="text-lg font-semibold text-slate-900">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
                   {t(
                     "productive_threshold_minutes",
                     "Productive Threshold"
                   )}
                 </h2>
 
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Minutes before productivity reminders.
                 </p>
 
@@ -153,18 +153,18 @@ const Reminders = () => {
               name="productive_threshold"
               value={settings.productive_threshold}
               onChange={handleChange}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+              className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/80 px-4 py-3 text-slate-900 dark:text-slate-200 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800"
             />
 
           </div>
 
           {/* Non Productive */}
 
-          <div className="rounded-2xl border border-rose-100/50 bg-gradient-to-br from-rose-50/70 to-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
+          <div className="rounded-2xl border border-rose-100/50 dark:border-slate-700/50 bg-gradient-to-br from-rose-50/70 to-white dark:from-rose-950/30 dark:to-[#111827] p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
 
             <div className="mb-4 flex items-center gap-4">
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-100/50 text-rose-600 shadow-sm shadow-rose-500/10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-100/50 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 shadow-sm shadow-rose-500/10">
 
                 <FiActivity size={24} />
 
@@ -172,14 +172,14 @@ const Reminders = () => {
 
               <div>
 
-                <h2 className="text-lg font-semibold text-slate-900">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
                   {t(
                     "non_productive_threshold_minutes",
                     "Non-Productive Threshold"
                   )}
                 </h2>
 
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Minutes before distraction reminders.
                 </p>
 
@@ -192,17 +192,17 @@ const Reminders = () => {
               name="non_productive_threshold"
               value={settings.non_productive_threshold}
               onChange={handleChange}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-200"
+              className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/80 px-4 py-3 text-slate-900 dark:text-slate-200 outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-200 dark:focus:ring-red-800"
             />
 
           </div>
-                    {/* Idle Threshold */}
+          {/* Idle Threshold */}
 
-          <div className="rounded-2xl border border-amber-100/50 bg-gradient-to-br from-amber-50/70 to-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
+          <div className="rounded-2xl border border-amber-100/50 dark:border-slate-700/50 bg-gradient-to-br from-amber-50/70 to-white dark:from-amber-950/30 dark:to-[#111827] p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md">
 
             <div className="mb-4 flex items-center gap-4">
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100/50 text-amber-600 shadow-sm shadow-amber-500/10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100/50 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 shadow-sm shadow-amber-500/10">
 
                 <FiClock size={24} />
 
@@ -210,14 +210,14 @@ const Reminders = () => {
 
               <div>
 
-                <h2 className="text-lg font-semibold text-slate-900">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
                   {t(
                     "idle_threshold_minutes",
                     "Idle Threshold"
                   )}
                 </h2>
 
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Minutes before idle reminders.
                 </p>
 
@@ -230,20 +230,20 @@ const Reminders = () => {
               name="idle_threshold"
               value={settings.idle_threshold}
               onChange={handleChange}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+              className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/80 px-4 py-3 text-slate-900 dark:text-slate-200 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-800"
             />
 
           </div>
 
           {/* Browser Notifications */}
 
-          <div className="rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md lg:col-span-3">
+          <div className="rounded-2xl border border-indigo-100/50 dark:border-slate-700/50 bg-gradient-to-br from-indigo-50/70 to-white dark:from-indigo-950/30 dark:to-[#111827] p-5 shadow-sm transition-all duration-200 hover:-translate-y-[2px] hover:shadow-md lg:col-span-3">
 
             <div className="flex items-center justify-between gap-6">
 
               <div className="flex items-center gap-4">
 
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100/50 text-indigo-600 shadow-sm shadow-indigo-500/10">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100/50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 shadow-sm shadow-indigo-500/10">
 
                   <FiBell size={24} />
 
@@ -251,14 +251,14 @@ const Reminders = () => {
 
                 <div>
 
-                  <h2 className="text-lg font-semibold text-slate-900">
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
                     {t(
                       "browser_notifications",
                       "Browser Notifications"
                     )}
                   </h2>
 
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     {t(
                       "receive_reminder_popups",
                       "Receive reminder popups while browsing."
@@ -279,7 +279,7 @@ const Reminders = () => {
                   className="peer sr-only"
                 />
 
-                <div className="h-7 w-12 rounded-full bg-slate-300 transition peer-checked:bg-indigo-600 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-5"></div>
+                <div className="h-7 w-12 rounded-full bg-slate-300 dark:bg-slate-700 transition peer-checked:bg-indigo-600 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-5"></div>
 
               </label>
 
@@ -310,8 +310,8 @@ const Reminders = () => {
             <div
               className={`rounded-2xl border p-4 text-center font-medium transition-all lg:col-span-3 ${
                 message.includes("❌")
-                  ? "border-red-200 bg-red-50 text-red-700"
-                  : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  ? "border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
+                  : "border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400"
               }`}
             >
               {message}

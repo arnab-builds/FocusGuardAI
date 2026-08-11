@@ -189,19 +189,19 @@ const AICoach = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col py-2 sm:py-4">
-      <div className="flex min-h-[calc(100vh-10rem)] w-full flex-col overflow-hidden rounded-2xl border border-indigo-100/50 bg-white shadow-sm">
+      <div className="flex min-h-[calc(100vh-10rem)] w-full flex-col overflow-hidden rounded-2xl border border-indigo-100/50 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
 
         {/* Header */}
 
-        <div className="flex items-center justify-between border-b border-indigo-100/50 bg-gradient-to-r from-indigo-50/80 to-white px-4 py-3">
+        <div className="flex items-center justify-between border-b border-indigo-100/50 dark:border-slate-700/50 bg-gradient-to-r from-indigo-50/80 to-white dark:from-indigo-950/30 dark:to-slate-800 px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-indigo-100/50 p-2 shadow-sm shadow-indigo-500/10">
-              <FiCpu className="h-5 w-5 text-indigo-600" />
+            <div className="rounded-xl bg-indigo-100/50 dark:bg-indigo-900/40 p-2 shadow-sm shadow-indigo-500/10">
+              <FiCpu className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             </div>
 
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">{t("focusguard_ai", "FocusGuard AI")}</h2>
-              <div className="text-xs text-slate-600">{t("productivity_assistant", "Productivity Assistant")}</div>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">{t("focusguard_ai", "FocusGuard AI")}</h2>
+              <div className="text-xs text-slate-600 dark:text-slate-400">{t("productivity_assistant", "Productivity Assistant")}</div>
             </div>
           </div>
 
@@ -209,17 +209,17 @@ const AICoach = () => {
             <button
               onClick={handleClearChat}
               disabled={!hasUserMessage || loading || loadingHistory}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t("clear_chat", "Clear Chat")}
             </button>
-            <div className="text-xs text-slate-600">{selectedDate}</div>
+            <div className="text-xs text-slate-600 dark:text-slate-400">{selectedDate}</div>
           </div>
         </div>
 
         {/* Chat */}
 
-        <div className="flex-1 overflow-y-auto bg-indigo-50/20 px-4 py-6">
+        <div className="flex-1 overflow-y-auto bg-indigo-50/20 dark:bg-slate-900/50 px-4 py-6">
           <div className="mx-auto w-full max-w-4xl flex flex-col gap-4">
 
             {/* Suggestion chips: show only before the first user message */}
@@ -230,7 +230,7 @@ const AICoach = () => {
                     key={q}
                     onClick={() => handleSuggestion(q)}
                     disabled={loading}
-                    className="chip rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-sm text-indigo-700"
+                    className="chip rounded-full border border-indigo-100 dark:border-indigo-900/50 bg-indigo-50 dark:bg-indigo-900/40 px-3 py-1 text-sm text-indigo-700 dark:text-indigo-400"
                   >
                     {q}
                   </button>
@@ -257,7 +257,7 @@ const AICoach = () => {
                   className={`max-w-[78%] rounded-xl px-4 py-2 shadow-sm ${
                     msg.sender === "user"
                       ? "rounded-br-md bg-indigo-600 text-white"
-                      : "rounded-bl-md border border-indigo-100/50 bg-white text-slate-800"
+                      : "rounded-bl-md border border-indigo-100/50 dark:border-slate-700 bg-white dark:bg-[#172033] text-slate-800 dark:text-slate-200"
                   }`}
                 >
                   <div className="prose prose-sm max-w-none leading-snug">
@@ -272,12 +272,12 @@ const AICoach = () => {
                 <div className="mr-3 mt-1 flex h-8 w-8 items-center justify-center rounded-md bg-indigo-600 text-white">
                   <FiCpu className="text-white" />
                 </div>
-                <div className="rounded-xl rounded-bl-md border border-indigo-100/50 bg-white px-4 py-2 shadow-sm">
+                <div className="rounded-xl rounded-bl-md border border-indigo-100/50 dark:border-slate-700 bg-white dark:bg-[#172033] px-4 py-2 shadow-sm">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" />
                     <div className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" style={{ animationDelay: ".12s" }} />
                     <div className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" style={{ animationDelay: ".24s" }} />
-                    <span className="ml-3 text-sm text-slate-500">{t("thinking_message", "FocusGuard AI is thinking...")}</span>
+                    <span className="ml-3 text-sm text-slate-500 dark:text-slate-400">{t("thinking_message", "FocusGuard AI is thinking...")}</span>
                   </div>
                 </div>
               </div>
@@ -287,7 +287,7 @@ const AICoach = () => {
           </div>
         </div>
 
-        <div className="sticky bottom-0 border-t border-slate-100 bg-white px-4 py-3">
+        <div className="sticky bottom-0 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3">
           <div className="mb-3">
             {/* on small screens suggestions shown above messages; once user messages exist they hide */}
           </div>
@@ -298,7 +298,7 @@ const AICoach = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={t("ask_anything_productivity", "Ask anything about your productivity...")}
-              className="flex-1 rounded-full border border-slate-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200"
+              className="flex-1 rounded-full border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800"
             />
 
             <button

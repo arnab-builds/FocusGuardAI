@@ -9,33 +9,33 @@ export default function AISummary({
   const { t } = useLanguage();
 
   return (
-    <section className="flex min-h-[360px] flex-col overflow-hidden rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-blue-50/50 p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-[2px]">
+    <section className="flex min-h-[360px] flex-col overflow-hidden rounded-2xl border border-indigo-100/50 dark:border-slate-700/50 bg-gradient-to-br from-indigo-50/70 to-blue-50/50 dark:from-indigo-950/30 dark:to-[#111827] p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-[2px]">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600">
+          <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
             {t("ai_coach", "AI Coach")}
           </p>
 
-          <h2 className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">
+          <h2 className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50 sm:text-2xl">
             {t("recommendation", "Recommendation")}
           </h2>
         </div>
 
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100/50 text-indigo-600 shadow-sm shadow-indigo-500/10 transition-colors duration-200 hover:bg-indigo-100">
-          <FiCpu className="h-6 w-6 text-indigo-600" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100/50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 shadow-sm shadow-indigo-500/10 transition-colors duration-200 hover:bg-indigo-100 dark:hover:bg-indigo-900/60">
+          <FiCpu className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
         </div>
       </div>
 
       {/* Recommendation */}
-      <div className="mt-5 flex flex-1 flex-col rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+      <div className="mt-5 flex flex-1 flex-col rounded-xl border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-[#172033] p-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
               {t("productivity", "Productivity")}
             </p>
 
-            <h3 className="mt-2 break-words text-lg font-bold leading-7 text-slate-900 sm:text-xl">
+            <h3 className="mt-2 break-words text-lg font-bold leading-7 text-slate-900 dark:text-slate-50 sm:text-xl">
               {recommendation?.title ||
                 t(
                   "no_recommendation_yet",
@@ -44,14 +44,14 @@ export default function AISummary({
             </h3>
           </div>
 
-          <span className="shrink-0 rounded-full bg-emerald-100/60 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
+          <span className="shrink-0 rounded-full bg-emerald-100/60 dark:bg-emerald-900/40 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
             {recommendation?.recommendation_type ||
               t("idle", "Idle")}
           </span>
         </div>
 
         <div className="mt-4 flex-1">
-          <p className="break-words text-sm leading-7 text-slate-600">
+          <p className="break-words text-sm leading-7 text-slate-600 dark:text-slate-300">
             {recommendation?.message ||
               t(
                 "generate_ai_recommendation_hint",
