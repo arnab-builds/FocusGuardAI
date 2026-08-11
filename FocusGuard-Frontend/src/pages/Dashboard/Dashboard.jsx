@@ -72,9 +72,13 @@ function Dashboard() {
   }, [selectedDate, currentLanguageCode]);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let activeController;
 
     const fetchData = async () => {
+      activeController?.abort();
+      const controller = new AbortController();
+      activeController = controller;
+
       try {
         const [trendData, recentData] = await Promise.all([
           getDashboardTrend(selectedDate, controller.signal),
@@ -96,7 +100,16 @@ function Dashboard() {
 
     fetchData();
 
-    return () => controller.abort();
+    const refreshInterval = window.setInterval(() => {
+      if (!document.hidden) {
+        fetchData();
+      }
+    }, 30_000);
+
+    return () => {
+      window.clearInterval(refreshInterval);
+      activeController?.abort();
+    };
   }, [selectedDate]);
 
   if (!profile || !analytics) {

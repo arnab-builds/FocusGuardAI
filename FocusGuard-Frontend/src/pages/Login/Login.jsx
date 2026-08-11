@@ -10,6 +10,7 @@ import {
 
 import { loginUser } from "../../services/authService";
 import { useLanguage } from "../../context/useLanguage";
+import ThemeToggle from "../../components/ThemeToggle";
 
 function Login() {
   const navigate = useNavigate();
@@ -116,7 +117,9 @@ function Login() {
 
       {/* Language */}
 
-      <div className="absolute right-6 top-6 z-20">
+      <div className="absolute right-6 top-6 z-20 flex items-center gap-3">
+
+        <ThemeToggle />
 
         <div className="relative">
 
@@ -169,7 +172,7 @@ function Login() {
               </h1>
 
               <p className="mt-2 text-blue-100">
-                Employee Productivity Platform
+                {t("employee_productivity_platform")}
               </p>
 
             </div>
@@ -195,7 +198,7 @@ function Login() {
               </h3>
 
               <p className="mt-1 text-sm text-blue-100">
-                Monitor browsing activity instantly.
+                {t("login_feature_monitoring")}
               </p>
 
             </div>
@@ -210,7 +213,7 @@ function Login() {
               </h3>
 
               <p className="mt-1 text-sm text-blue-100">
-                Receive intelligent productivity recommendations.
+                {t("login_feature_recommendations")}
               </p>
 
             </div>
@@ -225,7 +228,7 @@ function Login() {
               </h3>
 
               <p className="mt-1 text-sm text-blue-100">
-                Analyze productivity trends with detailed reports.
+                {t("login_feature_reports")}
               </p>
 
             </div>

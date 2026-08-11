@@ -1,4 +1,5 @@
 import { FiLayers } from "react-icons/fi";
+import { useLanguage } from "../../context/useLanguage";
 
 const parseDurationToSeconds = (time) => {
   if (!time) return 0;
@@ -10,6 +11,7 @@ const parseDurationToSeconds = (time) => {
 const palette = ["#6366f1", "#14b8a6", "#f43f5e", "#f59e0b", "#8b5cf6"];
 
 export default function CategoryChart({ categorySummary }) {
+  const { t } = useLanguage();
   const categories = Object.entries(categorySummary || {}).map(([label, time]) => ({
     label,
     seconds: parseDurationToSeconds(time),
@@ -22,9 +24,9 @@ export default function CategoryChart({ categorySummary }) {
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
-            Top Categories
+            {t("top_categories")}
           </p>
-          <h2 className="mt-3 text-2xl font-semibold text-slate-900">Category distribution</h2>
+          <h2 className="mt-3 text-2xl font-semibold text-slate-900">{t("category_distribution")}</h2>
         </div>
         <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-slate-100 text-slate-700">
           <FiLayers size={20} />

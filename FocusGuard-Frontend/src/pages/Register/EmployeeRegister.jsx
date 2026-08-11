@@ -15,6 +15,7 @@ import {
 
 import { registerEmployee, registerNormalUser } from "../../services/authService";
 import { useLanguage } from "../../context/useLanguage";
+import ThemeToggle from "../../components/ThemeToggle";
 
 const getErrorMessage = (error) => {
   const data = error?.response?.data;
@@ -186,20 +187,23 @@ function EmployeeRegister() {
             </p>
           </div>
 
-          <div className="relative inline-flex min-w-[180px] items-center rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 shadow-sm">
-            <FiGlobe className="mr-2 h-4 w-4 text-indigo-600" />
-            <select
-              value={currentLanguageCode}
-              onChange={handlePublicLanguageChange}
-              aria-label={t("preferred_language", "Preferred Language")}
-              className="w-full bg-transparent text-sm text-slate-700 outline-none"
-            >
-              {languages.map((language) => (
-                <option key={language.id} value={language.language_code}>
-                  {language.native_name || language.language_name}
-                </option>
-              ))}
-            </select>
+          <div className="flex items-center gap-3">
+            <ThemeToggle className="border-slate-200 bg-slate-50 shadow-sm hover:bg-slate-100" />
+            <div className="relative inline-flex min-w-[180px] items-center rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 shadow-sm">
+              <FiGlobe className="mr-2 h-4 w-4 text-indigo-600" />
+              <select
+                value={currentLanguageCode}
+                onChange={handlePublicLanguageChange}
+                aria-label={t("preferred_language", "Preferred Language")}
+                className="w-full bg-transparent text-sm text-slate-700 outline-none"
+              >
+                {languages.map((language) => (
+                  <option key={language.id} value={language.language_code}>
+                    {language.native_name || language.language_name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 

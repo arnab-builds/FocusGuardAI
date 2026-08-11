@@ -11,7 +11,12 @@ const message = document.getElementById("message");
 
 const loginContainer = document.getElementById("loginContainer");
 const dashboardContainer = document.getElementById("dashboardContainer");
+let currentAccess = null;
+let sessionStateVersion = 0;
 
+// Render the last known state synchronously so opening the popup never waits
+// for Chrome storage or the background service worker to wake up.
+renderSession(localStorage.getItem("focusguard_session_state") === "active");
 checkLoginStatus();
 
 loginBtn.addEventListener("click", login);
@@ -19,20 +24,31 @@ logoutBtn.addEventListener("click", logout);
 dashboardBtn.addEventListener("click", openDashboard);
 
 async function checkLoginStatus() {
+    const requestVersion = sessionStateVersion;
+
+    if (localStorage.getItem("focusguard_session_state") === "logged_out") {
+        renderSession(false);
+        return;
+    }
 
     const result = await chrome.storage.local.get("access");
 
-    if (result.access) {
-
-        loginContainer.style.display = "none";
-        dashboardContainer.style.display = "block";
-
-    } else {
-
-        loginContainer.style.display = "block";
-        dashboardContainer.style.display = "none";
-
+    // Do not let a slow startup read overwrite a newer login or logout click.
+    if (requestVersion !== sessionStateVersion) {
+        return;
     }
+
+    currentAccess = result.access || null;
+
+    renderSession(Boolean(result.access));
+
+}
+
+function renderSession(isAuthenticated) {
+
+    loginContainer.style.display = isAuthenticated ? "none" : "block";
+    dashboardContainer.style.display = isAuthenticated ? "block" : "none";
+    dashboardContainer.setAttribute("aria-hidden", String(!isAuthenticated));
 
 }
 
@@ -85,12 +101,18 @@ async function login() {
             user: data.user,
         });
 
-        await chrome.runtime.sendMessage({
-            type: "FOCUSGUARD_LOGIN_SUCCESS",
-        });
+        currentAccess = data.access;
+        sessionStateVersion++;
+        localStorage.setItem("focusguard_session_state", "active");
+        renderSession(true);
 
-        loginContainer.style.display = "none";
-        dashboardContainer.style.display = "block";
+        // Starting tracking can involve network work in the service worker.
+        // Do not keep the popup waiting for it to finish rendering.
+        chrome.runtime.sendMessage({
+            type: "FOCUSGUARD_LOGIN_SUCCESS",
+        }).catch((error) => {
+            console.log("Background login startup failed.", error);
+        });
 
         console.log("Logged In", data);
 
@@ -106,30 +128,33 @@ async function login() {
 
 async function logout() {
 
-    try {
+    // Give immediate feedback. The service worker can finish ending the
+    // current activity after the popup has already shown the signed-out view.
+    sessionStateVersion++;
+    localStorage.setItem("focusguard_session_state", "logged_out");
+    usernameInput.value = "";
+    passwordInput.value = "";
+    message.innerText = "";
+    renderSession(false);
 
-        await chrome.runtime.sendMessage({
-            type: "FOCUSGUARD_LOGOUT",
-        });
+    const logoutAccess = currentAccess;
+    currentAccess = null;
 
-    } catch (error) {
-
-        console.log("Background logout cleanup failed.", error);
-
-    }
-
+    // Remove the session before background cleanup finishes. The token is
+    // included in the message so the worker can still close the active
+    // backend activity without leaving this browser signed in.
     await chrome.storage.local.remove([
         "access",
         "refresh",
         "user"
     ]);
 
-    usernameInput.value = "";
-    passwordInput.value = "";
-    message.innerText = "";
-
-    dashboardContainer.style.display = "none";
-    loginContainer.style.display = "block";
+    chrome.runtime.sendMessage({
+            type: "FOCUSGUARD_LOGOUT",
+            access: logoutAccess,
+    }).catch((error) => {
+        console.log("Background logout cleanup failed.", error);
+    });
 
     console.log("Logged Out");
 

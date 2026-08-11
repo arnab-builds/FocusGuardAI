@@ -19,6 +19,12 @@ chrome.idle.onStateChanged.addListener(
 
         console.log("Idle State:", state);
 
+        const { access } = await chrome.storage.local.get("access");
+
+        if (!access) {
+            return;
+        }
+
         if (state === "idle" || state === "locked") {
 
             if (currentWebsite) {

@@ -56,11 +56,21 @@ export default function ActivityLog() {
 
   useEffect(() => {
     fetchActivities(page);
+
+    const refreshInterval = window.setInterval(() => {
+      if (!document.hidden) {
+        fetchActivities(page, false);
+      }
+    }, 30_000);
+
+    return () => window.clearInterval(refreshInterval);
   }, [page, selectedDate]);
 
-  const fetchActivities = async (currentPage) => {
+  const fetchActivities = async (currentPage, showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
 
       const data = await getActivityHistory(
         currentPage,
@@ -72,7 +82,9 @@ export default function ActivityLog() {
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 

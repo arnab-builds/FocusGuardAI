@@ -16,6 +16,7 @@ import {
 } from "../services/authService";
 import { useLanguage } from "../context/useLanguage";
 import { getApiErrorMessage } from "../utils/responseUtils";
+import ThemeToggle from "../../components/ThemeToggle";
 
 function OrganizationRegister() {
     const navigate = useNavigate();
@@ -144,7 +145,8 @@ function OrganizationRegister() {
             <div className="pointer-events-none absolute left-1/2 top-1/3 h-56 w-56 -translate-x-1/2 rounded-full bg-sky-200/20 blur-3xl" />
             <div className="pointer-events-none absolute bottom-10 right-1/4 h-64 w-64 rounded-full bg-indigo-300/20 blur-3xl" />
 
-            <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6">
+            <div className="absolute right-4 top-4 z-20 flex items-center gap-3 sm:right-6 sm:top-6">
+                <ThemeToggle />
                 <div className="relative">
                     <Globe2
                         size={18}

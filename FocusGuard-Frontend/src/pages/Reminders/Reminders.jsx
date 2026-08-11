@@ -141,7 +141,7 @@ const Reminders = () => {
                 </h2>
 
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Minutes before productivity reminders.
+                  {t("reminder_productivity_minutes")}
                 </p>
 
               </div>
@@ -180,7 +180,7 @@ const Reminders = () => {
                 </h2>
 
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Minutes before distraction reminders.
+                  {t("reminder_distraction_minutes")}
                 </p>
 
               </div>
@@ -218,7 +218,7 @@ const Reminders = () => {
                 </h2>
 
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Minutes before idle reminders.
+                  {t("reminder_idle_minutes")}
                 </p>
 
               </div>

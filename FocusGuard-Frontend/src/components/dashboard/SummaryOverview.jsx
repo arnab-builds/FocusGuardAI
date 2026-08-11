@@ -1,4 +1,5 @@
 import { FiTarget, FiTrendingUp, FiAward } from "react-icons/fi";
+import { useLanguage } from "../../context/useLanguage";
 
 const parseDurationToSeconds = (time) => {
   if (!time) return 0;
@@ -33,6 +34,7 @@ const getStreak = (activities) => {
 };
 
 export default function SummaryOverview({ analytics, activities }) {
+  const { t } = useLanguage();
   const productiveSeconds = parseDurationToSeconds(analytics.productive_time);
   const nonProductiveSeconds = parseDurationToSeconds(analytics.non_productive_time);
   const idleSeconds = parseDurationToSeconds(analytics.idle_time);
@@ -46,9 +48,9 @@ export default function SummaryOverview({ analytics, activities }) {
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
-            Weekly summary
+            {t("weekly_summary")}
           </p>
-          <h2 className="mt-3 text-2xl font-semibold text-slate-900">Goal & streak</h2>
+          <h2 className="mt-3 text-2xl font-semibold text-slate-900">{t("goal_and_streak")}</h2>
         </div>
       </div>
 
@@ -59,9 +61,9 @@ export default function SummaryOverview({ analytics, activities }) {
               <FiTrendingUp size={18} />
             </span>
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Focus score</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t("focus_score")}</p>
               <p className="mt-3 text-3xl font-semibold text-slate-900">{focusScore}%</p>
-              <p className="mt-2 text-sm text-slate-500">Higher is better.</p>
+              <p className="mt-2 text-sm text-slate-500">{t("higher_is_better")}</p>
             </div>
           </div>
         </div>
@@ -72,9 +74,9 @@ export default function SummaryOverview({ analytics, activities }) {
               <FiTarget size={18} />
             </span>
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Goal progress</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t("goal_progress")}</p>
               <p className="mt-3 text-3xl font-semibold text-slate-900">{goalProgress}%</p>
-              <p className="mt-2 text-sm text-slate-500">Toward 5h focus goal.</p>
+              <p className="mt-2 text-sm text-slate-500">{t("toward_focus_goal")}</p>
             </div>
           </div>
         </div>
@@ -85,9 +87,9 @@ export default function SummaryOverview({ analytics, activities }) {
               <FiAward size={18} />
             </span>
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Flow streak</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t("flow_streak")}</p>
               <p className="mt-3 text-3xl font-semibold text-slate-900">{streak} days</p>
-              <p className="mt-2 text-sm text-slate-500">Consecutive active days.</p>
+              <p className="mt-2 text-sm text-slate-500">{t("consecutive_active_days")}</p>
             </div>
           </div>
         </div>
@@ -95,7 +97,7 @@ export default function SummaryOverview({ analytics, activities }) {
 
       <div className="mt-6 rounded-3xl bg-slate-100 p-5 text-sm text-slate-600">
         <p>
-          This summary helps you see the most important progress signals at a glance, without diving into detailed analytics.
+          {t("dashboard_summary_description")}
         </p>
       </div>
     </section>

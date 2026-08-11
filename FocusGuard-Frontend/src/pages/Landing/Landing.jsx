@@ -14,50 +14,25 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const stats = [
-  {
-    title: "Browser Tracking",
-    value: "Real-time",
-  },
-  {
-    title: "AI Insights",
-    value: "Smart",
-  },
-  {
-    title: "Organizations",
-    value: "Multi-role",
-  },
-  {
-    title: "Reports",
-    value: "Daily",
-  },
-];
-
-const navLinks = [
-  {
-    name: "Features",
-    href: "#features",
-  },
-  {
-    name: "Workflow",
-    href: "#workflow",
-  },
-  {
-    name: "Dashboard",
-    href: "#dashboard",
-  },
-  {
-    name: "About",
-    href: "#about",
-  },
-];
+import ThemeToggle from "../../components/ThemeToggle";
 
 export default function Landing() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const stats = [
+    { title: "Browser Tracking", value: "Real-time" },
+    { title: "AI Insights", value: "Smart" },
+    { title: "Organizations", value: "Multi-role" },
+    { title: "Reports", value: "Daily" },
+  ];
+  const navLinks = [
+    { name: "Features", href: "#features" },
+    { name: "Workflow", href: "#workflow" },
+    { name: "Dashboard", href: "#dashboard" },
+    { name: "About", href: "#about" },
+  ];
 
   return (
-    <main id="top" className="public-theme overflow-hidden bg-white text-slate-900">
+    <main id="top" className="public-theme landing-page overflow-hidden bg-white text-slate-900">
 
       {/* ====================================================== */}
       {/* Background */}
@@ -103,11 +78,7 @@ export default function Landing() {
 
               </h1>
 
-              <p className="text-xs text-slate-500">
-
-                Employee Productivity Platform
-
-              </p>
+              <p className="text-xs text-slate-500">Employee Productivity Platform</p>
 
             </div>
 
@@ -131,6 +102,8 @@ export default function Landing() {
 
           <div className="hidden items-center gap-4 lg:flex">
 
+            <ThemeToggle />
+
             <Link
               to="/login"
               className="rounded-xl px-5 py-3 font-semibold text-slate-700 transition hover:bg-blue-50"
@@ -147,18 +120,21 @@ export default function Landing() {
 
           </div>
 
-          <button
+          <div className="flex items-center gap-3 lg:hidden">
+            <ThemeToggle />
+            <button
             onClick={() =>
               setMobileOpen(!mobileOpen)
             }
-            className="lg:hidden"
+            aria-label="Toggle navigation menu"
           >
             {mobileOpen ? (
               <X />
             ) : (
               <Menu />
             )}
-          </button>
+            </button>
+          </div>
 
         </div>
 
@@ -216,41 +192,22 @@ export default function Landing() {
 
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
 
-              <Sparkles size={16} />
+              <Sparkles size={16} />AI Powered Productivity Platform</div>
 
-              AI Powered Productivity Platform
-
-            </div>
-
-            <h1 className="mt-8 text-5xl font-black leading-tight md:text-7xl">
-
-              Build Better
-
-              <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+            <h1 className="mt-8 text-5xl font-black leading-tight md:text-7xl">Build Better<span className="landing-focus-title block bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">
 
                 Focus
 
-              </span>
+              </span>Together.</h1>
 
-              Together.
-
-            </h1>
-
-            <p className="mt-8 max-w-xl text-xl leading-9 text-slate-600">
-
-              FocusGuardAI helps organizations and individuals understand browser activity, improve productivity, receive AI-powered insights, and manage work more effectively from one intelligent platform.
-
-            </p>
+            <p className="mt-8 max-w-xl text-xl leading-9 text-slate-600">FocusGuardAI helps organizations and individuals understand browser activity, improve productivity, receive AI-powered insights, and manage work more effectively from one intelligent platform.</p>
 
             <div className="mt-10 flex flex-wrap gap-5">
 
               <Link
                 to="/register"
                 className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 font-semibold text-white shadow-xl transition hover:scale-[1.03]"
-              >
-                Get Started
-
-                <ArrowRight
+              >Get Started<ArrowRight
                   size={18}
                 />
 
@@ -273,11 +230,7 @@ export default function Landing() {
 
                 <CheckCircle2 className="text-blue-600" />
 
-                <span>
-
-                  AI Productivity Recommendations
-
-                </span>
+                <span>AI Productivity Recommendations</span>
 
               </div>
 
@@ -285,11 +238,7 @@ export default function Landing() {
 
                 <CheckCircle2 className="text-blue-600" />
 
-                <span>
-
-                  Browser Activity Tracking
-
-                </span>
+                <span>Browser Activity Tracking</span>
 
               </div>
 
@@ -297,11 +246,7 @@ export default function Landing() {
 
                 <CheckCircle2 className="text-blue-600" />
 
-                <span>
-
-                  Organization Management
-
-                </span>
+                <span>Organization Management</span>
 
               </div>
 
@@ -309,11 +254,7 @@ export default function Landing() {
 
                 <CheckCircle2 className="text-blue-600" />
 
-                <span>
-
-                  Smart Analytics & Reports
-
-                </span>
+                <span>Smart Analytics &amp; Reports</span>
 
               </div>
 
@@ -337,11 +278,7 @@ export default function Landing() {
 
                 <div>
 
-                  <p className="text-sm text-slate-500">
-
-                    Productivity Score
-
-                  </p>
+                  <p className="text-sm text-slate-500">Productivity Score</p>
 
                   <h2 className="mt-2 text-5xl font-black text-blue-600">
 
@@ -376,11 +313,7 @@ export default function Landing() {
 
                 </div>
 
-                <p className="mt-4 leading-7 text-blue-50">
-
-                  Your productivity is highest during morning hours. Schedule deep work before noon and reduce context switching for better focus.
-
-                </p>
+                <p className="mt-4 leading-7 text-blue-50">Your productivity is highest during morning hours. Schedule deep work before noon and reduce context switching for better focus.</p>
 
               </div>
 
@@ -490,17 +423,9 @@ export default function Landing() {
 
           <div className="text-center">
 
-            <span className="rounded-full bg-blue-100 px-5 py-2 text-sm font-semibold text-blue-700">
+            <span className="rounded-full bg-blue-100 px-5 py-2 text-sm font-semibold text-blue-700">Everything you need</span>
 
-              Everything you need
-
-            </span>
-
-            <h2 className="mt-6 text-5xl font-black tracking-tight">
-
-              Built for modern teams.
-
-            </h2>
+            <h2 className="mt-6 text-5xl font-black tracking-tight">Built for modern teams.</h2>
 
             <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600">
 
@@ -526,11 +451,7 @@ export default function Landing() {
 
               <Brain size={48} />
 
-              <h3 className="mt-8 text-4xl font-black">
-
-                AI Productivity Coach
-
-              </h3>
+              <h3 className="mt-8 text-4xl font-black">AI Productivity Coach</h3>
 
               <p className="mt-6 max-w-2xl text-lg leading-8 text-blue-50">
 
@@ -570,11 +491,7 @@ export default function Landing() {
 
               </div>
 
-              <h3 className="mt-8 text-2xl font-bold">
-
-                Browser Activity Tracking
-
-              </h3>
+              <h3 className="mt-8 text-2xl font-bold">Browser Activity Tracking</h3>
 
               <p className="mt-5 leading-7 text-slate-600">
 
@@ -598,11 +515,7 @@ export default function Landing() {
 
               </div>
 
-              <h3 className="mt-8 text-2xl font-bold">
-
-                Productivity Analytics
-
-              </h3>
+              <h3 className="mt-8 text-2xl font-bold">Productivity Analytics</h3>
 
               <p className="mt-5 leading-7 text-slate-600">
 
@@ -622,11 +535,7 @@ export default function Landing() {
                 className="text-blue-600"
               />
 
-              <h3 className="mt-8 text-2xl font-bold">
-
-                Smart Reports
-
-              </h3>
+              <h3 className="mt-8 text-2xl font-bold">Smart Reports</h3>
 
               <p className="mt-5 leading-7 text-slate-600">
 
@@ -646,11 +555,7 @@ export default function Landing() {
                 size={34}
               />
 
-              <h3 className="mt-8 text-2xl font-bold">
-
-                Employee Invitations
-
-              </h3>
+              <h3 className="mt-8 text-2xl font-bold">Employee Invitations</h3>
 
               <p className="mt-5 leading-7 text-slate-600">
 
@@ -670,11 +575,7 @@ export default function Landing() {
                 size={34}
               />
 
-              <h3 className="mt-8 text-2xl font-bold">
-
-                Secure Authentication
-
-              </h3>
+              <h3 className="mt-8 text-2xl font-bold">Secure Authentication</h3>
 
               <p className="mt-5 leading-7 text-slate-600">
 
@@ -704,17 +605,9 @@ export default function Landing() {
 
           <div className="text-center">
 
-            <span className="rounded-full bg-cyan-100 px-5 py-2 text-sm font-semibold text-cyan-700">
+            <span className="rounded-full bg-cyan-100 px-5 py-2 text-sm font-semibold text-cyan-700">Simple Workflow</span>
 
-              Simple Workflow
-
-            </span>
-
-            <h2 className="mt-6 text-5xl font-black">
-
-              How FocusGuardAI Works
-
-            </h2>
+            <h2 className="mt-6 text-5xl font-black">How FocusGuardAI Works</h2>
 
             <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600">
 
@@ -824,17 +717,9 @@ export default function Landing() {
 
           <div className="text-center">
 
-            <span className="rounded-full bg-blue-100 px-5 py-2 text-sm font-semibold text-blue-700">
+            <span className="rounded-full bg-blue-100 px-5 py-2 text-sm font-semibold text-blue-700">Platform Preview</span>
 
-              Platform Preview
-
-            </span>
-
-            <h2 className="mt-6 text-5xl font-black">
-
-              Everything in one dashboard
-
-            </h2>
+            <h2 className="mt-6 text-5xl font-black">Everything in one dashboard</h2>
 
             <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600">
 
@@ -856,25 +741,13 @@ export default function Landing() {
 
                 <div>
 
-                  <h3 className="text-2xl font-bold">
+                  <h3 className="text-2xl font-bold">FocusGuard Dashboard</h3>
 
-                    FocusGuard Dashboard
-
-                  </h3>
-
-                  <p className="mt-2 text-slate-500">
-
-                    Productivity Overview
-
-                  </p>
+                  <p className="mt-2 text-slate-500">Productivity Overview</p>
 
                 </div>
 
-                <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-white shadow-lg">
-
-                  Live Monitoring
-
-                </div>
+                <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-white shadow-lg">Live Monitoring</div>
 
               </div>
 
@@ -886,11 +759,7 @@ export default function Landing() {
 
                 <div className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-600 p-7 text-white">
 
-                  <p className="text-blue-100">
-
-                    Productivity Score
-
-                  </p>
+                  <p className="text-blue-100">Productivity Score</p>
 
                   <h2 className="mt-3 text-6xl font-black">
 
@@ -912,11 +781,7 @@ export default function Landing() {
 
                   <div className="flex items-center justify-between">
 
-                    <h4 className="font-bold">
-
-                      Browser Usage
-
-                    </h4>
+                    <h4 className="font-bold">Browser Usage</h4>
 
                     <Globe className="text-blue-600" />
 
@@ -1019,11 +884,7 @@ export default function Landing() {
 
                   </h3>
 
-                  <p className="mt-2 text-slate-600">
-
-                    Manage employees and departments effortlessly.
-
-                  </p>
+                  <p className="mt-2 text-slate-600">Manage employees and departments effortlessly.</p>
 
                 </div>
 
@@ -1031,17 +892,9 @@ export default function Landing() {
 
                   <Activity className="text-cyan-600" />
 
-                  <h3 className="mt-5 font-bold">
+                  <h3 className="mt-5 font-bold">Activity Timeline</h3>
 
-                    Activity Timeline
-
-                  </h3>
-
-                  <p className="mt-2 text-slate-600">
-
-                    View browser activity with intelligent analytics.
-
-                  </p>
+                  <p className="mt-2 text-slate-600">View browser activity with intelligent analytics.</p>
 
                 </div>
 
@@ -1049,17 +902,9 @@ export default function Landing() {
 
                   <Shield className="text-indigo-600" />
 
-                  <h3 className="mt-5 font-bold">
+                  <h3 className="mt-5 font-bold">Secure Access</h3>
 
-                    Secure Access
-
-                  </h3>
-
-                  <p className="mt-2 text-slate-600">
-
-                    Protected authentication across every user role.
-
-                  </p>
+                  <p className="mt-2 text-slate-600">Protected authentication across every user role.</p>
 
                 </div>
 
@@ -1086,17 +931,9 @@ export default function Landing() {
 
           <div>
 
-            <span className="rounded-full bg-blue-100 px-5 py-2 text-sm font-semibold text-blue-700">
+            <span className="rounded-full bg-blue-100 px-5 py-2 text-sm font-semibold text-blue-700">About FocusGuardAI</span>
 
-              About FocusGuardAI
-
-            </span>
-
-            <h2 className="mt-8 text-5xl font-black">
-
-              Helping teams work smarter.
-
-            </h2>
+            <h2 className="mt-8 text-5xl font-black">Helping teams work smarter.</h2>
 
             <p className="mt-8 text-lg leading-9 text-slate-600">
 
@@ -1182,19 +1019,13 @@ export default function Landing() {
                 <div className="blob-c pointer-events-none absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.08] blur-[90px]" />
 
                 <div className="relative mx-auto max-w-2xl">
-                  <h2 className="font-display text-3xl font-bold tracking-tight text-white sm:text-5xl">
-                    Ready to improve your team's productivity?
-                  </h2>
-                  <p className="mt-4 text-white/75">
-                    Set up your organization and invite your first employees today.
-                  </p>
+                  <h2 className="font-display text-3xl font-bold tracking-tight text-white sm:text-5xl">Ready to improve your team's productivity?</h2>
+                  <p className="mt-4 text-white/75">Set up your organization and invite your first employees today.</p>
                   <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
                     <Link
                       to="/register"
                       className="rounded-xl bg-white px-7 py-4 text-[15px] font-semibold text-[#4F46E5] shadow-[0_20px_50px_-14px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                    >
-                      Get Started
-                    </Link>
+                    >Get Started</Link>
                     <Link
                       to="/login"
                       className="rounded-xl border border-white/40 bg-white/10 px-7 py-4 text-[15px] font-semibold text-white backdrop-blur transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -1220,16 +1051,12 @@ export default function Landing() {
                     <span className="bg-gradient-to-r from-[#4F46E5] to-[#2F8FF0] bg-clip-text text-transparent">AI</span>
                   </span>
                 </a>
-                <p className="mt-3 text-sm leading-6 text-[#5B6072]">
-                  Browser activity tracking, analytics, and AI-powered productivity insights for teams and individuals.
-                </p>
+                <p className="mt-3 text-sm leading-6 text-[#5B6072]">Browser activity tracking, analytics, and AI-powered productivity insights for teams and individuals.</p>
               </div>
 
               <div>
                 <p className="font-mono text-[11px] uppercase tracking-wider text-black/30">About</p>
-                <p className="mt-3 text-sm leading-6 text-[#5B6072]">
-                  Contact your FocusGuardAI administrator for support or organization access.
-                </p>
+                <p className="mt-3 text-sm leading-6 text-[#5B6072]">Contact your FocusGuardAI administrator for support or organization access.</p>
               </div>
 
               <div>

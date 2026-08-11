@@ -62,7 +62,7 @@ function DeleteInvitationModal({
 
                 <div className="mt-5 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-center">
                     <p className="text-sm font-medium text-red-600">
-                        This action cannot be undone.
+                        {t("action_cannot_be_undone")}
                     </p>
                 </div>
 

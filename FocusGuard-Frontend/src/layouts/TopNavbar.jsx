@@ -107,10 +107,12 @@ export default function TopNavbar({
     if (!languageId || languageSaving) return;
 
     try {
-      setLanguageSaving(true);
-      await updatePreferredLanguage(languageId);
       await setLanguageById(languageId);
-      window.location.reload();
+      // Persist in the background; the local i18next resources have already
+      // updated the screen and must not wait for a network round-trip.
+      void updatePreferredLanguage(languageId).catch((error) => {
+        console.error("Preferred language could not be updated:", error);
+      });
     } catch (error) {
       console.error("Preferred language could not be updated:", error);
     } finally {
@@ -146,7 +148,7 @@ export default function TopNavbar({
             <button
               onClick={() => onToggleSidebar?.()}
               className="inline-flex items-center rounded-md bg-slate-50 dark:bg-slate-800 p-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 md:hidden"
-              aria-label="Open menu"
+              aria-label={t("open_menu")}
             >
               <svg
                 className="h-5 w-5"

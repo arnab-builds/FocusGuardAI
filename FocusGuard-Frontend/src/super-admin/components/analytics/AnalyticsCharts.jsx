@@ -254,7 +254,7 @@ function AnalyticsCharts() {
                         </div>
 
                         <p className="text-base font-semibold text-slate-600">
-                            No organization data found.
+                            {t("no_organization_data_found")}
                         </p>
                     </div>
                 ) : (

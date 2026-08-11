@@ -20,6 +20,8 @@ import {
 console.log("FocusGuard Background Service Started");
 // Current tracked activity
 let currentActivity = null;
+let trackingEnabled = false;
+let trackingSessionId = 0;
 
 (async () => {
 
@@ -37,6 +39,19 @@ async function isAuthenticated() {
     const result = await chrome.storage.local.get("access");
     return Boolean(result.access);
 }
+
+// A logout can happen from any popup instance. Stop local tracking as soon as
+// Chrome removes the session, even if a popup closes before its message flow
+// has completed.
+chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (
+        areaName === "local" &&
+        changes.access &&
+        !changes.access.newValue
+    ) {
+        void stopFocusGuardSession({ notifyBackend: false });
+    }
+});
 
 function getActiveTab() {
     return new Promise((resolve) => {
@@ -57,7 +72,15 @@ async function startFocusGuardSession() {
         return;
     }
 
+    trackingEnabled = true;
+    const sessionId = ++trackingSessionId;
+
     await loadUserSettings();
+
+    if (!trackingEnabled || sessionId !== trackingSessionId) {
+        return;
+    }
+
     startTracking();
 
     const tab = await getActiveTab();
@@ -66,30 +89,35 @@ async function startFocusGuardSession() {
     setCurrentActivity(null);
     updateCurrentWebsite(null);
 
-    if (tab) {
+    if (trackingEnabled && sessionId === trackingSessionId && tab) {
         await processTab(tab);
     }
 }
 
-async function stopFocusGuardSession({ notifyBackend = true } = {}) {
+async function stopFocusGuardSession({ notifyBackend = true, accessToken = null } = {}) {
+    // Stop local timers and ignore all pending tab/category requests first.
+    // Backend cleanup can be slow, but it must never keep tracking alive.
+    trackingEnabled = false;
+    trackingSessionId++;
+    currentActivity = null;
+    updateCurrentWebsite(null);
+    resetNotificationState();
+    resetTracking();
+
     if (notifyBackend) {
         try {
-            await stopActivity();
+            await stopActivity(accessToken);
         } catch (error) {
             console.log("No active activity to stop.", error);
         }
 
         try {
-            await stopInactivity();
+            await stopInactivity(accessToken);
         } catch (error) {
             console.log("No active inactivity to stop.", error);
         }
     }
 
-    currentActivity = null;
-    updateCurrentWebsite(null);
-    resetNotificationState();
-    resetTracking();
 }
 
 function isValidTab(tab) {
@@ -132,7 +160,7 @@ const DEFAULT_CATEGORY = Object.freeze({
 
 async function processTab(tab) {
 
-    if (!(await isAuthenticated())) {
+    if (!trackingEnabled || !(await isAuthenticated())) {
 
     await stopFocusGuardSession({
         notifyBackend: false,
@@ -163,6 +191,12 @@ async function processTab(tab) {
         } catch (error) {
             console.error("❌ Category Fetch Failed", error);
         }
+    }
+
+    // A logout can happen while the category API request above is pending.
+    // Re-check before creating or sending a new activity record.
+    if (!trackingEnabled || !(await isAuthenticated())) {
+        return;
     }
 
     const activity = {
@@ -276,7 +310,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             }
 
             if (message.type === "FOCUSGUARD_LOGOUT") {
-                await stopFocusGuardSession();
+                await stopFocusGuardSession({ accessToken: message.access });
                 console.log("FocusGuard tracking stopped after logout");
             }
 

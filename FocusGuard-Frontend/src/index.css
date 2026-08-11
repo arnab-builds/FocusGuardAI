@@ -20,7 +20,7 @@ html.dark .public-theme :is(
   [class*="bg-blue-50"],
   [class*="to-white"]
 ) {
-  background-color: #111827;
+  background-color: #101D35;
 }
 
 html.dark .public-theme [class*="to-white"] {
@@ -28,8 +28,8 @@ html.dark .public-theme [class*="to-white"] {
 }
 
 html.dark .public-theme :is(input, select, textarea) {
-  background-color: #172033;
-  border-color: #263449;
+  background-color: #132442;
+  border-color: #2A4268;
   color: #F8FAFC;
 }
 
@@ -56,6 +56,64 @@ html.dark .public-theme :is(
   [class*="border-blue-100"],
   [class*="border-indigo-100"]
 ) { border-color: #263449; }
+
+/* Keep the marketing landing page deep navy rather than flat gray in dark mode. */
+html.dark .landing-page {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(37, 99, 235, 0.20), transparent 28rem),
+    radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.14), transparent 26rem),
+    #081426 !important;
+}
+
+html.dark .landing-page header,
+html.dark .landing-page footer,
+html.dark .landing-page [class*="bg-[#F6F8FF]"] {
+  background-color: #0C1930 !important;
+}
+
+html.dark .landing-page :is(
+  [class*="bg-white"],
+  [class*="bg-slate-50"],
+  [class*="bg-slate-100"],
+  [class*="bg-blue-50"],
+  [class*="bg-cyan-50"],
+  [class*="bg-indigo-50"]
+) {
+  background-color: #101F3A !important;
+  border-color: #2A4268;
+}
+
+html.dark .landing-page [class*="from-white/"] {
+  background-image: none !important;
+  background-color: #101F3A !important;
+}
+
+html.dark .landing-page .landing-focus-title {
+  background-image: none !important;
+  color: #67E8F9 !important;
+  -webkit-text-fill-color: #67E8F9 !important;
+}
+
+/* The Reports and Secure Authentication cards use Tailwind gradient stops. */
+html.dark .landing-page :is(
+  [class*="from-blue-50"],
+  [class*="to-blue-50"],
+  [class*="from-cyan-50"],
+  [class*="to-cyan-50"],
+  [class*="from-indigo-50"],
+  [class*="to-indigo-50"]
+) {
+  background-image: none !important;
+  background-color: #101F3A !important;
+}
+
+html.dark .landing-page :is(
+  [class*="text-[#12141F]"],
+  [class*="text-[#5B6072]"],
+  [class*="text-black/"]
+) {
+  color: #B9C9E2;
+}
 
 /* Super Admin theme only. Light-mode utility classes remain untouched. */
 .superadmin-shell[data-superadmin-theme="dark"] {

@@ -1,11 +1,14 @@
 import AppRoutes from "./routes/AppRoutes";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 
 function App() {
   return (
-    <LanguageProvider>
-      <AppRoutes />
-    </LanguageProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <AppRoutes />
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
 

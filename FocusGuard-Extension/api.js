@@ -87,9 +87,9 @@ async function refreshAccessToken() {
 /**
  * Fetch Wrapper
  */
-async function apiFetch(url, options = {}) {
+async function apiFetch(url, options = {}, accessToken = null) {
 
-    let access = await getAccessToken();
+    let access = accessToken || await getAccessToken();
 
     if (!access) {
         console.log("No access token.");
@@ -157,7 +157,7 @@ export async function startActivity(activityData) {
 /**
  * Stop Activity
  */
-export async function stopActivity() {
+export async function stopActivity(accessToken = null) {
 
     try {
 
@@ -168,7 +168,8 @@ export async function stopActivity() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-            }
+            },
+            accessToken
         );
 
         if (!response) return;
@@ -307,7 +308,7 @@ export async function getWebsiteCategory(domain) {
 /**
  * Stop Inactivity
  */
-export async function stopInactivity() {
+export async function stopInactivity(accessToken = null) {
 
     try {
 
@@ -315,7 +316,8 @@ export async function stopInactivity() {
             `${CONFIG.BASE_URL}/inactivity/stop/`,
             {
                 method: "POST",
-            }
+            },
+            accessToken
         );
 
         if (!response) return;

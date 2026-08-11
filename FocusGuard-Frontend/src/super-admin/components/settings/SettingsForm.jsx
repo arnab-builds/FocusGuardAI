@@ -119,7 +119,7 @@ function SettingsForm() {
                     </h2>
 
                     <p className="text-sm text-slate-500 mt-0.5">
-                        Update your personal details.
+                        {t("update_personal_details")}
                     </p>
                 </div>
             </div>

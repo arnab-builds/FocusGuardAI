@@ -23,11 +23,12 @@ export const getActiveLanguages = async () => {
   return response.data;
 };
 
-export const getTranslations = async (languageCode) => {
+export const getTranslations = async (languageCode, config = {}) => {
   const response = await api.get("/api/translations/", {
     params: {
       language: languageCode,
     },
+    ...config,
   });
 
   return response.data;
