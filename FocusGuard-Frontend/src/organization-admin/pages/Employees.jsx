@@ -103,12 +103,11 @@ function Employees() {
         setOpenDialog(true);
     };
 
-    if (loading) {
-        return <LoadingSpinner />;
-    }
-
     return (
         <DashboardLayout>
+            {loading ? (
+                <LoadingSpinner />
+            ) : (
             <div className="space-y-8">
                 <PageHeader
     title={t(
@@ -239,6 +238,7 @@ function Employees() {
                     employee={selectedEmployee}
                 />
             </div>
+            )}
         </DashboardLayout>
     );
 }
