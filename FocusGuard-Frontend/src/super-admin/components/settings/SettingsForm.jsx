@@ -20,7 +20,6 @@ function SettingsForm() {
     });
 
     const [loading, setLoading] = useState(false);
-
     async function loadSettings() {
         try {
             const res = await getSettings();

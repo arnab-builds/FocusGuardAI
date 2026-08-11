@@ -138,7 +138,7 @@ function OrganizationRegister() {
     };
 
     return (
-        <div className="relative flex min-h-screen items-center justify-center overflow-y-auto bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 px-4 py-4 sm:px-6 sm:py-6">
+        <div className="public-theme relative flex min-h-screen items-center justify-center overflow-y-auto bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 px-4 py-4 sm:px-6 sm:py-6">
             <div className="pointer-events-none absolute left-4 top-10 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
             <div className="pointer-events-none absolute right-10 top-20 h-80 w-80 rounded-full bg-violet-300/20 blur-3xl" />
             <div className="pointer-events-none absolute left-1/2 top-1/3 h-56 w-56 -translate-x-1/2 rounded-full bg-sky-200/20 blur-3xl" />

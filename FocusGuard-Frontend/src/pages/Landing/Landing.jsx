@@ -57,7 +57,7 @@ export default function Landing() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <main id="top" className="overflow-hidden bg-white text-slate-900">
+    <main id="top" className="public-theme overflow-hidden bg-white text-slate-900">
 
       {/* ====================================================== */}
       {/* Background */}

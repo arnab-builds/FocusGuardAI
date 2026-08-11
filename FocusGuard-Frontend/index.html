@@ -8,11 +8,21 @@
     <script>
       (function() {
         try {
-          var isOrg = window.location.pathname.startsWith('/organization-admin');
-          var theme = localStorage.getItem(isOrg ? 'focusguard_org_theme' : 'focusguard_theme');
+          var path = window.location.pathname;
+          var isSuperAdmin = path.startsWith('/super-admin');
+          var isOrg = path.startsWith('/organization-admin');
+          var themeKey = isSuperAdmin
+            ? 'focusguard_superadmin_theme'
+            : (isOrg ? 'focusguard_org_theme' : 'focusguard_theme');
+          var theme = localStorage.getItem(themeKey);
           if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-            document.documentElement.style.backgroundColor = isOrg ? '#0B1120' : '#0f172a';
+            if (isSuperAdmin) {
+              document.documentElement.dataset.superadminTheme = 'dark';
+              document.documentElement.style.backgroundColor = '#0B1120';
+            } else {
+              document.documentElement.classList.add('dark');
+              document.documentElement.style.backgroundColor = isOrg ? '#0B1120' : '#0f172a';
+            }
           }
         } catch (e) {}
       })();

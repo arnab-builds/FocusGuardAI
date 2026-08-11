@@ -1,2 +1,201 @@
 @import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
+
+html[data-superadmin-theme="dark"],
+html[data-superadmin-theme="dark"] body {
+  background: #0B1120;
+}
+
+/* Public pages inherit the employee/public preference, without affecting app layouts. */
+html.dark .public-theme {
+  background: #0B1120 !important;
+  color: #F8FAFC;
+}
+
+html.dark .public-theme :is(
+  [class*="bg-white"],
+  [class*="bg-slate-50"],
+  [class*="bg-slate-100"],
+  [class*="bg-indigo-50"],
+  [class*="bg-blue-50"],
+  [class*="to-white"]
+) {
+  background-color: #111827;
+}
+
+html.dark .public-theme [class*="to-white"] {
+  background-image: none;
+}
+
+html.dark .public-theme :is(input, select, textarea) {
+  background-color: #172033;
+  border-color: #263449;
+  color: #F8FAFC;
+}
+
+html.dark .public-theme :is(
+  [class*="text-slate-900"],
+  [class*="text-slate-800"],
+  [class*="text-gray-900"]
+) { color: #F8FAFC; }
+
+html.dark .public-theme :is(
+  [class*="text-slate-700"],
+  [class*="text-slate-600"],
+  [class*="text-gray-700"]
+) { color: #CBD5E1; }
+
+html.dark .public-theme :is(
+  [class*="text-slate-500"],
+  [class*="text-slate-400"],
+  [class*="placeholder"]
+) { color: #94A3B8; }
+
+html.dark .public-theme :is(
+  [class*="border-slate-"],
+  [class*="border-blue-100"],
+  [class*="border-indigo-100"]
+) { border-color: #263449; }
+
+/* Super Admin theme only. Light-mode utility classes remain untouched. */
+.superadmin-shell[data-superadmin-theme="dark"] {
+  background: #0B1120 !important;
+  color: #F8FAFC;
+  color-scheme: dark;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] main {
+  background: #0B1120;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] :is(
+  [class*="bg-white"],
+  [class*="bg-slate-50"],
+  [class*="bg-slate-100"],
+  [class*="bg-indigo-50"],
+  [class*="bg-blue-50"],
+  [class*="bg-amber-50"],
+  [class*="bg-emerald-50"],
+  [class*="bg-green-50"],
+  [class*="bg-red-50"],
+  [class*="bg-rose-50"],
+  [class*="to-white"],
+  [class*="F3F7FF"]
+) {
+  background-color: #111827 !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] :is(
+  input,
+  select,
+  textarea,
+  [class*="bg-slate-50"],
+  [class*="bg-indigo-50"]
+) {
+  background-color: #172033 !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] :is(
+  [class*="to-white"],
+  [class*="via-indigo-50"],
+  [class*="from-blue-50"],
+  [class*="from-indigo-50"],
+  [class*="from-emerald-50"],
+  [class*="from-red-50"],
+  [class*="from-amber-50"]
+) {
+  background-image: none !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] :is(
+  [class*="border-slate-"],
+  [class*="border-indigo-100"],
+  [class*="border-blue-100"],
+  [class*="border-emerald-100"],
+  [class*="border-amber-100"],
+  [class*="border-red-100"]
+) {
+  border-color: #263449 !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] :is(
+  [class*="text-slate-900"],
+  [class*="text-slate-800"],
+  [class*="text-gray-900"],
+  [class*="text-gray-800"]
+) {
+  color: #F8FAFC !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] :is(
+  [class*="text-slate-700"],
+  [class*="text-slate-600"],
+  [class*="text-gray-700"],
+  [class*="text-gray-600"]
+) {
+  color: #CBD5E1 !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] :is(
+  [class*="text-slate-500"],
+  [class*="text-slate-400"],
+  [class*="text-gray-500"],
+  [class*="placeholder"]
+) {
+  color: #94A3B8 !important;
+}
+
+/* Preserve the existing stat-card accent bars above the dark border layer. */
+.superadmin-shell[data-superadmin-theme="dark"] [class*="border-t-blue-500"] {
+  border-top-color: #3B82F6 !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] [class*="border-t-indigo-500"] {
+  border-top-color: #6366F1 !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] [class*="border-t-green-500"],
+.superadmin-shell[data-superadmin-theme="dark"] [class*="border-t-emerald-500"] {
+  border-top-color: #10B981 !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] [class*="border-t-amber-500"] {
+  border-top-color: #F59E0B !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] [class*="border-t-red-500"] {
+  border-top-color: #F43F5E !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] table tr:hover {
+  background-color: #172033 !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] option {
+  background: #172033;
+  color: #F8FAFC;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] .recharts-default-tooltip {
+  background: #172033 !important;
+  border-color: #263449 !important;
+  color: #F8FAFC !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] :is(
+  .recharts-default-tooltip-item,
+  .recharts-tooltip-label
+) {
+  color: #CBD5E1 !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] .recharts-cartesian-grid line {
+  stroke: #263449 !important;
+}
+
+.superadmin-shell[data-superadmin-theme="dark"] :is(
+  .recharts-cartesian-axis-tick-value,
+  .recharts-label
+) {
+  fill: #94A3B8 !important;
+}

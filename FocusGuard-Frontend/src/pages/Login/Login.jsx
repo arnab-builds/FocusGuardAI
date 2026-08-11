@@ -106,7 +106,7 @@ function Login() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-700 via-blue-600 to-cyan-500 p-6">
+    <div className="public-theme relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-700 via-blue-600 to-cyan-500 p-6">
 
       {/* Background Blur */}
 

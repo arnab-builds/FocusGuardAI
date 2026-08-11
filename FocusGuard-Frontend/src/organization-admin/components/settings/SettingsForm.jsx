@@ -231,7 +231,7 @@ function SettingsForm() {
         </section>
 
         <div className="space-y-6">
-        <section className="rounded-3xl border border-indigo-100/50 dark:border-slate-700/50 bg-gradient-to-br from-indigo-50/70 to-white dark:from-slate-900/50 dark:to-slate-800 shadow-md hover:shadow-lg transition-all duration-300 p-5 sm:p-6">
+        <section className="hidden" aria-hidden="true">
             <div className="flex items-start gap-3">
                 <span className="text-2xl leading-none mt-0.5">
                     🎨

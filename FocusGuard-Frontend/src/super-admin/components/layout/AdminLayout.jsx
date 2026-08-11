@@ -4,6 +4,23 @@ import Navbar from "./Navbar";
 
 function AdminLayout({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [theme, setTheme] = useState(() =>
+        localStorage.getItem("focusguard_superadmin_theme") === "dark"
+            ? "dark"
+            : "light"
+    );
+
+    useEffect(() => {
+        const handleThemeChange = (event) => {
+            setTheme(event.detail === "dark" ? "dark" : "light");
+        };
+
+        window.addEventListener("superadmin-theme-change", handleThemeChange);
+
+        return () => {
+            window.removeEventListener("superadmin-theme-change", handleThemeChange);
+        };
+    }, []);
 
     useEffect(() => {
         const mql = window.matchMedia("(min-width: 768px)");
@@ -35,7 +52,10 @@ function AdminLayout({ children }) {
     }, []);
 
     return (
-        <div className="flex min-h-screen bg-[#F3F7FF]">
+        <div
+            className="superadmin-shell flex min-h-screen bg-[#F3F7FF]"
+            data-superadmin-theme={theme}
+        >
             <Sidebar
                 isOpen={isSidebarOpen}
                 onClose={() =>
