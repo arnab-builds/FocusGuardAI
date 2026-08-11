@@ -129,8 +129,8 @@ function Dashboard() {
                         "Monitor employee productivity, activity, and organization performance."
                     )}
                     action={
-                        <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-500 shadow-sm">
-                            <span className="font-semibold text-slate-700">
+                        <div className="rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-sm text-slate-500 dark:text-slate-400 shadow-sm">
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">
                                 {t("last_synced", "Last synced")}:
                             </span>{" "}
                             {syncedLabel}
@@ -139,7 +139,7 @@ function Dashboard() {
                 />
 
                 {error && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+                    <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm font-medium text-amber-800 dark:text-amber-400">
                         {error}
                     </div>
                 )}
@@ -150,7 +150,7 @@ function Dashboard() {
                             (item) => (
                                 <div
                                     key={item}
-                                    className="h-36 animate-pulse rounded-[18px] border border-slate-200 bg-white"
+                                    className="h-36 animate-pulse rounded-[18px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
                                 />
                             )
                         )}
@@ -164,8 +164,8 @@ function Dashboard() {
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                     {loading ? (
                         <>
-                            <div className="h-[360px] animate-pulse rounded-[18px] border border-slate-200 bg-white" />
-                            <div className="h-[360px] animate-pulse rounded-[18px] border border-slate-200 bg-white" />
+                            <div className="h-[360px] animate-pulse rounded-[18px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" />
+                            <div className="h-[360px] animate-pulse rounded-[18px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" />
                         </>
                     ) : (
                         <>
@@ -186,8 +186,8 @@ function Dashboard() {
                 <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1.35fr)_minmax(380px,.65fr)]">
                     {loading ? (
                         <>
-                            <div className="h-[420px] animate-pulse rounded-[18px] border border-slate-200 bg-white" />
-                            <div className="h-[420px] animate-pulse rounded-[18px] border border-slate-200 bg-white" />
+                            <div className="h-[420px] animate-pulse rounded-[18px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" />
+                            <div className="h-[420px] animate-pulse rounded-[18px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" />
                         </>
                     ) : (
                         <>

@@ -207,7 +207,7 @@ function ChatWindow() {
     const hasUserMessage = messages.some((item) => item.sender === "user");
 
     return (
-        <div className="w-full max-w-full min-h-[70vh] rounded-3xl border border-violet-100/50 bg-gradient-to-br from-violet-50/70 to-white shadow-xl overflow-hidden flex flex-col">
+        <div className="w-full max-w-full min-h-[70vh] rounded-3xl border border-violet-100/50 dark:border-violet-900/50 bg-gradient-to-br from-violet-50/70 to-white dark:from-violet-950/20 dark:to-slate-800 shadow-xl overflow-hidden flex flex-col">
             <div className="bg-gradient-to-r from-indigo-700 via-violet-600 to-blue-600 px-5 sm:px-8 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <div className="h-14 w-14 shrink-0 rounded-2xl bg-white/20 flex items-center justify-center">
@@ -258,7 +258,7 @@ function ChatWindow() {
                 className="flex-1 overflow-y-auto scroll-smooth bg-transparent px-4 sm:px-8 py-6 sm:py-8 space-y-6"
             >
                 {loadingHistory ? (
-                    <p className="py-10 text-center text-sm text-slate-500">{t("loading", "Loading...")}</p>
+                    <p className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">{t("loading", "Loading...")}</p>
                 ) : messages.map((msg, index) => {
                     const isWelcome =
                         index === 0 &&
@@ -282,9 +282,9 @@ function ChatWindow() {
                                         />
                                     </div>
 
-                                    <div className="rounded-3xl bg-white border border-slate-200 shadow px-5 sm:px-6 py-5 flex-1 sm:flex-none">
+                                    <div className="rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 shadow px-5 sm:px-6 py-5 flex-1 sm:flex-none">
                                         {isWelcome && (
-                                            <h2 className="text-lg font-bold text-slate-900 mb-2">
+                                            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
                                                 {t(
                                                     "welcome_to_focusguard_ai",
                                                     "Welcome to FocusGuard AI"
@@ -292,7 +292,7 @@ function ChatWindow() {
                                             </h2>
                                         )}
 
-                                        <p className="text-base text-slate-700 whitespace-pre-line leading-8">
+                                        <p className="text-base text-slate-700 dark:text-slate-300 whitespace-pre-line leading-8">
                                             {msg.text}
                                         </p>
 
@@ -307,7 +307,7 @@ function ChatWindow() {
                                                                 key={
                                                                     capability
                                                                 }
-                                                                className="flex items-center gap-2 text-sm font-medium text-slate-600"
+                                                                className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400"
                                                             >
                                                                 <CheckCircle2
                                                                     size={
@@ -341,7 +341,7 @@ function ChatWindow() {
                                                                 disabled={
                                                                     loading
                                                                 }
-                                                                className="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 transition-all duration-200 hover:bg-indigo-100 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                className="rounded-full border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50 dark:bg-indigo-900/20 px-4 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-400 transition-all duration-200 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                                                             >
                                                                 {
                                                                     prompt
@@ -354,7 +354,7 @@ function ChatWindow() {
                                         )}
 
                                         {msg.provider && (
-                                            <span className="mt-3 inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase text-slate-500">
+                                            <span className="mt-3 inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-3 py-1 text-xs font-semibold uppercase text-slate-500 dark:text-slate-300">
                                                 {t(
                                                     "answered_by",
                                                     "Answered by"
@@ -390,14 +390,14 @@ function ChatWindow() {
                                 />
                             </div>
 
-                            <div className="rounded-3xl bg-white border border-slate-200 shadow px-6 py-5 flex items-center gap-3">
+                            <div className="rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 shadow px-6 py-5 flex items-center gap-3">
                                 <span className="flex items-center gap-1">
                                     <span className="h-2 w-2 rounded-full bg-indigo-400 animate-bounce [animation-delay:-0.3s]" />
                                     <span className="h-2 w-2 rounded-full bg-indigo-400 animate-bounce [animation-delay:-0.15s]" />
                                     <span className="h-2 w-2 rounded-full bg-indigo-400 animate-bounce" />
                                 </span>
 
-                                <span className="text-slate-500 text-sm font-medium">
+                                <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">
                                     {t(
                                         "analyzing_organization_data",
                                         "FocusGuard AI is analyzing..."
@@ -409,7 +409,7 @@ function ChatWindow() {
                 )}
             </div>
 
-            <div className="border-t bg-white px-4 sm:px-8 py-5 sm:py-6">
+            <div className="border-t border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800 px-4 sm:px-8 py-5 sm:py-6">
                 <div className="max-w-5xl mx-auto flex items-center gap-3 sm:gap-4">
                     <input
                         value={message}
@@ -425,7 +425,7 @@ function ChatWindow() {
                             "ask_anything_about_organization",
                             "Ask anything about your organization..."
                         )}
-                        className="flex-1 min-w-0 h-14 rounded-3xl border border-slate-300 px-6 outline-none shadow-sm transition-all duration-150 hover:border-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                        className="flex-1 min-w-0 h-14 rounded-3xl border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-slate-700/50 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-6 outline-none shadow-sm transition-all duration-150 hover:border-slate-400 dark:hover:border-slate-500 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:focus:ring-indigo-900/30"
                     />
 
                     <button

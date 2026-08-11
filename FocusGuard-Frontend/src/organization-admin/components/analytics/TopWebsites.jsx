@@ -84,22 +84,22 @@ function TopWebsites({ websites = [] }) {
         .slice(0, 5);
 
     return (
-        <div className="rounded-3xl border border-cyan-100/50 bg-gradient-to-br from-cyan-50/70 to-white shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
-            <div className="p-6 sm:p-7 border-b border-slate-100">
+        <div className="rounded-3xl border border-cyan-100/50 dark:border-cyan-900/50 bg-gradient-to-br from-cyan-50/70 to-white dark:from-cyan-950/20 dark:to-slate-800 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+            <div className="p-6 sm:p-7 border-b border-slate-100 dark:border-slate-700/50">
                 <div className="flex items-start gap-3">
                     <span className="text-2xl leading-none mt-0.5">
                         🌐
                     </span>
 
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-900">
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                             {t(
                                 "top_websites",
                                 "Top Websites"
                             )}
                         </h2>
 
-                        <p className="text-sm text-slate-500 mt-1">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                             {t(
                                 "most_visited_websites_description",
                                 "Most visited websites across your organization"
@@ -114,23 +114,23 @@ function TopWebsites({ websites = [] }) {
                     {/* Desktop / tablet table */}
                     <div className="hidden md:block overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-cyan-50/50">
+                            <thead className="bg-cyan-50/50 dark:bg-cyan-900/20">
                                 <tr>
-                                    <th className="text-left px-6 py-4 text-sm uppercase tracking-wide font-bold text-slate-700">
+                                    <th className="text-left px-6 py-4 text-sm uppercase tracking-wide font-bold text-slate-700 dark:text-slate-200">
                                         {t(
                                             "website",
                                             "Website"
                                         )}
                                     </th>
 
-                                    <th className="text-left px-6 py-4 text-sm uppercase tracking-wide font-bold text-slate-700">
+                                    <th className="text-left px-6 py-4 text-sm uppercase tracking-wide font-bold text-slate-700 dark:text-slate-200">
                                         {t(
                                             "category",
                                             "Category"
                                         )}
                                     </th>
 
-                                    <th className="text-left px-6 py-4 text-sm uppercase tracking-wide font-bold text-slate-700">
+                                    <th className="text-left px-6 py-4 text-sm uppercase tracking-wide font-bold text-slate-700 dark:text-slate-200">
                                         {t(
                                             "time",
                                             "Time"
@@ -147,7 +147,7 @@ function TopWebsites({ websites = [] }) {
                                                 site.id ||
                                                 index
                                             }
-                                            className="border-t border-slate-100 hover:bg-indigo-50 transition-colors duration-150"
+                                            className="border-t border-slate-100 dark:border-slate-700/50 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-colors duration-150"
                                         >
                                             <td className="px-6 py-5">
                                                 <div className="flex items-center gap-2.5">
@@ -155,7 +155,7 @@ function TopWebsites({ websites = [] }) {
                                                         🌐
                                                     </span>
 
-                                                    <span className="text-base font-semibold text-slate-900">
+                                                    <span className="text-base font-semibold text-slate-900 dark:text-slate-200">
                                                         {site.website_name ||
                                                             site.name}
                                                     </span>
@@ -164,7 +164,7 @@ function TopWebsites({ websites = [] }) {
 
                                             <td className="px-6 py-5">
                                                 {site.category ? (
-                                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+                                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-sm font-medium text-slate-700 dark:text-slate-300">
                                                         <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
                                                         {translateCategory(
                                                             site.category,
@@ -178,7 +178,7 @@ function TopWebsites({ websites = [] }) {
                                             </td>
 
                                             <td className="px-6 py-5">
-                                                <span className="inline-flex items-center gap-1.5 text-lg font-bold text-indigo-600">
+                                                <span className="inline-flex items-center gap-1.5 text-lg font-bold text-indigo-600 dark:text-indigo-400">
                                                     <span className="text-base leading-none">
                                                         ⏱
                                                     </span>
@@ -200,14 +200,14 @@ function TopWebsites({ websites = [] }) {
                         {topWebsites.map((site, index) => (
                             <div
                                 key={site.id || index}
-                                className="rounded-2xl border border-cyan-100/50 bg-gradient-to-br from-cyan-50/70 to-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-5 flex flex-col gap-3"
+                                className="rounded-2xl border border-cyan-100/50 dark:border-cyan-900/50 bg-gradient-to-br from-cyan-50/70 to-white dark:from-cyan-950/20 dark:to-slate-800 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-5 flex flex-col gap-3"
                             >
                                 <div className="flex items-center gap-2.5 min-w-0">
                                     <span className="text-lg leading-none shrink-0">
                                         🌐
                                     </span>
 
-                                    <span className="text-base font-semibold text-slate-900 truncate">
+                                    <span className="text-base font-semibold text-slate-900 dark:text-slate-200 truncate">
                                         {site.website_name ||
                                             site.name}
                                     </span>
@@ -215,7 +215,7 @@ function TopWebsites({ websites = [] }) {
 
                                 <div className="flex items-center justify-between gap-3 flex-wrap">
                                     {site.category ? (
-                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-sm font-medium text-slate-700 dark:text-slate-300">
                                             <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
                                             {translateCategory(
                                                 site.category,
@@ -224,12 +224,12 @@ function TopWebsites({ websites = [] }) {
                                             )}
                                         </span>
                                     ) : (
-                                        <span className="text-sm text-slate-400">
+                                        <span className="text-sm text-slate-400 dark:text-slate-500">
                                             -
                                         </span>
                                     )}
 
-                                    <span className="inline-flex items-center gap-1.5 text-lg font-bold text-indigo-600">
+                                    <span className="inline-flex items-center gap-1.5 text-lg font-bold text-indigo-600 dark:text-indigo-400">
                                         <span className="text-base leading-none">
                                             ⏱
                                         </span>
@@ -249,14 +249,14 @@ function TopWebsites({ websites = [] }) {
                         🌐
                     </span>
 
-                    <h3 className="text-lg font-bold text-slate-800">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
                         {t(
                             "no_website_activity",
                             "No Website Activity"
                         )}
                     </h3>
 
-                    <p className="text-sm text-slate-500 max-w-xs">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
                         {t(
                             "no_website_activity_available",
                             "Website usage data will appear once employee activity is available."

@@ -240,7 +240,7 @@ function Navbar({ onToggleSidebar }) {
     }
   };
   return (
-  <header className="sticky top-0 z-30 border-b border-slate-200 bg-gradient-to-r from-blue-50/70 to-indigo-50/40 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-8">
+  <header className="sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-blue-50/70 to-indigo-50/40 dark:from-slate-900/90 dark:to-slate-800/90 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-8">
     <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
       {/* Left Section */}
@@ -249,13 +249,13 @@ function Navbar({ onToggleSidebar }) {
 
         <button
           onClick={() => onToggleSidebar?.()}
-          className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-100 md:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-slate-200 shadow-sm transition hover:bg-slate-100 dark:hover:bg-slate-700 md:hidden"
         >
           <Menu size={20} />
         </button>
 
         <div>
-  <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+  <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
     {t(
       "organization_dashboard",
       "Organization Dashboard"
@@ -265,9 +265,9 @@ function Navbar({ onToggleSidebar }) {
   <div className="mt-2 flex items-center gap-2">
     <span className="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
 
-    <p className="text-base text-slate-600">
+    <p className="text-base text-slate-600 dark:text-slate-400">
       {t("welcome_back", "Welcome back,")}{" "}
-      <span className="font-semibold text-slate-800">
+      <span className="font-semibold text-slate-800 dark:text-slate-200">
         {username}
       </span>
     </p>
@@ -282,11 +282,11 @@ function Navbar({ onToggleSidebar }) {
 
         {/* Language */}
 
-        <div className="flex h-11 items-center rounded-xl border border-slate-200 bg-white px-3 shadow-sm">
+        <div className="flex h-11 items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 shadow-sm">
 
           <Languages
             size={18}
-            className="mr-2 text-indigo-600"
+            className="mr-2 text-indigo-600 dark:text-indigo-400"
           />
 
           <select
@@ -302,7 +302,7 @@ function Navbar({ onToggleSidebar }) {
               languageSaving ||
               !languages.length
             }
-            className="bg-transparent text-sm outline-none"
+            className="bg-transparent text-sm outline-none dark:text-slate-200 [&>option]:dark:bg-slate-800"
           >
             {languages.map((language) => (
               <option
@@ -323,7 +323,7 @@ function Navbar({ onToggleSidebar }) {
 
           <Search
             size={18}
-            className="absolute left-4 top-3.5 text-slate-400"
+            className="absolute left-4 top-3.5 text-slate-400 dark:text-slate-500"
           />
 
           <input
@@ -332,7 +332,7 @@ function Navbar({ onToggleSidebar }) {
               "search_employees",
               "Search employees..."
             )}
-            className="h-11 w-72 rounded-xl border border-slate-200 bg-white pl-11 pr-4 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+            className="h-11 w-72 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-slate-200 dark:placeholder-slate-500 pl-11 pr-4 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-500/50"
           />
 
         </div>
@@ -350,7 +350,7 @@ function Navbar({ onToggleSidebar }) {
                 !showNotifications
               )
             }
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-100"
+            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-slate-200 shadow-sm transition hover:bg-slate-100 dark:hover:bg-slate-700"
           >
 
             <Bell size={20} />
@@ -366,11 +366,11 @@ function Navbar({ onToggleSidebar }) {
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 top-full z-50 mt-3 w-[380px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="absolute right-0 top-full z-50 mt-3 w-[380px] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl">
 
-              <div className="flex items-center justify-between border-b border-slate-200 p-4">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 p-4">
 
-                <h3 className="text-lg font-semibold text-slate-800">
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
                   {t(
                     "notifications",
                     "Notifications"
@@ -382,7 +382,7 @@ function Navbar({ onToggleSidebar }) {
                     onClick={
                       handleMarkAllRead
                     }
-                    className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                    className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
                   >
                     {t(
                       "mark_all_read",
@@ -395,7 +395,7 @@ function Navbar({ onToggleSidebar }) {
 
               <div className="max-h-96 overflow-y-auto">
                 {notifications.length === 0 ? (
-                  <div className="p-8 text-center text-sm text-slate-500">
+                  <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
                     {t(
                       "no_notifications_found",
                       "No notifications found."
@@ -408,19 +408,19 @@ function Navbar({ onToggleSidebar }) {
                       onClick={() =>
                         handleNotificationClick(notification)
                       }
-                      className={`cursor-pointer border-b border-slate-100 p-4 transition hover:bg-slate-50 ${
-                        !notification.is_read ? "bg-indigo-50" : "bg-white"
+                      className={`cursor-pointer border-b border-slate-100 dark:border-slate-700/50 p-4 transition hover:bg-slate-50 dark:hover:bg-slate-700/50 ${
+                        !notification.is_read ? "bg-indigo-50 dark:bg-slate-700/80" : "bg-white dark:bg-slate-800"
                       }`}
                     >
-                      <h4 className="font-semibold text-slate-800">
+                      <h4 className="font-semibold text-slate-800 dark:text-slate-200">
                         {notification.title}
                       </h4>
 
-                      <p className="mt-1 text-sm leading-6 text-slate-600">
+                      <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
                         {notification.message || notification.description}
                       </p>
 
-                      <p className="mt-2 text-xs text-slate-400">
+                      <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
                         {notification.created_at
                           ? new Date(notification.created_at).toLocaleString()
                           : notification.time}
@@ -435,13 +435,13 @@ function Navbar({ onToggleSidebar }) {
 
         {/* Settings */}
 
-        <button className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-100">
+        <button className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-slate-200 shadow-sm transition hover:bg-slate-100 dark:hover:bg-slate-700">
           <Settings size={20} />
         </button>
 
         {/* Profile */}
 
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 shadow-sm">
 
           <div className="relative">
 
@@ -455,11 +455,11 @@ function Navbar({ onToggleSidebar }) {
 
           <div className="min-w-0">
 
-            <p className="truncate text-base font-semibold text-slate-800">
+            <p className="truncate text-base font-semibold text-slate-800 dark:text-slate-200">
               {username}
             </p>
 
-            <p className="truncate text-sm text-slate-500">
+            <p className="truncate text-sm text-slate-500 dark:text-slate-400">
               {organization}
             </p>
 

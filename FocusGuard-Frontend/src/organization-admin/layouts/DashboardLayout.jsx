@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
+import { OrgThemeProvider, useOrgTheme } from "../context/OrgThemeContext";
 
-function DashboardLayout({ children }) {
+function DashboardLayoutContent({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { theme } = useOrgTheme();
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 768px)");
@@ -29,8 +31,9 @@ function DashboardLayout({ children }) {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-[#F3F7FF]">
-      <Sidebar
+    <div className={theme === "dark" ? "dark" : ""}>
+      <div className="flex min-h-screen bg-[#F3F7FF] dark:bg-[#0B1120] text-slate-900 dark:text-slate-50">
+        <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
@@ -49,7 +52,14 @@ function DashboardLayout({ children }) {
         </main>
       </div>
     </div>
+    </div>
   );
 }
 
-export default DashboardLayout;
+export default function DashboardLayout({ children }) {
+  return (
+    <OrgThemeProvider>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </OrgThemeProvider>
+  );
+}

@@ -10,13 +10,13 @@ function EmployeeTable({
 
     if (employees.length === 0) {
         return (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                 <div className="flex flex-col items-center justify-center gap-3 py-16 px-6 text-center">
-                    <div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center">
-                        <Users size={26} className="text-slate-400" />
+                    <div className="h-14 w-14 rounded-full bg-slate-100 dark:bg-slate-800/50 flex items-center justify-center">
+                        <Users size={26} className="text-slate-400 dark:text-slate-500" />
                     </div>
 
-                    <p className="text-base font-semibold text-slate-600">
+                    <p className="text-base font-semibold text-slate-600 dark:text-slate-400">
                         {t(
                             "no_employees_found",
                             "No Employees Found"
@@ -30,47 +30,47 @@ function EmployeeTable({
     return (
         <div className="w-full">
             {/* Desktop / tablet: table layout */}
-            <div className="hidden md:block rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-sm overflow-hidden">
+            <div className="hidden md:block rounded-2xl border border-indigo-100/50 dark:border-indigo-900/50 bg-gradient-to-br from-indigo-50/70 to-white dark:from-indigo-950/20 dark:to-slate-800 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-indigo-50/50">
+                        <thead className="bg-indigo-50/50 dark:bg-indigo-900/20">
                             <tr>
-                                <th className="px-6 py-5 text-left text-base font-bold text-slate-700">
+                                <th className="px-6 py-5 text-left text-base font-bold text-slate-700 dark:text-slate-200">
                                     {t(
                                         "employee",
                                         "Employee"
                                     )}
                                 </th>
 
-                                <th className="px-6 py-5 text-left text-base font-bold text-slate-700">
+                                <th className="px-6 py-5 text-left text-base font-bold text-slate-700 dark:text-slate-200">
                                     {t(
                                         "email",
                                         "Email"
                                     )}
                                 </th>
 
-                                <th className="px-6 py-5 text-left text-base font-bold text-slate-700">
+                                <th className="px-6 py-5 text-left text-base font-bold text-slate-700 dark:text-slate-200">
                                     {t(
                                         "role",
                                         "Role"
                                     )}
                                 </th>
 
-                                <th className="px-6 py-5 text-left text-base font-bold text-slate-700">
+                                <th className="px-6 py-5 text-left text-base font-bold text-slate-700 dark:text-slate-200">
                                     {t(
                                         "status",
                                         "Status"
                                     )}
                                 </th>
 
-                                <th className="px-6 py-5 text-left text-base font-bold text-slate-700">
+                                <th className="px-6 py-5 text-left text-base font-bold text-slate-700 dark:text-slate-200">
                                     {t(
                                         "productivity",
                                         "Productivity"
                                     )}
                                 </th>
 
-                                <th className="px-6 py-5 text-center text-base font-bold text-slate-700">
+                                <th className="px-6 py-5 text-center text-base font-bold text-slate-700 dark:text-slate-200">
                                     {t(
                                         "action",
                                         "Action"
@@ -93,11 +93,11 @@ function EmployeeTable({
                                 return (
                                     <tr
                                         key={employee.id}
-                                        className="border-t border-slate-100 hover:bg-indigo-50/40 transition-colors duration-150"
+                                        className="border-t border-slate-100 dark:border-slate-700/50 hover:bg-indigo-50/40 dark:hover:bg-indigo-900/10 transition-colors duration-150"
                                     >
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-4">
-                                                <div className="h-14 w-14 shrink-0 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center font-bold text-lg text-indigo-700 ring-1 ring-indigo-200">
+                                                <div className="h-14 w-14 shrink-0 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 flex items-center justify-center font-bold text-lg text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-900/50">
                                                     {name
                                                         ?.charAt(
                                                             0
@@ -106,11 +106,11 @@ function EmployeeTable({
                                                 </div>
 
                                                 <div>
-                                                    <p className="font-semibold text-slate-900 text-base">
+                                                    <p className="font-semibold text-slate-900 dark:text-slate-100 text-base">
                                                         {name}
                                                     </p>
 
-                                                    <p className="text-sm text-slate-500">
+                                                    <p className="text-sm text-slate-500 dark:text-slate-400">
                                                         ID #
                                                         {
                                                             employee.id
@@ -120,14 +120,14 @@ function EmployeeTable({
                                             </div>
                                         </td>
 
-                                        <td className="px-6 py-5 text-slate-600 text-[15px] break-all">
+                                        <td className="px-6 py-5 text-slate-600 dark:text-slate-300 text-[15px] break-all">
                                             {
                                                 employee.email
                                             }
                                         </td>
 
                                         <td className="px-6 py-5">
-                                            <span className="inline-flex items-center rounded-full bg-slate-100 px-3.5 py-1.5 text-sm font-medium text-slate-700">
+                                            <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-3.5 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">
                                                 {
                                                     employee.role
                                                 }
@@ -138,8 +138,8 @@ function EmployeeTable({
                                             <span
                                                 className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold ring-1 ${
                                                     employee.is_active
-                                                        ? "bg-green-50 text-green-700 ring-green-200"
-                                                        : "bg-red-50 text-red-700 ring-red-200"
+                                                        ? "bg-green-50 text-green-700 ring-green-200 dark:bg-green-900/30 dark:text-green-400 dark:ring-green-900/50"
+                                                        : "bg-red-50 text-red-700 ring-red-200 dark:bg-red-900/30 dark:text-red-400 dark:ring-red-900/50"
                                                 }`}
                                             >
                                                 {employee.is_active
@@ -156,7 +156,7 @@ function EmployeeTable({
 
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-32 h-2.5 rounded-full bg-slate-200 overflow-hidden">
+                                                <div className="w-32 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
                                                     <div
                                                         className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
                                                         style={{
@@ -165,7 +165,7 @@ function EmployeeTable({
                                                     />
                                                 </div>
 
-                                                <span className="font-bold text-slate-800 text-base">
+                                                <span className="font-bold text-slate-800 dark:text-slate-200 text-base">
                                                     {
                                                         productivity
                                                     }
@@ -182,7 +182,7 @@ function EmployeeTable({
                                                             employee
                                                         )
                                                     }
-                                                    className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-white font-medium shadow-sm hover:bg-indigo-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-150"
+                                                    className="flex items-center gap-2 rounded-xl bg-indigo-600 dark:bg-indigo-500 px-4 py-2.5 text-white font-medium shadow-sm hover:bg-indigo-700 dark:hover:bg-indigo-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-150"
                                                 >
                                                     <Eye
                                                         size={
@@ -218,40 +218,40 @@ function EmployeeTable({
                     return (
                         <div
                             key={employee.id}
-                            className="rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-sm p-5 flex flex-col gap-4"
+                            className="rounded-2xl border border-indigo-100/50 dark:border-indigo-900/50 bg-gradient-to-br from-indigo-50/70 to-white dark:from-indigo-950/20 dark:to-slate-800 shadow-sm p-5 flex flex-col gap-4"
                         >
                             <div className="flex items-center gap-4">
-                                <div className="h-14 w-14 shrink-0 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center font-bold text-lg text-indigo-700 ring-1 ring-indigo-200">
+                                <div className="h-14 w-14 shrink-0 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 flex items-center justify-center font-bold text-lg text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-900/50">
                                     {name
                                         ?.charAt(0)
                                         ?.toUpperCase()}
                                 </div>
 
                                 <div className="min-w-0">
-                                    <p className="font-semibold text-slate-900 text-base truncate">
+                                    <p className="font-semibold text-slate-900 dark:text-slate-100 text-base truncate">
                                         {name}
                                     </p>
 
-                                    <p className="text-sm text-slate-500">
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">
                                         ID #{employee.id}
                                     </p>
                                 </div>
                             </div>
 
-                            <p className="text-sm text-slate-600 break-all">
+                            <p className="text-sm text-slate-600 dark:text-slate-300 break-all">
                                 {employee.email}
                             </p>
 
                             <div className="flex flex-wrap items-center gap-2">
-                                <span className="inline-flex items-center rounded-full bg-slate-100 px-3.5 py-1.5 text-sm font-medium text-slate-700">
+                                <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-3.5 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">
                                     {employee.role}
                                 </span>
 
                                 <span
                                     className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold ring-1 ${
                                         employee.is_active
-                                            ? "bg-green-50 text-green-700 ring-green-200"
-                                            : "bg-red-50 text-red-700 ring-red-200"
+                                            ? "bg-green-50 text-green-700 ring-green-200 dark:bg-green-900/30 dark:text-green-400 dark:ring-green-900/50"
+                                            : "bg-red-50 text-red-700 ring-red-200 dark:bg-red-900/30 dark:text-red-400 dark:ring-red-900/50"
                                     }`}
                                 >
                                     {employee.is_active
@@ -268,19 +268,19 @@ function EmployeeTable({
 
                             <div className="flex flex-col gap-2">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-slate-500">
+                                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
                                         {t(
                                             "productivity",
                                             "Productivity"
                                         )}
                                     </span>
 
-                                    <span className="font-bold text-slate-800 text-base">
+                                    <span className="font-bold text-slate-800 dark:text-slate-200 text-base">
                                         {productivity}%
                                     </span>
                                 </div>
 
-                                <div className="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden">
+                                <div className="w-full h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
                                     <div
                                         className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
                                         style={{
@@ -294,7 +294,7 @@ function EmployeeTable({
                                 onClick={() =>
                                     onView(employee)
                                 }
-                                className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-white font-medium shadow-sm hover:bg-indigo-700 active:scale-[0.98] transition-all duration-150"
+                                className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 dark:bg-indigo-500 px-4 py-3 text-white font-medium shadow-sm hover:bg-indigo-700 dark:hover:bg-indigo-400 active:scale-[0.98] transition-all duration-150"
                             >
                                 <Eye size={16} />
 

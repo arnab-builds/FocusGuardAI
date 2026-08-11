@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { useLanguage } from "../../context/useLanguage";
+import { useOrgTheme } from "../../context/OrgThemeContext";
 
 import { getEmployeeBrowsingHistory } from "../../services/employeeService";
 
@@ -115,14 +116,14 @@ const productivityPillClasses = (value) => {
     const normalized = String(value || "NEUTRAL").toUpperCase();
 
     if (normalized === "PRODUCTIVE") {
-        return "bg-green-50 text-green-700 ring-green-200";
+        return "bg-green-50 text-green-700 ring-green-200 dark:bg-green-900/30 dark:text-green-400 dark:ring-green-900/50";
     }
 
     if (normalized === "NON_PRODUCTIVE") {
-        return "bg-red-50 text-red-700 ring-red-200";
+        return "bg-red-50 text-red-700 ring-red-200 dark:bg-red-900/30 dark:text-red-400 dark:ring-red-900/50";
     }
 
-    return "bg-yellow-50 text-yellow-700 ring-yellow-200";
+    return "bg-yellow-50 text-yellow-700 ring-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:ring-yellow-900/50";
 };
 
 function EmployeeAnalyticsDialog({
@@ -131,6 +132,7 @@ function EmployeeAnalyticsDialog({
     employee,
 }) {
     const { currentLanguageCode, t } = useLanguage();
+    const { theme } = useOrgTheme();
 
     const [historyDate, setHistoryDate] =
         useState("");
@@ -242,17 +244,59 @@ function EmployeeAnalyticsDialog({
             onClose={onClose}
             maxWidth="xl"
             fullWidth
+            className={theme === "dark" ? "dark" : ""}
+            PaperProps={{
+                className: theme === "dark" ? "!bg-[#111827]" : "!bg-white",
+                style: {
+                    backgroundColor: theme === "dark" ? "#111827" : "#FFFFFF",
+                    backgroundImage: "none",
+                    color: theme === "dark" ? "#F8FAFC" : undefined,
+                    border: "none",
+                    boxShadow: theme === "dark" ? "0 25px 50px -12px rgba(0, 0, 0, 0.5)" : undefined,
+                },
+                sx: {
+                    backgroundColor: theme === "dark" ? "#111827 !important" : undefined,
+                    backgroundImage: theme === "dark" ? "none !important" : undefined,
+                    color: theme === "dark" ? "#F8FAFC !important" : undefined,
+                    border: theme === "dark" ? "none !important" : undefined,
+                    boxShadow: theme === "dark" ? "0 25px 50px -12px rgba(0, 0, 0, 0.5) !important" : undefined,
+                    "&::-webkit-scrollbar": {
+                        width: "8px",
+                        height: "8px",
+                    },
+                    "&::-webkit-scrollbar-track": {
+                        background: theme === "dark" ? "#111827" : "#F8FAFC",
+                        borderRadius: "4px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                        background: theme === "dark" ? "#334155" : "#CBD5E1",
+                        borderRadius: "4px",
+                    },
+                    "&::-webkit-scrollbar-thumb:hover": {
+                        background: theme === "dark" ? "#475569" : "#94A3B8",
+                    },
+                }
+            }}
+            BackdropProps={{
+                style: {
+                    backgroundColor: theme === "dark" ? "rgba(0, 0, 0, 0.75)" : undefined,
+                },
+                sx: {
+                    backgroundColor: theme === "dark" ? "rgba(0, 0, 0, 0.75) !important" : undefined,
+                }
+            }}
         >
+            <div className="w-full h-full flex flex-col bg-white dark:bg-[#111827] m-0 p-0 rounded-[inherit] overflow-hidden">
             <DialogTitle className="flex justify-between items-start gap-4 px-4 py-5 sm:px-8 sm:py-6">
                 <div>
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50">
                         {t(
                             "employee_details",
                             "Employee Details"
                         )}
                     </h2>
 
-                    <p className="text-slate-500 text-sm sm:text-base mt-1.5 font-medium">
+                    <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base mt-1.5 font-medium">
                         {t(
                             "productivity_activity_summary",
                             "Productivity & Activity Summary"
@@ -260,7 +304,7 @@ function EmployeeAnalyticsDialog({
                     </p>
                 </div>
 
-                <IconButton onClick={onClose} className="shrink-0">
+                <IconButton onClick={onClose} className="shrink-0 dark:text-slate-300">
                     <X size={22} />
                 </IconButton>
             </DialogTitle>
@@ -268,26 +312,26 @@ function EmployeeAnalyticsDialog({
             <DialogContent className="px-4 pb-6 sm:px-8 sm:pb-8">
                 <div className="space-y-8 py-2">
                     {/* Profile card */}
-                    <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5 sm:p-7 shadow-sm">
+                    <div className="rounded-2xl border border-slate-200 dark:border-[#263449] bg-gradient-to-br from-slate-50 to-white dark:bg-none dark:bg-[#172033] p-5 sm:p-7 shadow-sm">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-7">
-                            <div className="h-20 w-20 sm:h-24 sm:w-24 shrink-0 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center text-3xl sm:text-4xl font-bold text-indigo-700 ring-2 ring-indigo-200">
+                            <div className="h-20 w-20 sm:h-24 sm:w-24 shrink-0 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 flex items-center justify-center text-3xl sm:text-4xl font-bold text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-200 dark:ring-indigo-900/50">
                                 {employee.username
                                     ?.charAt(0)
                                     ?.toUpperCase()}
                             </div>
 
                             <div className="flex flex-col gap-2.5 min-w-0">
-                                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">
+                                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50 truncate">
                                     {employee.username}
                                 </h3>
 
-                                <p className="text-slate-500 text-sm sm:text-base break-all">
+                                <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base break-all">
                                     {employee.email}
                                 </p>
 
                                 <div className="flex flex-wrap items-center gap-2 mt-1">
                                     {employee.role && (
-                                        <span className="inline-flex items-center rounded-full bg-slate-100 px-3.5 py-1.5 text-sm font-medium text-slate-700">
+                                        <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-700 px-3.5 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">
                                             {employee.role}
                                         </span>
                                     )}
@@ -295,8 +339,8 @@ function EmployeeAnalyticsDialog({
                                     <span
                                         className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold ring-1 ${
                                             employee.is_active
-                                                ? "bg-green-50 text-green-700 ring-green-200"
-                                                : "bg-red-50 text-red-700 ring-red-200"
+                                                ? "bg-green-50 text-green-700 ring-green-200 dark:bg-green-900/30 dark:text-green-400 dark:ring-green-900/50"
+                                                : "bg-red-50 text-red-700 ring-red-200 dark:bg-red-900/30 dark:text-red-400 dark:ring-red-900/50"
                                         }`}
                                     >
                                         {employee.is_active
@@ -316,26 +360,26 @@ function EmployeeAnalyticsDialog({
 
                     {/* Analytics cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                        <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md transition">
+                        <div className="rounded-2xl border border-slate-200 dark:border-[#263449] bg-white dark:bg-[#172033] p-5 sm:p-6 shadow-sm hover:shadow-md transition">
                             <div className="flex items-center gap-3 mb-3">
                                 <div
-                                    className={`h-11 w-11 rounded-xl flex items-center justify-center ${
+                                    className={`h-11 w-11 rounded-xl flex items-center justify-center dark:h-auto dark:w-auto ${
                                         employee.is_active
-                                            ? "bg-green-100"
-                                            : "bg-red-100"
+                                            ? "bg-green-100 dark:bg-transparent"
+                                            : "bg-red-100 dark:bg-transparent"
                                     }`}
                                 >
                                     <Activity
                                         size={20}
                                         className={
                                             employee.is_active
-                                                ? "text-green-600"
-                                                : "text-red-600"
+                                                ? "text-green-600 dark:text-green-400"
+                                                : "text-red-600 dark:text-red-400"
                                         }
                                     />
                                 </div>
 
-                                <p className="text-base font-semibold text-slate-700">
+                                <p className="text-base font-semibold text-slate-700 dark:text-slate-300">
                                     {t(
                                         "status",
                                         "Status"
@@ -346,8 +390,8 @@ function EmployeeAnalyticsDialog({
                             <h3
                                 className={`text-3xl font-bold ${
                                     employee.is_active
-                                        ? "text-green-600"
-                                        : "text-red-600"
+                                        ? "text-green-600 dark:text-green-400"
+                                        : "text-red-600 dark:text-red-400"
                                 }`}
                             >
                                 {employee.is_active
@@ -362,16 +406,16 @@ function EmployeeAnalyticsDialog({
                             </h3>
                         </div>
 
-                        <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md transition">
+                        <div className="rounded-2xl border border-slate-200 dark:border-[#263449] bg-white dark:bg-[#172033] p-5 sm:p-6 shadow-sm hover:shadow-md transition">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="h-11 w-11 rounded-xl bg-indigo-100 flex items-center justify-center">
+                                <div className="h-11 w-11 rounded-xl bg-indigo-100 dark:bg-transparent dark:h-auto dark:w-auto flex items-center justify-center">
                                     <Gauge
                                         size={20}
-                                        className="text-indigo-600"
+                                        className="text-indigo-600 dark:text-indigo-400"
                                     />
                                 </div>
 
-                                <p className="text-base font-semibold text-slate-700">
+                                <p className="text-base font-semibold text-slate-700 dark:text-slate-300">
                                     {t(
                                         "productivity",
                                         "Productivity"
@@ -379,21 +423,21 @@ function EmployeeAnalyticsDialog({
                                 </p>
                             </div>
 
-                            <h3 className="text-3xl font-bold text-indigo-600">
+                            <h3 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                                 {productivity}%
                             </h3>
                         </div>
 
-                        <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md transition">
+                        <div className="rounded-2xl border border-slate-200 dark:border-[#263449] bg-white dark:bg-[#172033] p-5 sm:p-6 shadow-sm hover:shadow-md transition">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="h-11 w-11 rounded-xl bg-emerald-100 flex items-center justify-center">
+                                <div className="h-11 w-11 rounded-xl bg-emerald-100 dark:bg-transparent dark:h-auto dark:w-auto flex items-center justify-center">
                                     <Timer
                                         size={20}
-                                        className="text-emerald-600"
+                                        className="text-emerald-600 dark:text-emerald-400"
                                     />
                                 </div>
 
-                                <p className="text-base font-semibold text-slate-700">
+                                <p className="text-base font-semibold text-slate-700 dark:text-slate-300">
                                     {t(
                                         "productive_time",
                                         "Productive Time"
@@ -401,21 +445,21 @@ function EmployeeAnalyticsDialog({
                                 </p>
                             </div>
 
-                            <h3 className="text-3xl font-bold text-slate-900">
+                            <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
                                 {productiveTime}
                             </h3>
                         </div>
 
-                        <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md transition">
+                        <div className="rounded-2xl border border-slate-200 dark:border-[#263449] bg-white dark:bg-[#172033] p-5 sm:p-6 shadow-sm hover:shadow-md transition">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="h-11 w-11 rounded-xl bg-orange-100 flex items-center justify-center">
+                                <div className="h-11 w-11 rounded-xl bg-orange-100 dark:bg-transparent dark:h-auto dark:w-auto flex items-center justify-center">
                                     <TimerOff
                                         size={20}
-                                        className="text-orange-600"
+                                        className="text-orange-600 dark:text-orange-400"
                                     />
                                 </div>
 
-                                <p className="text-base font-semibold text-slate-700">
+                                <p className="text-base font-semibold text-slate-700 dark:text-slate-300">
                                     {t(
                                         "unproductive_time",
                                         "Unproductive Time"
@@ -423,7 +467,7 @@ function EmployeeAnalyticsDialog({
                                 </p>
                             </div>
 
-                            <h3 className="text-3xl font-bold text-slate-900">
+                            <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
                                 {formatDuration(
                                     nonProductiveTime,
                                     t
@@ -433,17 +477,17 @@ function EmployeeAnalyticsDialog({
                     </div>
 
                     {/* Browsing history */}
-                    <div className="rounded-2xl border border-slate-200 p-5 sm:p-7 shadow-sm">
+                    <div className="rounded-2xl border border-slate-200 dark:border-[#263449] bg-white dark:bg-[#172033] p-5 sm:p-7 shadow-sm">
                         <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
                             <div>
-                                <h3 className="text-xl sm:text-2xl font-bold text-slate-900">
+                                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50">
                                     {t(
                                         "browsing_history",
                                         "Browsing Activity"
                                     )}
                                 </h3>
 
-                                <p className="text-sm text-slate-500 font-medium mt-1">
+                                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
                                     {t(
                                         "todays_website_usage",
                                         "Today's Website Usage"
@@ -452,10 +496,10 @@ function EmployeeAnalyticsDialog({
                             </div>
 
                             <div className="flex items-center gap-2.5">
-                                <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2.5 focus-within:border-indigo-500 transition">
+                                <div className="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-[#334155] bg-white dark:bg-[#172033] px-3 py-2.5 focus-within:border-indigo-500 transition">
                                     <CalendarDays
                                         size={16}
-                                        className="text-slate-400 shrink-0"
+                                        className="text-slate-400 dark:text-slate-300 shrink-0"
                                     />
 
                                     <input
@@ -470,7 +514,7 @@ function EmployeeAnalyticsDialog({
                                                 1
                                             );
                                         }}
-                                        className="text-sm outline-none bg-transparent"
+                                        className="text-sm outline-none bg-transparent dark:text-slate-300 [color-scheme:light] dark:[color-scheme:dark]"
                                     />
                                 </div>
 
@@ -485,7 +529,7 @@ function EmployeeAnalyticsDialog({
                                                 1
                                             );
                                         }}
-                                        className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50 hover:border-slate-400 transition whitespace-nowrap"
+                                        className="rounded-xl border border-slate-300 dark:border-slate-700/50 bg-white dark:bg-transparent px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 shadow-sm hover:bg-slate-50 hover:border-slate-400 dark:hover:bg-slate-700/80 dark:hover:border-slate-600 transition whitespace-nowrap"
                                     >
                                         {t(
                                             "clear",
@@ -497,13 +541,13 @@ function EmployeeAnalyticsDialog({
                         </div>
 
                         {historyError && (
-                            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            <div className="mb-4 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-700 dark:text-red-400">
                                 {historyError}
                             </div>
                         )}
 
                         {historyLoading ? (
-                            <div className="py-10 text-center text-slate-500 font-medium">
+                            <div className="py-10 text-center text-slate-500 dark:text-slate-400 font-medium">
                                 {t(
                                     "loading_browsing_history",
                                     "Loading browsing history..."
@@ -512,10 +556,10 @@ function EmployeeAnalyticsDialog({
                         ) : history.length >
                           0 ? (
                             <>
-                                <div className="rounded-2xl border border-slate-200 overflow-hidden">
+                                <div className="rounded-2xl border border-slate-200 dark:border-transparent overflow-hidden">
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-sm sm:text-base">
-                                            <thead className="bg-slate-50 text-left text-slate-700">
+                                            <thead className="bg-slate-50 dark:bg-transparent border-b border-transparent dark:border-[#263449]/50 text-left text-slate-700 dark:text-slate-300">
                                                 <tr>
                                                     <th className="px-5 py-4 font-semibold whitespace-nowrap">
                                                         <span className="inline-flex items-center gap-1.5">
@@ -523,7 +567,7 @@ function EmployeeAnalyticsDialog({
                                                                 size={
                                                                     15
                                                                 }
-                                                                className="text-slate-400"
+                                                                className="text-slate-400 dark:text-slate-300"
                                                             />
                                                             {t(
                                                                 "website",
@@ -585,20 +629,20 @@ function EmployeeAnalyticsDialog({
                                                             key={
                                                                 activity.id
                                                             }
-                                                            className="border-t border-slate-100 hover:bg-indigo-50/40 transition-colors"
+                                                            className="border-t border-slate-100 dark:border-[#263449] hover:bg-indigo-50/40 dark:hover:bg-indigo-900/10 transition-colors"
                                                         >
-                                                            <td className="px-5 py-4 font-semibold text-slate-800 whitespace-nowrap">
+                                                            <td className="px-5 py-4 font-semibold text-slate-800 dark:text-slate-50 whitespace-nowrap">
                                                                 {activity.website_name ||
                                                                     activity.website ||
                                                                     "-"}
                                                             </td>
 
-                                                            <td className="px-5 py-4 text-slate-600">
+                                                            <td className="px-5 py-4 text-slate-600 dark:text-slate-400">
                                                                 {activity.tab_title ||
                                                                     "-"}
                                                             </td>
 
-                                                            <td className="px-5 py-4 text-slate-600 whitespace-nowrap">
+                                                            <td className="px-5 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">
                                                                 {activity.category
                                                                     ? translateCategory(
                                                                           activity.category,
@@ -608,21 +652,21 @@ function EmployeeAnalyticsDialog({
                                                                     : "-"}
                                                             </td>
 
-                                                            <td className="px-5 py-4 text-slate-600 whitespace-nowrap">
+                                                            <td className="px-5 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">
                                                                 {formatDuration(
                                                                     activity.duration,
                                                                     t
                                                                 )}
                                                             </td>
 
-                                                            <td className="px-5 py-4 text-slate-600 whitespace-nowrap">
+                                                            <td className="px-5 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">
                                                                 {formatDate(
                                                                     activity.start_time,
                                                                     currentLanguageCode
                                                                 )}
                                                             </td>
 
-                                                            <td className="px-5 py-4 text-slate-600 whitespace-nowrap">
+                                                            <td className="px-5 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">
                                                                 {formatTime(
                                                                     activity.start_time,
                                                                     currentLanguageCode
@@ -649,8 +693,8 @@ function EmployeeAnalyticsDialog({
                                     </div>
                                 </div>
 
-                                <div className="mt-5 w-full flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 md:flex-row md:items-center md:justify-between text-sm text-slate-600">
-                                    <span className="font-medium text-slate-600 text-center md:text-left whitespace-nowrap">
+                                <div className="mt-5 w-full flex flex-col gap-4 rounded-2xl border border-slate-200 dark:border-transparent bg-white dark:bg-transparent p-4 sm:p-5 md:flex-row md:items-center md:justify-between text-sm text-slate-600 dark:text-slate-300">
+                                    <span className="font-medium text-slate-600 dark:text-slate-300 text-center md:text-left whitespace-nowrap">
                                         {t(
                                             "showing_records",
                                             "Showing {shown} of {total} records"
@@ -685,8 +729,8 @@ function EmployeeAnalyticsDialog({
                                             }
                                             className={`shrink-0 whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition-all duration-200 ${
                                                 historyPage === 1
-                                                    ? "cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400 shadow-none"
-                                                    : "border border-slate-200 bg-white text-slate-700 hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600"
+                                                    ? "cursor-not-allowed border border-slate-200 dark:border-transparent bg-slate-100 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 shadow-none"
+                                                    : "border border-slate-200 dark:border-[#263449] bg-white dark:bg-transparent text-slate-700 dark:text-slate-300 hover:border-indigo-500 dark:hover:border-slate-500 hover:bg-indigo-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-300"
                                             }`}
                                         >
                                             ← {t(
@@ -695,7 +739,7 @@ function EmployeeAnalyticsDialog({
                                             )}
                                         </button>
 
-                                        <div className="shrink-0 min-w-[110px] whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 text-center">
+                                        <div className="shrink-0 min-w-[110px] whitespace-nowrap rounded-xl border border-slate-200 dark:border-[#263449]/50 bg-slate-50 dark:bg-transparent px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 text-center">
                                             {t(
                                                 "page_of",
                                                 "Page {page} of {total}"
@@ -731,8 +775,8 @@ function EmployeeAnalyticsDialog({
                                             className={`shrink-0 whitespace-nowrap rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition-all duration-200 ${
                                                 historyPage ===
                                                 totalHistoryPages
-                                                    ? "cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400 shadow-none"
-                                                    : "border border-slate-200 bg-white text-slate-700 hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600"
+                                                    ? "cursor-not-allowed border border-slate-200 dark:border-transparent bg-slate-100 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 shadow-none"
+                                                    : "border border-slate-200 dark:border-[#263449] bg-white dark:bg-transparent text-slate-700 dark:text-slate-300 hover:border-indigo-500 dark:hover:border-slate-500 hover:bg-indigo-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-300"
                                             }`}
                                         >
                                             {t(
@@ -744,7 +788,7 @@ function EmployeeAnalyticsDialog({
                                 </div>
                             </>
                         ) : (
-                            <div className="py-10 text-center text-slate-500 font-medium">
+                            <div className="py-10 text-center text-slate-500 dark:text-slate-400 font-medium">
                                 {t(
                                     "no_browsing_history_found",
                                     "No browsing history found."
@@ -755,6 +799,7 @@ function EmployeeAnalyticsDialog({
                     </div>
                 </div>
             </DialogContent>
+            </div>
         </Dialog>
     );
 }

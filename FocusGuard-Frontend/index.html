@@ -5,6 +5,18 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FocusGuard AI</title>
+    <script>
+      (function() {
+        try {
+          var isOrg = window.location.pathname.startsWith('/organization-admin');
+          var theme = localStorage.getItem(isOrg ? 'focusguard_org_theme' : 'focusguard_theme');
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.backgroundColor = isOrg ? '#0B1120' : '#0f172a';
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

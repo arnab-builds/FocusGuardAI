@@ -7,6 +7,7 @@ import {
 } from "recharts";
 
 import { useLanguage } from "../../context/useLanguage";
+import { useOrgTheme } from "../../context/OrgThemeContext";
 import { translateCategory } from "../../utils/categoryTranslations";
 
 const colors = [
@@ -22,6 +23,8 @@ const colors = [
 
 function CategoryChart({ data = [] }) {
     const { currentLanguageCode, t } = useLanguage();
+    const { theme } = useOrgTheme();
+    const isDark = theme === "dark";
 
     const chartData = Array.isArray(data)
         ? data.map((item) => ({
@@ -40,8 +43,8 @@ function CategoryChart({ data = [] }) {
     );
 
     return (
-        <div className="rounded-[18px] border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-sm transition-all duration-200 hover:shadow-md p-6 h-[460px] overflow-hidden">
-            <h2 className="text-lg font-semibold mb-4">
+        <div className="rounded-[18px] border border-indigo-100/50 dark:border-indigo-900/50 bg-gradient-to-br from-indigo-50/70 to-white dark:from-indigo-950/20 dark:to-slate-800 shadow-sm transition-all duration-200 hover:shadow-md p-6 h-[460px] overflow-hidden">
+            <h2 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">
                 {t(
                     "category_distribution",
                     "Category Distribution"
@@ -87,9 +90,18 @@ function CategoryChart({ data = [] }) {
                                         )
                                     )}
                                 </Pie>
-
-                                <Tooltip />
-
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+                                        borderColor: isDark ? "#334155" : "#E2E8F0",
+                                        color: isDark ? "#F8FAFC" : "#0F172A",
+                                        borderRadius: "12px",
+                                        boxShadow: "0 12px 24px rgba(0,0,0,0.1)",
+                                    }}
+                                    itemStyle={{
+                                        color: isDark ? "#F8FAFC" : "#0F172A",
+                                    }}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
@@ -129,12 +141,12 @@ function CategoryChart({ data = [] }) {
                                                 }}
                                             />
 
-                                            <span className="min-w-0 break-words text-slate-600">
+                                            <span className="min-w-0 break-words text-slate-600 dark:text-slate-300">
                                                 {item.name}
                                             </span>
                                         </div>
 
-                                        <span className="shrink-0 font-semibold text-slate-700">
+                                        <span className="shrink-0 font-semibold text-slate-700 dark:text-slate-200">
                                             {
                                                 percentage
                                             }
@@ -147,7 +159,7 @@ function CategoryChart({ data = [] }) {
                     </div>
                 </div>
             ) : (
-                <div className="h-full flex items-center justify-center text-slate-500">
+                <div className="h-full flex items-center justify-center text-slate-500 dark:text-slate-400">
                     {t(
                         "no_category_data_available",
                         "No category data available."

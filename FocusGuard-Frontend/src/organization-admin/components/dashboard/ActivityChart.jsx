@@ -17,6 +17,7 @@ import {
 } from "recharts";
 
 import { useLanguage } from "../../context/useLanguage";
+import { useOrgTheme } from "../../context/OrgThemeContext";
 
 const formatHours = (value, t) =>
     `${Number(value || 0).toFixed(1)}${t("hours_short", "h")}`;
@@ -52,6 +53,8 @@ const formatDay = (item) => {
 
 function ActivityChart({ data = [] }) {
     const { t } = useLanguage();
+    const { theme } = useOrgTheme();
+    const isDark = theme === "dark";
 
     const chartData = data.map((item) => ({
         day: formatDay(item),
@@ -68,15 +71,15 @@ function ActivityChart({ data = [] }) {
     return (
         <Card
             elevation={0}
-            className="rounded-[18px] border border-blue-100/50 bg-gradient-to-br from-blue-50/70 to-white shadow-sm transition-all duration-200 hover:shadow-md"
-            sx={{ height: "100%" }}
+            className="rounded-[18px] border border-blue-100/50 dark:border-blue-900/50 bg-gradient-to-br from-blue-50/70 to-white dark:from-blue-950/20 dark:to-slate-800 shadow-sm transition-all duration-200 hover:shadow-md !bg-transparent"
+            sx={{ height: "100%", background: "transparent" }}
         >
             <CardContent sx={{ p: 3.5 }}>
                 <div className="mb-8 flex items-start justify-between">
                     <div>
                         <Typography
+                            className="text-slate-500 dark:text-slate-400"
                             sx={{
-                                color: "#64748B",
                                 fontWeight: 700,
                                 fontSize: 12,
                                 letterSpacing: 0,
@@ -93,7 +96,7 @@ function ActivityChart({ data = [] }) {
                             variant="h5"
                             fontWeight={800}
                             mt={0.5}
-                            color="#0F172A"
+                            className="text-slate-900 dark:text-slate-50"
                         >
                             {t(
                                 "weekly_trend",
@@ -102,7 +105,7 @@ function ActivityChart({ data = [] }) {
                         </Typography>
                     </div>
 
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
                         <AnalyticsRoundedIcon fontSize="small" />
                     </div>
                 </div>
@@ -122,7 +125,7 @@ function ActivityChart({ data = [] }) {
                                 }}
                             >
                                 <CartesianGrid
-                                    stroke="#E2E8F0"
+                                    stroke={isDark ? "#334155" : "#E2E8F0"}
                                     strokeDasharray="4 4"
                                     vertical={false}
                                 />
@@ -132,7 +135,7 @@ function ActivityChart({ data = [] }) {
                                     axisLine={false}
                                     tickLine={false}
                                     tick={{
-                                        fill: "#64748B",
+                                        fill: isDark ? "#94A3B8" : "#64748B",
                                         fontSize: 12,
                                     }}
                                 />
@@ -147,7 +150,7 @@ function ActivityChart({ data = [] }) {
                                         )
                                     }
                                     tick={{
-                                        fill: "#64748B",
+                                        fill: isDark ? "#94A3B8" : "#64748B",
                                         fontSize: 12,
                                     }}
                                     width={44}
@@ -155,7 +158,7 @@ function ActivityChart({ data = [] }) {
 
                                 <Tooltip
                                     cursor={{
-                                        fill: "rgba(99,102,241,.08)",
+                                        fill: isDark ? "rgba(255,255,255,.05)" : "rgba(99,102,241,.08)",
                                     }}
                                     formatter={(
                                         value,
@@ -177,12 +180,13 @@ function ActivityChart({ data = [] }) {
                                               ),
                                     ]}
                                     labelStyle={{
-                                        color: "#0F172A",
+                                        color: isDark ? "#F8FAFC" : "#0F172A",
                                         fontWeight: 700,
                                     }}
                                     contentStyle={{
+                                        backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
                                         borderRadius: 12,
-                                        border: "1px solid #E2E8F0",
+                                        border: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
                                         boxShadow:
                                             "0 12px 24px rgba(15,23,42,.10)",
                                     }}
@@ -228,7 +232,7 @@ function ActivityChart({ data = [] }) {
                             </BarChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-sm font-medium text-slate-500">
+                        <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-sm font-medium text-slate-500 dark:text-slate-400">
                             {t(
                                 "no_weekly_trend_data",
                                 "No weekly trend data available."

@@ -33,16 +33,16 @@ function RequestTable() {
     const getStatusPillClasses = (status) => {
         const classes = {
             PENDING:
-                "bg-amber-100 text-amber-700",
+                "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400",
             APPROVED:
-                "bg-green-100 text-green-700",
+                "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400",
             REJECTED:
-                "bg-red-100 text-red-700",
+                "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
         };
 
         return (
             classes[normalizeStatus(status)] ||
-            "bg-slate-100 text-slate-600"
+            "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
         );
     };
 
@@ -175,14 +175,14 @@ function RequestTable() {
     };
 
     return (
-        <div className="rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
+        <div className="rounded-3xl border border-indigo-100/50 dark:border-indigo-900/50 bg-gradient-to-br from-indigo-50/70 to-white dark:from-indigo-950/20 dark:to-slate-800 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
             {error && (
-                <div className="flex items-start gap-3 border-b border-red-200 bg-red-50 px-6 py-4">
+                <div className="flex items-start gap-3 border-b border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 px-6 py-4">
                     <span className="text-xl leading-none mt-0.5">
                         ⚠️
                     </span>
 
-                    <p className="text-sm sm:text-base font-medium text-red-700">
+                    <p className="text-sm sm:text-base font-medium text-red-700 dark:text-red-400">
                         {error}
                     </p>
                 </div>
@@ -193,15 +193,15 @@ function RequestTable() {
                     {[0, 1, 2, 3].map((skeleton) => (
                         <div
                             key={skeleton}
-                            className="rounded-2xl border border-slate-200 p-5 animate-pulse"
+                            className="rounded-2xl border border-slate-200 dark:border-slate-700/50 p-5 animate-pulse"
                         >
                             <div className="flex items-center justify-between gap-4">
                                 <div className="space-y-2.5 flex-1">
-                                    <div className="h-4 w-1/4 rounded-full bg-slate-200" />
-                                    <div className="h-3.5 w-2/3 rounded-full bg-slate-100" />
+                                    <div className="h-4 w-1/4 rounded-full bg-slate-200 dark:bg-slate-700" />
+                                    <div className="h-3.5 w-2/3 rounded-full bg-slate-100 dark:bg-slate-800" />
                                 </div>
 
-                                <div className="h-8 w-24 rounded-full bg-slate-100 shrink-0" />
+                                <div className="h-8 w-24 rounded-full bg-slate-100 dark:bg-slate-800 shrink-0" />
                             </div>
                         </div>
                     ))}
@@ -212,30 +212,30 @@ function RequestTable() {
                     {/* Desktop / tablet table */}
                     <div className="hidden md:block overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-indigo-50/50">
+                            <thead className="bg-indigo-50/50 dark:bg-indigo-900/20">
                                 <tr>
-                                    <th className="px-6 py-5 text-left text-sm uppercase tracking-wider font-bold text-slate-700">
+                                    <th className="px-6 py-5 text-left text-sm uppercase tracking-wider font-bold text-slate-700 dark:text-slate-200">
                                         {t(
                                             "employee",
                                             "Employee"
                                         )}
                                     </th>
 
-                                    <th className="px-6 py-5 text-left text-sm uppercase tracking-wider font-bold text-slate-700">
+                                    <th className="px-6 py-5 text-left text-sm uppercase tracking-wider font-bold text-slate-700 dark:text-slate-200">
                                         {t(
                                             "reason",
                                             "Reason"
                                         )}
                                     </th>
 
-                                    <th className="px-6 py-5 text-left text-sm uppercase tracking-wider font-bold text-slate-700">
+                                    <th className="px-6 py-5 text-left text-sm uppercase tracking-wider font-bold text-slate-700 dark:text-slate-200">
                                         {t(
                                             "status",
                                             "Status"
                                         )}
                                     </th>
 
-                                    <th className="px-6 py-5 text-center text-sm uppercase tracking-wider font-bold text-slate-700">
+                                    <th className="px-6 py-5 text-center text-sm uppercase tracking-wider font-bold text-slate-700 dark:text-slate-200">
                                         {t(
                                             "action",
                                             "Action"
@@ -251,7 +251,7 @@ function RequestTable() {
                                             key={
                                                 request.id
                                             }
-                                            className="border-t border-slate-100 hover:bg-indigo-50 transition-colors duration-150"
+                                            className="border-t border-slate-100 dark:border-slate-700/50 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-colors duration-150"
                                         >
                                             <td className="px-6 py-5">
                                                 <div className="flex items-center gap-2.5">
@@ -260,13 +260,13 @@ function RequestTable() {
                                                     </span>
 
                                                     <div>
-                                                        <p className="text-base font-semibold text-slate-900">
+                                                        <p className="text-base font-semibold text-slate-900 dark:text-slate-100">
                                                             {getEmployeeName(
                                                                 request
                                                             )}
                                                         </p>
 
-                                                        <p className="text-xs text-slate-500">
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400">
                                                             {t(
                                                                 "employee",
                                                                 "Employee"
@@ -281,7 +281,7 @@ function RequestTable() {
                                             </td>
 
                                             <td className="px-6 py-5 max-w-md">
-                                                <p className="leading-6 text-slate-700">
+                                                <p className="leading-6 text-slate-700 dark:text-slate-300">
                                                     {
                                                         request.reason
                                                     }
@@ -356,7 +356,7 @@ function RequestTable() {
                         {requests.map((request) => (
                             <div
                                 key={request.id}
-                                className="rounded-2xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col gap-4"
+                                className="rounded-2xl border border-indigo-100/50 dark:border-indigo-900/50 bg-gradient-to-br from-indigo-50/70 to-white dark:from-indigo-950/20 dark:to-slate-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col gap-4"
                             >
                                 <div className="flex items-center gap-2.5 min-w-0">
                                     <span className="text-lg leading-none shrink-0">
@@ -364,13 +364,13 @@ function RequestTable() {
                                     </span>
 
                                     <div className="min-w-0">
-                                        <p className="text-base font-semibold text-slate-900 truncate">
+                                        <p className="text-base font-semibold text-slate-900 dark:text-slate-100 truncate">
                                             {getEmployeeName(
                                                 request
                                             )}
                                         </p>
 
-                                        <p className="text-xs text-slate-500">
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">
                                             {t(
                                                 "employee",
                                                 "Employee"
@@ -383,7 +383,7 @@ function RequestTable() {
                                     </div>
                                 </div>
 
-                                <p className="leading-6 text-slate-700 text-sm">
+                                <p className="leading-6 text-slate-700 dark:text-slate-300 text-sm">
                                     {request.reason}
                                 </p>
 
@@ -448,14 +448,14 @@ function RequestTable() {
                         📋✅
                     </span>
 
-                    <h3 className="text-lg font-bold text-slate-800">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
                         {t(
                             "no_pending_requests_heading",
                             "No Pending Requests"
                         )}
                     </h3>
 
-                    <p className="text-sm text-slate-500 max-w-xs">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
                         {t(
                             "no_pending_requests",
                             "All employee requests have been processed. New requests will appear here."
