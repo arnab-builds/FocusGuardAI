@@ -348,7 +348,9 @@
         #dashboardContainer{
             display:flex;
             flex-direction:column;
-            gap:var(--space-md);
+            /* Keep the compact dashboard comfortably separated without
+               making the popup feel tall. */
+            gap:10px;
         }
 
         /* CHANGE: this is the key fix for issues #2 and #3 — the
@@ -361,14 +363,15 @@
             align-items:center;
             justify-content:space-between;
             flex-wrap:wrap;
-            gap:var(--space-md);
+            column-gap:var(--space-md);
+            row-gap:var(--space-sm);
             width:100%;
         }
 
         /* Left group: avatar + title + tracking message */
         #dashboardContainer > div:first-child > div:first-child{
             display:flex;
-            gap:var(--space-md);
+            gap:10px;
             align-items:center;
             /* NEW: this is what lets "Tracking started successfully." wrap
                naturally on its own line width instead of colliding with the
@@ -424,6 +427,25 @@
             font-size:12px;
             margin-left:0;
             flex-shrink:0;
+        }
+
+        #dashboardBtn{
+            width:100%;
+            padding:9px 12px;
+            background:#eef2ff;
+            border:1px solid #c7d2fe;
+            color:#4338ca;
+            font-size:13px;
+            transition:background .12s ease, border-color .12s ease, transform .12s ease;
+        }
+        #dashboardBtn:hover{
+            background:#e0e7ff;
+            border-color:#a5b4fc;
+            transform:translateY(-1px);
+        }
+        #dashboardBtn:focus-visible{
+            outline:2px solid var(--accent);
+            outline-offset:2px;
         }
 
         /* Utility */
@@ -482,6 +504,7 @@
                             <button id="logoutBtn" class="primary-btn" style="padding:6px 10px;font-size:12px;margin-left:6px;">Logout</button>
                         </div>
                     </div>
+                    <button id="dashboardBtn" class="primary-btn" type="button">Go to Dashboard</button>
                 </div>
             </div>
         </div>

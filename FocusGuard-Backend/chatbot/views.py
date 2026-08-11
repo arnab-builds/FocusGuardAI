@@ -123,6 +123,16 @@ class ChatHistoryAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        all_dates = str(
+            request.query_params.get("all_dates", "")
+        ).lower() in ("1", "true", "yes")
+
+        if all_dates:
+            messages = ChatMessage.objects.filter(
+                user=request.user,
+            ).order_by("-selected_date", "created_at", "id")
+            return Response(ChatMessageSerializer(messages, many=True).data)
+
         selected_date = request.query_params.get(
             "selected_date",
             date.today().isoformat(),

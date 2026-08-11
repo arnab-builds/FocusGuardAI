@@ -93,9 +93,6 @@ function Dashboard() {
     };
 
     useEffect(() => {
-        console.log("ACCESS TOKEN:", localStorage.getItem("access"));
-        console.log("USER:", localStorage.getItem("user"));
-
         loadDashboard();
     }, []);
 

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Landing from "../pages/Landing/Landing";
 import PublicLanguageDefault from "../components/PublicLanguageDefault";
@@ -33,10 +34,36 @@ import SuperAnalytics from "../super-admin/pages/analytics/Analytics";
 import SuperSettings from "../super-admin/pages/settings/Settings";
 import NormalUsers from "../super-admin/pages/normal-users/NormalUsers";
 
+function ExtensionSessionBridge({ children }) {
+  const [sessionReady] = useState(() => {
+    const session = new URLSearchParams(window.location.hash.slice(1)).get("extension-session");
+    if (!session) return true;
+
+    try {
+      const { access, refresh, user } = JSON.parse(decodeURIComponent(session));
+      if (!access || !user) return true;
+      localStorage.setItem("access", access);
+      if (refresh) localStorage.setItem("refresh", refresh);
+      localStorage.setItem("user", JSON.stringify(user));
+    } catch (error) {
+      console.error("Unable to restore extension session.", error);
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    if (window.location.hash.includes("extension-session=")) {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    }
+  }, []);
+
+  return sessionReady ? children : null;
+}
+
 function AppRoutes() {
   return (
     <BrowserRouter>
-      <Routes>
+      <ExtensionSessionBridge><Routes>
         <Route path="/" element={<Landing />} />
         <Route
           path="/login"
@@ -87,7 +114,7 @@ function AppRoutes() {
           <Route path="/super-admin/normal-users" element={<NormalUsers />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      </Routes></ExtensionSessionBridge>
     </BrowserRouter>
   );
 }

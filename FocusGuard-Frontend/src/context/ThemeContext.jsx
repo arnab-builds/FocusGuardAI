@@ -9,6 +9,9 @@ export const ThemeProvider = ({ children }) => {
     const storedTheme = localStorage.getItem("focusguard_theme");
     if (storedTheme === "dark") {
       setTheme("dark");
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 
@@ -16,6 +19,13 @@ export const ThemeProvider = ({ children }) => {
     setTheme((prev) => {
       const nextTheme = prev === "light" ? "dark" : "light";
       localStorage.setItem("focusguard_theme", nextTheme);
+      
+      if (nextTheme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+      
       return nextTheme;
     });
   };

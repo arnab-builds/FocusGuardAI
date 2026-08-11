@@ -1,8 +1,11 @@
+import { CONFIG } from "./config.js";
+
 const usernameInput = document.getElementById("username");
 const passwordInput = document.getElementById("password");
 
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+const dashboardBtn = document.getElementById("dashboardBtn");
 
 const message = document.getElementById("message");
 
@@ -13,6 +16,7 @@ checkLoginStatus();
 
 loginBtn.addEventListener("click", login);
 logoutBtn.addEventListener("click", logout);
+dashboardBtn.addEventListener("click", openDashboard);
 
 async function checkLoginStatus() {
 
@@ -129,4 +133,26 @@ async function logout() {
 
     console.log("Logged Out");
 
+}
+
+async function openDashboard() {
+    const { access, refresh, user } = await chrome.storage.local.get([
+        "access",
+        "refresh",
+        "user",
+    ]);
+
+    if (!access || !user) {
+        message.innerText = "Your session has expired. Please sign in again.";
+        await checkLoginStatus();
+        return;
+    }
+
+    // The fragment is deliberately used so JWTs are never sent to the web
+    // server or included in its request logs. The dashboard consumes this
+    // existing session once and immediately removes the fragment from history.
+    const session = encodeURIComponent(JSON.stringify({ access, refresh, user }));
+    await chrome.tabs.create({
+        url: `${CONFIG.DASHBOARD_URL}#extension-session=${session}`,
+    });
 }
