@@ -1,7 +1,6 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
-
 from .views import (
+    ActiveAccountTokenRefreshView,
     CustomLoginView,
     LanguageListView,
     ProfileView,
@@ -119,7 +118,7 @@ urlpatterns = [
 
     path(
         "token/refresh/",
-        TokenRefreshView.as_view(),
+        ActiveAccountTokenRefreshView.as_view(),
         name="token-refresh",
     ),
 

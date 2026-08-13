@@ -66,6 +66,7 @@ function EmployeeRegister() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [hasExistingAccount, setHasExistingAccount] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -119,6 +120,7 @@ function EmployeeRegister() {
     event.preventDefault();
     setLoading(true);
     setError("");
+    setHasExistingAccount(false);
 
     try {
       if (isInvitationRegistration) {
@@ -151,7 +153,14 @@ function EmployeeRegister() {
           : { registrationSuccess: true },
       });
     } catch (submitError) {
-      setError(getErrorMessage(submitError));
+      const errorMessage = getErrorMessage(submitError);
+      const isExistingEmail =
+        !isInvitationRegistration &&
+        Boolean(submitError?.response?.data?.email) &&
+        /already exists/i.test(errorMessage);
+
+      setError(errorMessage);
+      setHasExistingAccount(isExistingEmail);
     } finally {
       setLoading(false);
     }
@@ -209,7 +218,27 @@ function EmployeeRegister() {
 
         {error && (
           <div className="mb-6 mt-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700 shadow-sm">
-            {error}
+            <p>{error}</p>
+            {hasExistingAccount && (
+              <>
+                <p className="mt-2">
+                  {t(
+                    "existing_account_login_hint",
+                    "You already have an account. Please use your existing credentials to log in."
+                  )}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="mt-3 font-semibold text-indigo-700 underline transition hover:text-indigo-900"
+                >
+                  {t(
+                    "use_existing_account_login",
+                    "Use Existing Account / Login"
+                  )}
+                </button>
+              </>
+            )}
           </div>
         )}
 

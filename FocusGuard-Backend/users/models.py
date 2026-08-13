@@ -114,7 +114,18 @@ class User(AbstractUser):
         ("NORMAL_USER", "Normal User"),
     ]
 
-    email = models.EmailField(unique=True)
+    # Closed accounts are retained for audit/history, but only an active
+    # account may reserve an email address. This permits a new registration
+    # after an approved deactivation without reactivating the old account.
+    email = models.EmailField()
+    # Preserve the original identifier when a closed account's unique Django
+    # username is released for a new active registration.
+    closed_username = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        editable=False,
+    )
 
     organization = models.ForeignKey(
         Organization,
@@ -137,6 +148,17 @@ class User(AbstractUser):
         default="USER",
     )
 
+    class Meta:
+        verbose_name = "user"
+        verbose_name_plural = "users"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["email"],
+                condition=models.Q(is_active=True),
+                name="unique_active_user_email",
+            ),
+        ]
+
     def __str__(self):
         return self.username
 
@@ -145,7 +167,9 @@ import random
 import string
 
 class Invitation(models.Model):
-    email = models.EmailField(unique=True)
+    # Invitations are historical records. A previous invitation must not
+    # prevent a newly created organization from inviting an email again.
+    email = models.EmailField()
 
     organization = models.ForeignKey(
         Organization,

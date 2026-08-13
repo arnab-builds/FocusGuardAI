@@ -5,6 +5,7 @@ from datetime import timedelta
 from datetime import datetime
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db import transaction
 from django.utils import duration, timezone
 from rest_framework import generics, serializers, status
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
@@ -12,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from admin_notifications.utils import create_admin_notification
 from notifications.services import create_user_notification
 from users.services.response_translation import TranslatedResponseMixin
@@ -216,6 +217,27 @@ class LanguageListView(APIView):
         )
 
 
+class ActiveAccountTokenRefreshView(TokenRefreshView):
+    """Do not refresh sessions belonging to closed accounts."""
+
+    def post(self, request, *args, **kwargs):
+        try:
+            user_id = RefreshToken(request.data.get("refresh"))["user_id"]
+            user = User.objects.filter(id=user_id, is_active=True).first()
+        except (TokenError, KeyError, TypeError):
+            user = None
+
+        if not user or (
+            user.organization and not user.organization.is_active
+        ):
+            return Response(
+                {"detail": "Token is invalid or expired."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        return super().post(request, *args, **kwargs)
+
+
 class TranslationListView(APIView):
     permission_classes = [AllowAny]
 
@@ -372,9 +394,49 @@ class OrganizationCreateView(TranslatedResponseMixin, APIView):
             None,
         )
 
-        organization = serializer.save(
-            owner=request.user,
-        )
+        # An existing active normal/employee account is promoted instead of
+        # being invited to create a duplicate account. Check before creating
+        # the organization so an already-active admin cannot leave behind an
+        # organization with no valid administrator.
+        existing_user = None
+        if admin_email:
+            existing_user = User.objects.filter(
+                email=admin_email,
+                is_active=True,
+            ).first()
+
+            if existing_user and existing_user.role not in {
+                "NORMAL_USER",
+                "USER",
+            }:
+                return Response(
+                    {
+                        "error": (
+                            "An active account with this email already has "
+                            "an administrative or restricted role."
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        with transaction.atomic():
+            organization = serializer.save(
+                owner=request.user,
+            )
+
+            if existing_user:
+                existing_user.role = "SUB_ADMIN"
+                existing_user.organization = organization
+                existing_user.save(update_fields=["role", "organization"])
+
+            elif admin_email:
+                Invitation.objects.create(
+                    email=admin_email,
+                    organization=organization,
+                    invited_by=request.user,
+                    role="SUB_ADMIN",
+                    token=str(uuid.uuid4()),
+                )
 
         # Notification : Organization Created
         create_admin_notification(
@@ -386,15 +448,7 @@ class OrganizationCreateView(TranslatedResponseMixin, APIView):
             notification_type="organization",
         )
 
-        if admin_email:
-
-            invitation = Invitation.objects.create(
-                email=admin_email,
-                organization=organization,
-                invited_by=request.user,
-                role="SUB_ADMIN",
-                token=str(uuid.uuid4()),
-            )
+        if admin_email and not existing_user:
 
             
 
@@ -435,6 +489,16 @@ FocusGuardAI Team
                     f"{organization.name}."
                 ),
                 notification_type="invitation",
+            )
+
+        elif existing_user:
+            create_admin_notification(
+                title="Organization Administrator Promoted",
+                message=(
+                    f"{existing_user.username} was promoted to Organization "
+                    f"Administrator for {organization.name}."
+                ),
+                notification_type="organization",
             )
 
         return Response(
@@ -687,7 +751,7 @@ class InvitationRegistrationBaseView(TranslatedResponseMixin, APIView):
 
         username = serializer.validated_data.get("username") or invitation.email
 
-        if User.objects.filter(username=username).exists():
+        if User.objects.filter(username=username, is_active=True).exists():
 
             return Response(
                 {
@@ -697,7 +761,8 @@ class InvitationRegistrationBaseView(TranslatedResponseMixin, APIView):
             )
 
         if User.objects.filter(
-            email=invitation.email
+            email=invitation.email,
+            is_active=True,
         ).exists():
 
             return Response(
@@ -2252,8 +2317,18 @@ class SuperAdminNormalUserDeactivationRequestActionView(
         deactivation_request.save()
 
         if action == "APPROVED":
-            deactivation_request.user.is_active = False
-            deactivation_request.user.save(update_fields=["is_active"])
+            closed_user = deactivation_request.user
+            closed_user.closed_username = closed_user.username
+            # Django requires username to be globally unique. Preserve the
+            # original value above, then replace the live identifier so a new
+            # active account may reuse the same username after closure.
+            closed_user.username = (
+                f"closed-{closed_user.id}-{uuid.uuid4().hex[:12]}"
+            )
+            closed_user.is_active = False
+            closed_user.save(
+                update_fields=["closed_username", "username", "is_active"]
+            )
 
         return Response({
             "message": "Request approved successfully." if action == "APPROVED" else "Request rejected successfully.",

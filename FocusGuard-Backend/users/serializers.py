@@ -37,8 +37,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         validators=[
             UniqueValidator(
-                queryset=User.objects.all(),
-                message="User already exists."
+                queryset=User.objects.filter(is_active=True),
+                message=(
+                    "An account with this email already exists. Please use "
+                    "your existing credentials to log in."
+                )
             )
         ]
     )
@@ -152,14 +155,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         ]
 
 class InvitationSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(
-        validators=[
-            UniqueValidator(
-                queryset=Invitation.objects.all(),
-                message="An invitation for this email already exists.",
-            )
-        ]
-    )
+    email = serializers.EmailField()
 
     organization = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.all(),
@@ -304,8 +300,11 @@ class NormalUserRegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(
         validators=[
             UniqueValidator(
-                queryset=User.objects.all(),
-                message="User already exists.",
+                queryset=User.objects.filter(is_active=True),
+                message=(
+                    "An account with this email already exists. Please use "
+                    "your existing credentials to log in."
+                ),
             )
         ]
     )
