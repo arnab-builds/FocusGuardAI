@@ -332,6 +332,7 @@ from .models import (
 
 class UserListSerializer(serializers.ModelSerializer):
 
+    username = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
 
     productivity_percentage = serializers.SerializerMethodField()
@@ -368,8 +369,12 @@ class UserListSerializer(serializers.ModelSerializer):
         ]
 
     def get_full_name(self, obj):
+        # Deactivated accounts replace `username` with a unique internal
+        # placeholder. Keep showing the employee's original name to admins.
+        return obj.closed_username or obj.get_full_name() or obj.username
 
-        return obj.get_full_name() or obj.username
+    def get_username(self, obj):
+        return obj.display_username
 
     def get_productivity_percentage(self, obj):
 
@@ -442,10 +447,7 @@ class ActivityLogSerializer(serializers.ModelSerializer):
             "created_at",
         )
 class AdminActivitySerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
-        source="user.username",
-        read_only=True
-    )
+    username = serializers.SerializerMethodField()
 
     email = serializers.EmailField(
         source="user.email",
@@ -473,6 +475,10 @@ class AdminActivitySerializer(serializers.ModelSerializer):
             "duration",
             "is_active",
         ]
+    def get_username(self, obj):
+        return obj.user.display_username
+
+
 class UserInactivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInactivity
@@ -526,7 +532,7 @@ class EmployeeDeactivationRequestSerializer(serializers.ModelSerializer):
         )
 
     def get_employee_name(self, obj):
-        return obj.employee.get_full_name() or obj.employee.username
+        return obj.employee.display_username or obj.employee.get_full_name()
 class OrganizationDeactivationRequestSerializer(serializers.ModelSerializer):
 
     organization = serializers.CharField(

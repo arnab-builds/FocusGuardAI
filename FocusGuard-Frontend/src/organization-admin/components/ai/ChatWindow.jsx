@@ -274,7 +274,7 @@ function ChatWindow() {
                             }`}
                         >
                             {msg.sender === "ai" ? (
-                                <div className="flex gap-3 sm:gap-4 max-w-full sm:max-w-4xl w-full sm:w-auto">
+                                <div className="flex w-full min-w-0 max-w-4xl gap-3 sm:gap-4">
                                     <div className="h-11 w-11 rounded-full bg-indigo-600 flex items-center justify-center shrink-0">
                                         <Bot
                                             size={20}
@@ -282,7 +282,7 @@ function ChatWindow() {
                                         />
                                     </div>
 
-                                    <div className="rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 shadow px-5 sm:px-6 py-5 flex-1 sm:flex-none">
+                                    <div className="min-w-0 w-full rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 shadow px-5 sm:px-6 py-5">
                                         {isWelcome && (
                                             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
                                                 {t(
@@ -292,7 +292,7 @@ function ChatWindow() {
                                             </h2>
                                         )}
 
-                                        <p className="text-base text-slate-700 dark:text-slate-300 whitespace-pre-line leading-8">
+                                        <p className="text-base text-slate-700 dark:text-slate-300 whitespace-pre-line break-words [overflow-wrap:anywhere] leading-8">
                                             {msg.text}
                                         </p>
 

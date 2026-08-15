@@ -160,7 +160,12 @@ class User(AbstractUser):
         ]
 
     def __str__(self):
-        return self.username
+        return self.display_username
+
+    @property
+    def display_username(self):
+        """Name safe to show outside the authentication/database layer."""
+        return self.closed_username or self.username
 
 
 import random

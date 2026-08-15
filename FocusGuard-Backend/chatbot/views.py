@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from datetime import timedelta
 
+from django.db.models import Count, Sum
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -212,6 +213,17 @@ class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
 
         employee_context = []
 
+        analytics_fields = (
+            "productive_time",
+            "non_productive_time",
+            "neutral_time",
+            "total_time",
+            "productive_percentage",
+            "productivity_percentage",
+            "total_websites_visited",
+            "total_tab_switches",
+        )
+
         for employee in employees:
             # Closed accounts release their Django username for reuse. Use the
             # preserved value in admin-facing AI context, never the internal
@@ -219,19 +231,28 @@ class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
             display_username = (
                 employee.closed_username or employee.username
             )
+            overall_analytics = calculate_user_analytics(employee)
+            selected_date_analytics = calculate_user_analytics(
+                employee,
+                selected_date,
+            )
             employee_context.append(
                 {
                     "id": employee.id,
                     "username": display_username,
                     "email": employee.email,
                     "is_active": employee.is_active,
-                    "overall_analytics": calculate_user_analytics(
-                        employee
-                    ),
-                    "selected_date_analytics": calculate_user_analytics(
-                        employee,
-                        selected_date,
-                    ),
+                    # Keep every employee in the AI context. The full
+                    # analytics object includes large website/category maps
+                    # that can otherwise force roster entries to be trimmed.
+                    "overall_analytics": {
+                        field: overall_analytics.get(field)
+                        for field in analytics_fields
+                    },
+                    "selected_date_analytics": {
+                        field: selected_date_analytics.get(field)
+                        for field in analytics_fields
+                    },
                 }
             )
 
@@ -256,7 +277,9 @@ class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
                 "duration",
                 "start_time",
                 "end_time",
-            )[:200]
+            # The assistant receives recent activity only. Sending hundreds
+            # of raw logs can exceed the fallback provider's TPM allowance.
+            )[:40]
         )
 
         # Activity-log values() cannot use the display property above, so
@@ -317,6 +340,20 @@ class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
             )[:50]
         )
 
+        website_summary = list(
+            ActivityLog.objects.filter(
+                user__organization=organization,
+                user__role="USER",
+                start_time__date__gte=start_date,
+            )
+            .values("website_name", "website_url", "category")
+            .annotate(
+                visits=Count("id"),
+                total_duration=Sum("duration"),
+            )
+            .order_by("-visits", "-total_duration", "website_name")[:10]
+        )
+
         context = {
             "organization": {
                 "id": organization.id,
@@ -329,6 +366,7 @@ class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
             },
             "employees": employee_context,
             "activity_logs": activity_logs,
+            "website_summary": website_summary,
             "requests": requests,
             "notifications": notifications,
         }

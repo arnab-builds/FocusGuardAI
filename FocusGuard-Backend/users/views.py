@@ -430,7 +430,7 @@ class OrganizationCreateView(TranslatedResponseMixin, APIView):
                 existing_user.save(update_fields=["role", "organization"])
 
             elif admin_email:
-                Invitation.objects.create(
+                invitation = Invitation.objects.create(
                     email=admin_email,
                     organization=organization,
                     invited_by=request.user,
@@ -1079,8 +1079,8 @@ class OrganizationActivityView(TranslatedResponseMixin, APIView):
         return {
             "id": activity.id,
             "user": activity.user.id,
-            "username": activity.user.username,
-            "employee": activity.user.username,
+            "username": activity.user.display_username,
+            "employee": activity.user.display_username,
             "website": activity.website_name,
             "website_name": activity.website_name,
             "website_url": activity.website_url,
@@ -1956,8 +1956,7 @@ class ApproveEmployeeDeactivationRequestView(TranslatedResponseMixin, APIView):
 
                     "status": deactivation_request.status,
 
-                    "employee": employee.get_full_name()
-                    or employee.username,
+                    "employee": employee.display_username,
 
                     "reviewed_by": request.user.username,
 
@@ -2023,10 +2022,7 @@ class RejectEmployeeDeactivationRequestView(TranslatedResponseMixin, APIView):
 
                     "status": deactivation_request.status,
 
-                    "employee": (
-                        deactivation_request.employee.get_full_name()
-                        or deactivation_request.employee.username
-                    ),
+                    "employee": deactivation_request.employee.display_username,
 
                     "reviewed_by": request.user.username,
 
@@ -2768,7 +2764,7 @@ class SuperAdminOrganizationDetailView(TranslatedResponseMixin, APIView):
 
             employee_data.append({
                 "id": employee.id,
-                "name": employee.username,
+                "name": employee.display_username,
                 "email": employee.email,
                 "department": "N/A",
                 "productive": percent,
@@ -2916,7 +2912,7 @@ class SuperAdminEmployeesSummaryView(TranslatedResponseMixin, APIView):
 
             data.append({
                 "id": employee.id,
-                "username": employee.username,
+                "username": employee.display_username,
                 "email": employee.email,
                 "department": "N/A",
                 "productive": percentage,
