@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Clock3 } from "lucide-react";
 
 import { useLanguage } from "../../context/useLanguage";
+import WebsiteIcon from "../../../components/common/WebsiteIcon";
 
 import {
     formatDuration,
@@ -78,11 +79,10 @@ function RecentActivities({ activities = [] }) {
                                                 )}
                                             </div>
 
-                                            <p className="mt-1 truncate text-sm text-slate-600 dark:text-slate-400">
-                                                {
-                                                    activity.website
-                                                }
-                                            </p>
+                                            <div className="mt-1 flex min-w-0 items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                                                <WebsiteIcon faviconUrl={activity.favicon_url} websiteUrl={activity.website_url} websiteName={activity.website} className="h-6 w-6 rounded-md" />
+                                                <p className="truncate">{activity.website}</p>
+                                            </div>
                                         </div>
 
                                         <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300">

@@ -1,4 +1,5 @@
 import { FiArrowRight } from "react-icons/fi";
+import WebsiteIcon from "../common/WebsiteIcon";
 import { useLanguage } from "../../context/useLanguage";
 
 const parseDurationToSeconds = (time) => {
@@ -20,6 +21,8 @@ export default function TopWebsites({ websiteSummary }) {
   const websites = Object.entries(websiteSummary || {}).map(
     ([name, data]) => ({
       name,
+      websiteUrl: data.url,
+      faviconUrl: data.favicon_url,
       duration: parseDurationToSeconds(data.time_spent),
       visits: data.visits,
     })
@@ -72,9 +75,10 @@ export default function TopWebsites({ websiteSummary }) {
                 className="rounded-xl border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-[#172033] p-4 transition-all duration-200 hover:border-cyan-200 dark:hover:border-cyan-500/30 hover:bg-cyan-50/30 dark:hover:bg-[#1f2b45] hover:shadow-sm hover:-translate-y-[1px]"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="max-w-[70%] truncate text-sm font-semibold text-slate-900 dark:text-slate-50 sm:text-base">
-                    {website.name}
-                  </span>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <WebsiteIcon faviconUrl={website.faviconUrl} websiteUrl={website.websiteUrl} websiteName={website.name} className="h-8 w-8" />
+                    <span className="max-w-[70%] truncate text-sm font-semibold text-slate-900 dark:text-slate-50 sm:text-base">{website.name}</span>
+                  </div>
 
                   <span className="shrink-0 text-xs text-slate-600 dark:text-slate-400 sm:text-sm">
                     {numberFormatter.format(website.visits)}{" "}

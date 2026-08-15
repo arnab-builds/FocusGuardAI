@@ -1,4 +1,5 @@
 import { useLanguage } from "../../context/useLanguage";
+import WebsiteIcon from "../common/WebsiteIcon";
 
 const parseTime = (time) => {
   if (!time) return 0;
@@ -99,8 +100,11 @@ export default function WebsiteTable({ analytics }) {
                       : ""
                   }`}
                 >
-                  <td className="max-w-xs truncate px-5 py-4 font-medium text-slate-900 dark:text-slate-50">
-                    {site.name}
+                  <td className="max-w-xs px-5 py-4 font-medium text-slate-900 dark:text-slate-50">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <WebsiteIcon faviconUrl={site.favicon_url} websiteUrl={site.url} websiteName={site.name} className="h-8 w-8" />
+                      <span className="truncate">{site.name}</span>
+                    </div>
                   </td>
 
                   <td className="whitespace-nowrap px-5 py-4 text-center text-slate-700 dark:text-slate-300">

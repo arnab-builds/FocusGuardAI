@@ -1,4 +1,5 @@
 import { FiClock } from "react-icons/fi";
+import WebsiteIcon from "../common/WebsiteIcon";
 import { formatDuration } from "../../utils/timeFormatter";
 import { useLanguage } from "../../context/useLanguage";
 
@@ -42,9 +43,12 @@ export default function RecentActivity({ activities }) {
               className="flex flex-col gap-3 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-[#172033] p-4 transition-all duration-200 hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:bg-indigo-50/50 dark:hover:bg-[#1f2b45] hover:shadow-sm hover:-translate-y-[1px] sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
-                  <FiClock className="h-5 w-5" />
-                </div>
+                <WebsiteIcon
+                  faviconUrl={activity.favicon_url}
+                  websiteUrl={activity.website_url}
+                  websiteName={activity.website_name}
+                  className="h-12 w-12 rounded-xl"
+                />
 
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-50 sm:text-base">

@@ -9,6 +9,7 @@ import {
 
 import DashboardLayout from "../layouts/DashboardLayout";
 import PageHeader from "../components/common/PageHeader";
+import WebsiteIcon from "../../components/common/WebsiteIcon";
 
 import { useLanguage } from "../context/useLanguage";
 
@@ -240,7 +241,12 @@ function Activities() {
                                                     {activity.employee}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-slate-700 dark:text-slate-300">{activity.website}</td>
+                                            <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                                                <div className="flex items-center gap-2">
+                                                    <WebsiteIcon faviconUrl={activity.favicon_url} websiteUrl={activity.website_url} websiteName={activity.website} className="h-8 w-8" />
+                                                    <span>{activity.website}</span>
+                                                </div>
+                                            </td>
                                             <td className="px-6 py-4">
                                                 <span className="inline-flex rounded-full bg-slate-100 dark:bg-slate-700 px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">{activity.category || "-"}</span>
                                             </td>

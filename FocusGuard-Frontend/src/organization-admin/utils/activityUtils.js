@@ -166,6 +166,8 @@ const normalizeFlatActivity = (activity, user = {}) => ({
         activity.website_name ||
         activity.name ||
         "Unknown website",
+    website_url: activity.website_url || activity.url || "",
+    favicon_url: activity.favicon_url || "",
     category: activity.category || "Uncategorized",
     duration: activity.duration,
     start_time:

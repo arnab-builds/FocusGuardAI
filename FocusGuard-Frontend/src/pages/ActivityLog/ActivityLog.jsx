@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import {
-  FiMonitor,
   FiClock,
   FiCheckCircle,
   FiXCircle,
@@ -10,6 +9,7 @@ import {
 
 import { getActivityHistory } from "../../services/activityService";
 import { useLanguage } from "../../context/useLanguage";
+import WebsiteIcon from "../../components/common/WebsiteIcon";
 
 const formatDuration = (duration, t, locale) => {
   if (!duration) return "-";
@@ -157,7 +157,7 @@ export default function ActivityLog() {
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 font-semibold">
-                      <FiMonitor className="shrink-0 text-slate-700 dark:text-slate-300" />
+                      <WebsiteIcon faviconUrl={activity.favicon_url} websiteUrl={activity.website_url} websiteName={activity.website_name} className="h-8 w-8" />
 
                       <a
                         href={activity.website_url}

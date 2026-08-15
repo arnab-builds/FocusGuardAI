@@ -1,5 +1,6 @@
 import { useLanguage } from "../../context/useLanguage";
 import { translateCategory } from "../../utils/categoryTranslations";
+import WebsiteIcon from "../../../components/common/WebsiteIcon";
 
 const parseDurationToSeconds = (value) => {
     if (value === null || value === undefined || value === "") {
@@ -151,9 +152,7 @@ function TopWebsites({ websites = [] }) {
                                         >
                                             <td className="px-6 py-5">
                                                 <div className="flex items-center gap-2.5">
-                                                    <span className="text-lg leading-none">
-                                                        🌐
-                                                    </span>
+                                                    <WebsiteIcon faviconUrl={site.favicon_url} websiteUrl={site.website_url} websiteName={site.website_name || site.name} className="h-8 w-8" />
 
                                                     <span className="text-base font-semibold text-slate-900 dark:text-slate-200">
                                                         {site.website_name ||
@@ -203,9 +202,7 @@ function TopWebsites({ websites = [] }) {
                                 className="rounded-2xl border border-cyan-100/50 dark:border-cyan-900/50 bg-gradient-to-br from-cyan-50/70 to-white dark:from-cyan-950/20 dark:to-slate-800 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-5 flex flex-col gap-3"
                             >
                                 <div className="flex items-center gap-2.5 min-w-0">
-                                    <span className="text-lg leading-none shrink-0">
-                                        🌐
-                                    </span>
+                                    <WebsiteIcon faviconUrl={site.favicon_url} websiteUrl={site.website_url} websiteName={site.website_name || site.name} className="h-8 w-8" />
 
                                     <span className="text-base font-semibold text-slate-900 dark:text-slate-200 truncate">
                                         {site.website_name ||

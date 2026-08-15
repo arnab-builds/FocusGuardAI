@@ -243,6 +243,12 @@ class ActivityLog(models.Model):
     null=True
 )
 
+    favicon_url = models.URLField(
+        max_length=1000,
+        blank=True,
+        null=True,
+    )
+
     category = models.CharField(
     max_length=100,
     blank=True,

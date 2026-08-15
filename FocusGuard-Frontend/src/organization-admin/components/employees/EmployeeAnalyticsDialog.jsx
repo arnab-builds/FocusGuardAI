@@ -28,6 +28,7 @@ import {
     normalizeListResponse,
 } from "../../utils/responseUtils";
 import { translateCategory } from "../../utils/categoryTranslations";
+import WebsiteIcon from "../../../components/common/WebsiteIcon";
 
 const PAGE_SIZE = 10;
 
@@ -632,9 +633,10 @@ function EmployeeAnalyticsDialog({
                                                             className="border-t border-slate-100 dark:border-[#263449] hover:bg-indigo-50/40 dark:hover:bg-indigo-900/10 transition-colors"
                                                         >
                                                             <td className="px-5 py-4 font-semibold text-slate-800 dark:text-slate-50 whitespace-nowrap">
-                                                                {activity.website_name ||
-                                                                    activity.website ||
-                                                                    "-"}
+                                                                <div className="flex items-center gap-2">
+                                                                    <WebsiteIcon faviconUrl={activity.favicon_url} websiteUrl={activity.website_url} websiteName={activity.website_name || activity.website} className="h-7 w-7" />
+                                                                    {activity.website_name || activity.website || "-"}
+                                                                </div>
                                                             </td>
 
                                                             <td className="px-5 py-4 text-slate-600 dark:text-slate-400">

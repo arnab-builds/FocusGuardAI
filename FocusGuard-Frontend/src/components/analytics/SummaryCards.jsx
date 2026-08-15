@@ -44,7 +44,7 @@ const formatTime = (time, t, locale) => {
   )}`;
 };
 
-export default function SummaryCards({ analytics }) {
+export default function SummaryCards({ analytics = {} }) {
   const { currentLanguageCode, t } = useLanguage();
 
   const numberFormatter = new Intl.NumberFormat(

@@ -934,6 +934,38 @@ class ActivityStartView(TranslatedResponseMixin, APIView):
             is_active=True,
         ).order_by("-start_time").first()
 
+        # A page's favicon can arrive after Chrome first reports the tab. In
+        # that case, enrich the active record instead of splitting one visit
+        # into multiple activity rows.
+        if (
+            active_activity and
+            active_activity.website_url == serializer.validated_data.get(
+                "website_url", ""
+            )
+        ):
+            update_fields = []
+            favicon_url = serializer.validated_data.get("favicon_url")
+            tab_title = serializer.validated_data.get("tab_title")
+
+            if favicon_url and favicon_url != active_activity.favicon_url:
+                active_activity.favicon_url = favicon_url
+                update_fields.append("favicon_url")
+
+            if tab_title and tab_title != active_activity.tab_title:
+                active_activity.tab_title = tab_title
+                update_fields.append("tab_title")
+
+            if update_fields:
+                active_activity.save(update_fields=update_fields)
+
+            return Response(
+                {
+                    "message": "Activity updated successfully.",
+                    "activity": ActivityLogSerializer(active_activity).data,
+                },
+                status=status.HTTP_200_OK,
+            )
+
         # Stop previous activity
         if active_activity:
             active_activity.end_time = timezone.now()
@@ -947,6 +979,7 @@ class ActivityStartView(TranslatedResponseMixin, APIView):
         # Start new activity
         website_name = serializer.validated_data["website_name"]
         website_url = serializer.validated_data.get("website_url", "")
+        favicon_url = serializer.validated_data.get("favicon_url", "")
         category = serializer.validated_data.get("category")
         productivity_type = serializer.validated_data.get("productivity_type", "NEUTRAL")
 
@@ -954,6 +987,7 @@ class ActivityStartView(TranslatedResponseMixin, APIView):
             user=request.user,
             website_name=website_name,
             website_url=website_url,
+            favicon_url=favicon_url,
             category=category,
             productivity_type=productivity_type,
             tab_title=serializer.validated_data.get("tab_title"),
@@ -1223,6 +1257,7 @@ def calculate_user_analytics(user, selected_date=None):
     website_summary = defaultdict(timedelta)
     website_visits = defaultdict(int)
     website_urls = {}
+    website_favicons = {}
     website_categories = {}
 
     websites = set()
@@ -1233,6 +1268,7 @@ def calculate_user_analytics(user, selected_date=None):
 
         website = activity.website_name or "Unknown"
         url = activity.website_url or ""
+        favicon_url = activity.favicon_url or ""
         category = activity.category or DEFAULT_CATEGORY
 
         if activity.duration:
@@ -1253,6 +1289,9 @@ def calculate_user_analytics(user, selected_date=None):
 
         if website not in website_urls:
             website_urls[website] = url
+
+        if website not in website_favicons and favicon_url:
+            website_favicons[website] = favicon_url
 
         if website not in website_categories and category:
             website_categories[website] = category
@@ -1340,6 +1379,7 @@ def calculate_user_analytics(user, selected_date=None):
                 website,
                 "",
             ),
+            "favicon_url": website_favicons.get(website, ""),
             "time_spent": str(
                 website_summary[website]
             ),
@@ -1363,6 +1403,7 @@ def calculate_user_analytics(user, selected_date=None):
                     website,
                     "",
                 ),
+                "favicon_url": website_favicons.get(website, ""),
                 "category": website_categories.get(
                     website,
                     "Unknown",
@@ -1563,6 +1604,7 @@ class OrganizationAnalyticsView(TranslatedResponseMixin, APIView):
                     website_totals[website_name] = {
                         "website_name": website_name,
                         "website_url": website.get("website_url", ""),
+                        "favicon_url": website.get("favicon_url", ""),
                         # Unlike category_summary, top_websites is assembled
                         # manually below. Translate its category here so old
                         # records and newly tracked websites use the same

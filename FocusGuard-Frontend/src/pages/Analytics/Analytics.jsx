@@ -12,7 +12,7 @@ export default function Analytics() {
   const { selectedDate, setDashboardHeader } = useOutletContext();
   const { t } = useLanguage();
 
-  const [analytics, setAnalytics] = useState(null);
+  const [analytics, setAnalytics] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

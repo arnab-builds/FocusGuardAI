@@ -465,6 +465,8 @@ class AdminActivitySerializer(serializers.ModelSerializer):
             "username",
             "email",
             "website_name",
+            "website_url",
+            "favicon_url",
             "tab_title",
             "start_time",
             "end_time",

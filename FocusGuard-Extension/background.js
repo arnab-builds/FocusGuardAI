@@ -207,6 +207,8 @@ async function processTab(tab) {
 
         website_url: tab.url,
 
+        favicon_url: tab.favIconUrl || "",
+
         tab_title: tab.title,
 
         domain,
@@ -236,8 +238,17 @@ async function processTab(tab) {
 
         console.log("Same URL - Ignored");
 
-        // Update title only
+        // Chrome can provide a favicon only after navigation completes.
+        // Refresh the current backend activity once it becomes available.
         currentActivity.tab_title = activity.tab_title;
+
+        if (
+            activity.favicon_url &&
+            activity.favicon_url !== currentActivity.favicon_url
+        ) {
+            currentActivity.favicon_url = activity.favicon_url;
+            await startActivity(currentActivity);
+        }
 
         return;
 
