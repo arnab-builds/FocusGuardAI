@@ -12,6 +12,36 @@ const CATEGORY_KEYS = {
     "Game Store": "category_game_store",
 };
 
+// Older activity records (and some API translation responses) contain the
+// i18n identifier rather than the category's display value.  Accept both
+// representations so an identifier is never shown to an administrator.
+const CATEGORY_NAMES_BY_KEY = Object.fromEntries(
+    Object.entries(CATEGORY_KEYS).map(([name, key]) => [key, name])
+);
+
+const getCategoryDisplayName = (category) => {
+    const value = String(category || "").trim();
+
+    if (!value) return "";
+
+    if (CATEGORY_NAMES_BY_KEY[value]) {
+        return CATEGORY_NAMES_BY_KEY[value];
+    }
+
+    // Keep unfamiliar legacy identifiers readable as well, for example
+    // `category_business_news` becomes `Business News`.
+    if (value.startsWith("category_")) {
+        return value
+            .slice("category_".length)
+            .split("_")
+            .filter(Boolean)
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+    }
+
+    return value;
+};
+
 // Analytics categories are stored as fixed English values. These local
 // fallbacks keep existing historical data localized even if the provider is
 // temporarily unavailable; catalog values take precedence when present.
@@ -77,18 +107,21 @@ export const translateCategory = (category, t, languageCode) => {
         return t("unknown", "Unknown");
     }
 
-    const key = CATEGORY_KEYS[category];
+    const displayName = getCategoryDisplayName(category);
+    const key = CATEGORY_KEYS[displayName];
     const catalogValue = key ? t(key, "") : "";
 
-    if (catalogValue) {
+    // `t` returns the key itself if that key is absent from the catalog. In
+    // that case, use the clean display name instead of exposing `category_*`.
+    if (catalogValue && catalogValue !== key) {
         return catalogValue;
     }
 
     const languageFallbacks = CATEGORY_FALLBACKS[languageCode];
 
     if (languageFallbacks) {
-        return languageFallbacks[category] || category;
+        return languageFallbacks[displayName] || displayName;
     }
 
-    return category;
+    return displayName;
 };

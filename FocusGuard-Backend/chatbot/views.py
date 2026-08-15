@@ -213,10 +213,16 @@ class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
         employee_context = []
 
         for employee in employees:
+            # Closed accounts release their Django username for reuse. Use the
+            # preserved value in admin-facing AI context, never the internal
+            # `closed-<id>-...` placeholder.
+            display_username = (
+                employee.closed_username or employee.username
+            )
             employee_context.append(
                 {
                     "id": employee.id,
-                    "username": employee.username,
+                    "username": display_username,
                     "email": employee.email,
                     "is_active": employee.is_active,
                     "overall_analytics": calculate_user_analytics(
@@ -240,6 +246,7 @@ class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
             .select_related("user")
             .order_by("-start_time")
             .values(
+                "user_id",
                 "user__username",
                 "website_name",
                 "website_url",
@@ -252,6 +259,23 @@ class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
             )[:200]
         )
 
+        # Activity-log values() cannot use the display property above, so
+        # replace closed identifiers with their preserved usernames here too.
+        usernames_by_id = {
+            employee.id: employee.closed_username or employee.username
+            for employee in employees
+        }
+        for activity_log in activity_logs:
+            placeholder = activity_log.get("user__username", "")
+            if placeholder.startswith("closed-"):
+                display_username = usernames_by_id.get(
+                    activity_log.get("user_id")
+                )
+                if display_username:
+                    activity_log["user__username"] = usernames_by_id[
+                        activity_log["user_id"]
+                    ]
+
         requests = list(
             EmployeeDeactivationRequest.objects.filter(
                 organization=organization
@@ -260,6 +284,7 @@ class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
             .order_by("-requested_at")
             .values(
                 "id",
+                "employee_id",
                 "employee__username",
                 "reason",
                 "status",
@@ -267,6 +292,15 @@ class OrganizationAdminChatbotAPIView(TranslatedResponseMixin, APIView):
                 "reviewed_at",
             )[:50]
         )
+
+        for deactivation_request in requests:
+            placeholder = deactivation_request.get("employee__username", "")
+            if placeholder.startswith("closed-"):
+                display_username = usernames_by_id.get(
+                    deactivation_request.get("employee_id")
+                )
+                if display_username:
+                    deactivation_request["employee__username"] = display_username
 
         notifications = list(
             Notification.objects.filter(
