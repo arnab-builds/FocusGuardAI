@@ -65,6 +65,10 @@ EXACT_CONTRACT_KEYS = {
     # Protecting them avoids a second provider pass and preserves prompt-level
     # proper-noun instructions, while error/message fields still translate.
     "response",
+    # Focus plans are generated in the selected language by the planner.
+    # Sending them through the response translation provider can replace that
+    # language or damage the Markdown table/checklist formatting.
+    "plan",
     "company",
     "application",
     "product",

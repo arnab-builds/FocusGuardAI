@@ -1,4 +1,5 @@
 from users.views import calculate_user_analytics
+from users.services.translation_service import DEFAULT_LANGUAGE_CODE
 
 from .ai import generate_focus_plan_ai
 
@@ -88,22 +89,31 @@ def update_goal_progress(goal):
 from .ai import generate_focus_plan_ai
 
 
-def generate_focus_plan(goal):
+def generate_focus_plan(goal, language=None):
 
     analytics = calculate_user_analytics(
         goal.user,
         selected_date=None,
     )
 
-    language = getattr(goal.user.preferred_language, "language_code", "en-IN")
+    # The UI can have a newly selected language before the profile update is
+    # persisted. Prefer that validated request language, then the saved user
+    # preference, and finally English.
+    language = (
+        language
+        or getattr(goal.user.preferred_language, "language_code", None)
+        or DEFAULT_LANGUAGE_CODE
+    )
 
     prompt = f"""
 {PLANNER_PROMPT}
 
 You are an expert Productivity Coach.
 
-The user's preferred language is {language}. Generate every heading, table
-cell, checklist item, tip, risk, and expected outcome in that language only.
+Generate the entire plan in {language} only. This language requirement is
+mandatory: do not respond in Hindi, Marathi, or any other language unless
+{language} explicitly identifies that language. Generate every heading, table
+cell, checklist item, tip, risk, and expected outcome in the required language.
 Do not translate names, brands, company names, or website names included in
 the goal or analytics context.
 

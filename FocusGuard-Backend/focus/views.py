@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from users.models import Language
 from users.services.response_translation import TranslatedResponseMixin
 
 from .models import FocusGoal
@@ -122,7 +123,20 @@ class GenerateFocusPlanView(TranslatedResponseMixin, APIView):
             user=request.user,
         )
 
-        plan = generate_focus_plan(goal)
+        requested_language = request.query_params.get("language")
+        language = None
+
+        if requested_language:
+            language = (
+                Language.objects.filter(
+                    language_code=requested_language,
+                    is_active=True,
+                )
+                .values_list("language_code", flat=True)
+                .first()
+            )
+
+        plan = generate_focus_plan(goal, language=language)
 
         serializer = FocusPlanSerializer(plan)
 
