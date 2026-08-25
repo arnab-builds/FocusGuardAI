@@ -310,13 +310,6 @@ If the project has linting configured:
 npm run lint
 ```
 
-## 📑 Presentation
-
-The project presentation is available here:
-
-[View Project Presentation](./Presentation/FocusGuardAI_Presentation.pptx)
-
----
 
 ## 👤 Author
 
