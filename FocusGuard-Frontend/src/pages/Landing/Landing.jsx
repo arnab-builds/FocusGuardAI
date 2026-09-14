@@ -202,7 +202,7 @@ export default function Landing() {
 
             <p className="mt-8 max-w-xl text-xl leading-9 text-slate-600">FocusGuardAI helps organizations and individuals understand browser activity, improve productivity, receive AI-powered insights, and manage work more effectively from one intelligent platform.</p>
 
-            <div className="mt-10 flex flex-wrap gap-5">
+            <div className="mt-10 flex flex-wrap gap-4">
 
               <Link
                 to="/register"
@@ -220,6 +220,26 @@ export default function Landing() {
                 Login
               </Link>
 
+              <a
+                href="/FocusGuard-Extension.zip"
+                download="FocusGuard-Extension.zip"
+                className="rounded-2xl border border-indigo-200 bg-indigo-50 px-8 py-4 font-semibold text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-100"
+              >
+                Download Chrome Extension
+              </a>
+
+            </div>
+
+            <div className="mt-8 max-w-xl rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5 text-sm text-slate-700">
+              <h3 className="mb-3 font-bold text-indigo-900">Chrome Extension Installation (Developer Mode)</h3>
+              <ol className="ml-5 list-decimal space-y-1.5 marker:font-semibold marker:text-indigo-600">
+                <li><strong>Download</strong> the ZIP archive using the button above.</li>
+                <li><strong>Extract</strong> the ZIP file to a folder on your computer.</li>
+                <li>Open Chrome and navigate to <strong>chrome://extensions</strong>.</li>
+                <li>Toggle on <strong>Developer mode</strong> in the top right corner.</li>
+                <li>Click the <strong>Load unpacked</strong> button.</li>
+                <li>Select the extracted <strong>FocusGuard-Extension</strong> folder.</li>
+              </ol>
             </div>
 
             {/* Highlights */}

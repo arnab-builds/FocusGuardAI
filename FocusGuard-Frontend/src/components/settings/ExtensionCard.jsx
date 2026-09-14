@@ -72,6 +72,16 @@ export default function ExtensionCard() {
 
       </div>
 
+      <div className="mt-6 flex justify-end">
+        <a
+          href="/FocusGuard-Extension.zip"
+          download="FocusGuard-Extension.zip"
+          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          {t("download_chrome_extension", "Download Chrome Extension")}
+        </a>
+      </div>
+
     </section>
   );
 }
