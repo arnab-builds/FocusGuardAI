@@ -470,7 +470,7 @@ Invitation Code:
 
 To complete your registration, please click the link below:
 
-http://localhost:3000/register?role=organization-admin&invite_code={invitation.invite_code}&email={quote(admin_email, safe='')}
+{settings.FRONTEND_URL}/register?role=organization-admin&invite_code={invitation.invite_code}&email={quote(admin_email, safe='')}
 
 Regards,
 FocusGuardAI Team
@@ -586,7 +586,7 @@ Invitation Code:
 
 To complete your registration, please click the link below:
 
-http://localhost:3000/register?role=organization-admin&invite_code={invitation.invite_code}&email={quote(invitation.email, safe='')}
+{settings.FRONTEND_URL}/register?role=organization-admin&invite_code={invitation.invite_code}&email={quote(invitation.email, safe='')}
 
 Regards,
 FocusGuardAI Team
@@ -607,7 +607,7 @@ Invitation Code:
 
 To complete your registration, please click the link below:
 
-http://localhost:3000/employee-register?invite_code={invitation.invite_code}&email={quote(invitation.email, safe='')}
+{settings.FRONTEND_URL}/employee-register?invite_code={invitation.invite_code}&email={quote(invitation.email, safe='')}
 
 Regards,
 FocusGuardAI Team

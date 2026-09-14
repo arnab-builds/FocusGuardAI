@@ -2,6 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "http://127.0.0.1:8000",
+  baseURL: import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, "") : "http://127.0.0.1:8000",
   headers: {
     "Content-Type": "application/json",
   },
@@ -91,8 +92,13 @@ api.interceptors.response.use(
       }
 
       try {
+        const refreshUrl = import.meta.env.VITE_API_URL 
+          ? import.meta.env.VITE_API_URL.replace(/\/$/, "") + "/token/refresh/"
+          : "http://127.0.0.1:8000/api/token/refresh/";
+
         const response = await axios.post(
           "http://127.0.0.1:8000/api/token/refresh/",
+          refreshUrl,
           {
             refresh,
           }

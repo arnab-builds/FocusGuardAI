@@ -24,9 +24,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY")
 
-DEBUG = True
+_debug_val = config("DEBUG", default="True")
+DEBUG = str(_debug_val).lower() in ("true", "1", "t", "yes", "y")
 
-ALLOWED_HOSTS = []
+# Allow multiple comma-separated hosts in production.
+_allowed_hosts = config("ALLOWED_HOSTS", default="127.0.0.1,localhost")
+ALLOWED_HOSTS = [host.strip() for host in _allowed_hosts.split(",")]
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # ------------------------------------------------------------------------------
 # APPLICATIONS
@@ -62,6 +70,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -147,6 +156,7 @@ USE_TZ = True
 # ------------------------------------------------------------------------------
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -243,7 +253,11 @@ FOCUS_PLAN_GROQ_API_KEY = config("FOCUS_PLAN_GROQ_API_KEY")
 
 BREAK_REMINDER_HOURS = 3
 
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000").rstrip("/")
+
+_cors_origins = config("CORS_ALLOWED_ORIGINS", default="")
 CORS_ALLOWED_ORIGINS = [
+    FRONTEND_URL,
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:3001",
@@ -254,6 +268,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5174",
     "http://localhost:5175",
 ]
+
+# Allow additional origins from environment separated by commas
+if _cors_origins:
+    CORS_ALLOWED_ORIGINS.extend([origin.strip() for origin in _cors_origins.split(",")])
+
 
 CORS_ALLOW_CREDENTIALS = True
 
