@@ -36,18 +36,18 @@ export const getTranslations = async (languageCode, config = {}) => {
 
 import { clearCache } from "../utils/apiCache";
 
-export const logoutUser = async () => {
-  try {
-    const refresh = localStorage.getItem("refresh");
+export const logoutUser = () => {
+  const refresh = localStorage.getItem("refresh");
+  
+  // Wipe local state immediately (Synchronous)
+  localStorage.removeItem("access");
+  localStorage.removeItem("refresh");
+  clearCache();
 
-    await api.post("/api/logout/", {
-      refresh,
+  // Fire revocation to backend in background (Best effort)
+  if (refresh) {
+    api.post("/api/logout/", { refresh }).catch((error) => {
+      console.error("Logout revocation failed:", error);
     });
-  } catch (error) {
-    console.error("Logout failed:", error);
-  } finally {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
-    clearCache();
   }
 };

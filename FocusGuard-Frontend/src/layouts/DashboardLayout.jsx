@@ -5,6 +5,7 @@ import TopNavbar from "./TopNavbar";
 import { getProfile } from "../services/profileService";
 import { getAnalytics } from "../services/analyticsService";
 import { useTheme } from "../context/ThemeContext";
+import { fetchWithCache, getCache } from "../utils/apiCache";
 
 const getTodayInputValue = () => {
   const today = new Date();
@@ -18,10 +19,13 @@ function DashboardLayoutContent() {
   const [selectedDate, setSelectedDate] = useState(getTodayInputValue());
   const isFollowingToday = useRef(true);
 
-  const [dashboardHeader, setDashboardHeader] = useState({
-    profile: null,
-    analytics: null,
-  });
+  const profileCacheKey = "emp-profile";
+  const analyticsCacheKey = `emp-analytics-${selectedDate}`;
+
+  const [dashboardHeader, setDashboardHeader] = useState(() => ({
+    profile: getCache(profileCacheKey) || null,
+    analytics: getCache(analyticsCacheKey) || null,
+  }));
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { theme } = useTheme();
@@ -88,17 +92,22 @@ function DashboardLayoutContent() {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadHeader = async () => {
       try {
         const [profile, analytics] = await Promise.all([
-          getProfile(),
-          getAnalytics(selectedDate),
+          fetchWithCache(profileCacheKey, getProfile),
+          fetchWithCache(analyticsCacheKey, () => getAnalytics(selectedDate)),
         ]);
-        setDashboardHeader({ profile, analytics });
+        if (isMounted) {
+          setDashboardHeader({ profile, analytics });
+        }
       } catch (error) {
         console.error("Header Error:", error);
       }
     };
+
     loadHeader();
 
     const refreshInterval = window.setInterval(() => {
@@ -107,7 +116,10 @@ function DashboardLayoutContent() {
       }
     }, 30_000);
 
-    return () => window.clearInterval(refreshInterval);
+    return () => {
+      isMounted = false;
+      window.clearInterval(refreshInterval);
+    };
   }, [selectedDate]);
 
   const outletContext = useMemo(

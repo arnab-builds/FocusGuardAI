@@ -118,6 +118,7 @@ function EmployeeRegister() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError("");
     setHasExistingAccount(false);
@@ -126,6 +127,7 @@ function EmployeeRegister() {
       if (isInvitationRegistration) {
         if (!inviteCode || !invitedEmail) {
           setError(t("invitation_link_incomplete", "This invitation link is incomplete."));
+          setLoading(false);
           return;
         }
         await registerEmployee({

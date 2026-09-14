@@ -59,6 +59,7 @@ function Login() {
   };
 
   const handleLogin = async () => {
+    if (loading) return;
     setLoading(true);
     setError("");
 
@@ -80,9 +81,10 @@ function Login() {
         JSON.stringify(data.user)
       );
 
-      await setLanguageFromPreference(
+      // Do not block navigation on translation fetch
+      setLanguageFromPreference(
         data.user?.preferred_language
-      );
+      ).catch(console.error);
 
       const dashboardByRole = {
         SUPER_ADMIN: "/super-admin/dashboard",

@@ -77,6 +77,7 @@ export default function Sidebar({ isOpen = true, onClose = () => {} }) {
     if (!confirmed) return;
 
     await logoutUser();
+    logoutUser();
 
     navigate("/", { replace: true });
   };

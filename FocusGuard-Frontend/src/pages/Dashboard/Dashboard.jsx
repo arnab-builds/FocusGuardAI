@@ -113,20 +113,16 @@ function Dashboard() {
     };
   }, [selectedDate, trendCacheKey, recentCacheKey]);
 
-  if (!profile || !analytics) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center rounded-2xl bg-white dark:bg-slate-800 text-lg font-medium text-slate-600 dark:text-slate-400 shadow-sm">
-        {t("loading", "Loading...")}
-      </div>
-    );
-  }
+  // Pass safe fallback {} if analytics is null during first load
+  const safeAnalytics = analytics || {};
+  const safeProfile = profile || {};
 
   return (
     <div className="w-full">
       <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-6">
 
         {/* Statistics */}
-        <StatsCards analytics={analytics} />
+        <StatsCards analytics={safeAnalytics} />
 
         {/* Charts + AI Summary */}
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -153,7 +149,7 @@ function Dashboard() {
 
           <div className="min-w-0">
             <TopWebsites
-              websiteSummary={analytics.website_summary}
+              websiteSummary={safeAnalytics.website_summary || []}
             />
           </div>
 

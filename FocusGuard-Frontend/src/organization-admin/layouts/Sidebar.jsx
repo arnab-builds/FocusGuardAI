@@ -15,6 +15,7 @@ import {
 import { NavLink } from "react-router-dom";
 import { getStoredOrganizationName } from "../utils/activityUtils";
 import { useLanguage } from "../context/useLanguage";
+import { logout } from "../services/authService";
 
 function Sidebar({ isOpen = true, onClose = () => {} }) {
   const { t } = useLanguage();
@@ -196,6 +197,11 @@ function Sidebar({ isOpen = true, onClose = () => {} }) {
           <button
             onClick={() => {
               localStorage.clear();
+              const confirmed = window.confirm(
+                t("logout_confirmation", "Are you sure you want to logout?")
+              );
+              if (!confirmed) return;
+              logout();
               window.location.href = "/login";
             }}
             className="flex w-full items-center justify-center gap-3 rounded-xl bg-red-500 px-5 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-red-600 active:scale-[0.98]"
