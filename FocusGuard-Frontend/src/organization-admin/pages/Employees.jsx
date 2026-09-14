@@ -28,7 +28,10 @@ function Employees() {
 
     const cacheKey = "org-employees";
 
-    const [employees, setEmployees] = useState(() => getCache(cacheKey) || []);
+    const [employees, setEmployees] = useState(() => {
+        const cached = getCache(cacheKey);
+        return cached ? normalizeListResponse(cached, ["members", "users", "results", "employees", "data"]) : [];
+    });
     const [loading, setLoading] = useState(() => !getCache(cacheKey));
 
     const [search, setSearch] = useState("");
