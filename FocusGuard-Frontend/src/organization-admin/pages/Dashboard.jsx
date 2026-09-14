@@ -15,6 +15,7 @@ import {
     getOrganizationMembers,
 } from "../services/dashboardService";
 import { normalizeOrganizationActivities } from "../utils/activityUtils";
+import { normalizeListResponse } from "../utils/responseUtils";
 import { fetchWithCache, getCache } from "../../utils/apiCache";
 import { useLanguage } from "../context/useLanguage";
 
@@ -35,9 +36,18 @@ function Dashboard() {
     const cacheKeyMem = "org-dash-members";
 
     const [analytics, setAnalytics] = useState(() => getCache(cacheKeyAnal) || initialAnalytics);
-    const [trend, setTrend] = useState(() => getCache(cacheKeyTrend) || []);
-    const [activities, setActivities] = useState(() => getCache(cacheKeyAct) || []);
-    const [employees, setEmployees] = useState(() => getCache(cacheKeyMem) || []);
+    const [trend, setTrend] = useState(() => {
+        const cached = getCache(cacheKeyTrend);
+        return Array.isArray(cached) ? cached : (cached?.data || cached?.results || []);
+    });
+    const [activities, setActivities] = useState(() => {
+        const cached = getCache(cacheKeyAct);
+        return cached ? normalizeOrganizationActivities(cached) : [];
+    });
+    const [employees, setEmployees] = useState(() => {
+        const cached = getCache(cacheKeyMem);
+        return cached ? normalizeListResponse(cached, ["members", "users", "results", "employees", "data"]) : [];
+    });
 
     const [loading, setLoading] = useState(() => !getCache(cacheKeyAnal));
 

@@ -42,7 +42,10 @@ function Activities() {
 
     const cacheKey = `org-activities-${currentLanguageCode}`;
 
-    const [activities, setActivities] = useState(() => getCache(cacheKey) || []);
+    const [activities, setActivities] = useState(() => {
+        const cached = getCache(cacheKey);
+        return cached ? normalizeOrganizationActivities(cached) : [];
+    });
     const [loading, setLoading] = useState(() => !getCache(cacheKey));
     const [error, setError] = useState("");
     const [search, setSearch] = useState("");

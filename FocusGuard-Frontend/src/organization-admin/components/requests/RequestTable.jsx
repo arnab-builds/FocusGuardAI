@@ -49,7 +49,10 @@ function RequestTable() {
 
     const cacheKey = "org-requests";
 
-    const [requests, setRequests] = useState(() => getCache(cacheKey) || []);
+    const [requests, setRequests] = useState(() => {
+        const cached = getCache(cacheKey);
+        return cached ? normalizeListResponse(cached, ["results", "requests", "data", "items"]) : [];
+    });
     const [loading, setLoading] = useState(() => !getCache(cacheKey));
     const [actionId, setActionId] = useState(null);
     const [error, setError] = useState("");
