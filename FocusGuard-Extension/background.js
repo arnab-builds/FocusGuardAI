@@ -83,7 +83,12 @@ async function stopFocusGuardSession({ notifyBackend = true, accessToken = null 
 function isValidTab(tab) {
     if (!tab.url) return false;
     const hostname = new URL(tab.url).hostname;
-    const ignoredHosts = ["127.0.0.1", "localhost"];
+    const ignoredHosts = [
+        "127.0.0.1",
+        "localhost",
+        "focusguard-platform.vercel.app",
+        "focusguard-backend-xn94.onrender.com"
+    ];
     return (
         !tab.url.startsWith("chrome://") &&
         !tab.url.startsWith("chrome-extension://") &&
@@ -127,7 +132,12 @@ async function processTab(tab) {
         return;
     }
 
-    if (!isValidTab(tab)) return;
+    if (!isValidTab(tab)) {
+        await setCurrentActivity(null);
+        updateCurrentWebsite(null);
+        try { await stopActivity(); } catch (e) { console.error("Error stopping activity for ignored tab", e); }
+        return;
+    }
 
     const domain = extractDomain(tab.url);
     let category = DEFAULT_CATEGORY.category;
