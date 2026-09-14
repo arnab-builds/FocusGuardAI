@@ -7,6 +7,8 @@ import { getAnalytics } from "../services/analyticsService";
 import { useTheme } from "../context/ThemeContext";
 import { fetchWithCache, getCache } from "../utils/apiCache";
 
+import { useLanguage } from "../context/useLanguage";
+
 const getTodayInputValue = () => {
   const today = new Date();
   const localDate = new Date(
@@ -18,9 +20,10 @@ const getTodayInputValue = () => {
 function DashboardLayoutContent() {
   const [selectedDate, setSelectedDate] = useState(getTodayInputValue());
   const isFollowingToday = useRef(true);
+  const { currentLanguageCode } = useLanguage();
 
-  const profileCacheKey = "emp-profile";
-  const analyticsCacheKey = `emp-analytics-${selectedDate}`;
+  const profileCacheKey = `emp-profile-${currentLanguageCode}`;
+  const analyticsCacheKey = `emp-analytics-${selectedDate}-${currentLanguageCode}`;
 
   const [dashboardHeader, setDashboardHeader] = useState(() => ({
     profile: getCache(profileCacheKey) || null,
@@ -116,11 +119,19 @@ function DashboardLayoutContent() {
       }
     }, 30_000);
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        loadHeader();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       isMounted = false;
       window.clearInterval(refreshInterval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [selectedDate]);
+  }, [selectedDate, profileCacheKey, analyticsCacheKey]);
 
   const outletContext = useMemo(
     () => ({

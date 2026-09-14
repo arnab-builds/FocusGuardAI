@@ -11,11 +11,12 @@
     "tabs",
     "storage",
     "idle",
-    "notifications"
+    "notifications",
+    "alarms"
   ],
 
   "host_permissions": [
-    "http://127.0.0.1:8000/*"
+    "https://focusguard-backend-xn94.onrender.com/*"
   ],
 
   "background": {

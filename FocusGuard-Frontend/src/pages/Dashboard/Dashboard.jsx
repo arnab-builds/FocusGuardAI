@@ -20,8 +20,8 @@ function Dashboard() {
 
   const { profile, analytics } = dashboardHeader;
 
-  const trendCacheKey = `emp-trend-${selectedDate}`;
-  const recentCacheKey = `emp-recent-${selectedDate}`;
+  const trendCacheKey = `emp-trend-${selectedDate}-${currentLanguageCode}`;
+  const recentCacheKey = `emp-recent-${selectedDate}-${currentLanguageCode}`;
   const recCacheKey = `emp-rec-${selectedDate}-${currentLanguageCode}`;
 
   const [trendActivities, setTrendActivities] = useState(() => getCache(trendCacheKey) || []);
@@ -107,9 +107,17 @@ function Dashboard() {
       }
     }, 30_000);
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchData();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       isCurrent = false;
       window.clearInterval(refreshInterval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [selectedDate, trendCacheKey, recentCacheKey]);
 

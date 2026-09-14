@@ -34,55 +34,59 @@ async function clearTokens() {
     ]);
 }
 
+let refreshPromise = null;
+
 /**
  * Refresh Access Token
  */
 async function refreshAccessToken() {
-
-    const refresh = await getRefreshToken();
-
-    if (!refresh) {
-        console.log("No refresh token found.");
-        await clearTokens();
-        return null;
+    if (refreshPromise) {
+        return refreshPromise;
     }
 
-    try {
+    refreshPromise = (async () => {
+        const refresh = await getRefreshToken();
 
-        const response = await fetch(
-            `${CONFIG.BASE_URL}/token/refresh/`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    refresh,
-                }),
-            }
-        );
-
-        if (!response.ok) {
-            console.log("Refresh token expired.");
+        if (!refresh) {
+            console.log("No refresh token found.");
             await clearTokens();
             return null;
         }
 
-        const data = await response.json();
+        try {
+            const response = await fetch(
+                `${CONFIG.BASE_URL}/token/refresh/`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ refresh }),
+                }
+            );
 
-        await saveAccessToken(data.access);
+            if (!response.ok) {
+                console.log("Refresh token expired.");
+                await clearTokens();
+                return null;
+            }
 
-        console.log("Access token refreshed.");
+            const data = await response.json();
+            await saveAccessToken(data.access);
+            console.log("Access token refreshed.");
+            return data.access;
+        } catch (error) {
+            console.error("Refresh Error:", error);
+            return null;
+        } finally {
+            refreshPromise = null;
+        }
+    })();
 
-        return data.access;
-
-    } catch (error) {
-
-        console.error("Refresh Error:", error);
-        return null;
-
-    }
+    return refreshPromise;
 }
+
+
 
 /**
  * Fetch Wrapper

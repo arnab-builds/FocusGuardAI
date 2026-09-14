@@ -10,129 +10,80 @@ import {
     setCurrentActivity,
     startTracking,
     resetTracking,
+    checkPeriodicThresholds
 } from "./productivityTracker.js";
-
 import {
     loadUserSettings,
     resetNotificationState,
 } from "./notificationManager.js";
 
-console.log("FocusGuard Background Service Started");
-// Current tracked activity
-let currentActivity = null;
-let trackingEnabled = false;
-let trackingSessionId = 0;
-
-(async () => {
-
-    if (await isAuthenticated()) {
-        await startFocusGuardSession();
-    } else {
-        await stopFocusGuardSession({
-            notifyBackend: false,
-        });
-    }
-
-})();
-
+// We check storage directly for auth state instead of relying on a slow global init
 async function isAuthenticated() {
     const result = await chrome.storage.local.get("access");
     return Boolean(result.access);
 }
 
-// A logout can happen from any popup instance. Stop local tracking as soon as
-// Chrome removes the session, even if a popup closes before its message flow
-// has completed.
+// Ensure alarm is created for MV3 tracking
+chrome.alarms.create("focusGuardMaintenance", { periodInMinutes: 1 });
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name === "focusGuardMaintenance" && await isAuthenticated()) {
+        await checkPeriodicThresholds();
+    }
+});
+
+// Setup initial state from storage (runs quickly when SW boots)
+(async () => {
+    if (await isAuthenticated()) {
+        await startTracking();
+    } else {
+        await stopFocusGuardSession({ notifyBackend: false });
+    }
+})();
+
 chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (
-        areaName === "local" &&
-        changes.access &&
-        !changes.access.newValue
-    ) {
+    if (areaName === "local" && changes.access && !changes.access.newValue) {
         void stopFocusGuardSession({ notifyBackend: false });
     }
 });
 
 function getActiveTab() {
     return new Promise((resolve) => {
-        chrome.tabs.query(
-            {
-                active: true,
-                lastFocusedWindow: true,
-            },
-            ([tab]) => {
-                resolve(tab || null);
-            }
-        );
+        chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
+            resolve(tab || null);
+        });
     });
 }
 
 async function startFocusGuardSession() {
-    if (!(await isAuthenticated())) {
-        return;
-    }
-
-    trackingEnabled = true;
-    const sessionId = ++trackingSessionId;
+    if (!(await isAuthenticated())) return;
 
     await loadUserSettings();
-
-    if (!trackingEnabled || sessionId !== trackingSessionId) {
-        return;
-    }
-
-    startTracking();
+    await startTracking();
 
     const tab = await getActiveTab();
-
-    currentActivity = null;
-    setCurrentActivity(null);
+    await setCurrentActivity(null);
     updateCurrentWebsite(null);
 
-    if (trackingEnabled && sessionId === trackingSessionId && tab) {
-        await processTab(tab);
+    if (tab) {
+        await debouncedProcessTab(tab);
     }
 }
 
 async function stopFocusGuardSession({ notifyBackend = true, accessToken = null } = {}) {
-    // Stop local timers and ignore all pending tab/category requests first.
-    // Backend cleanup can be slow, but it must never keep tracking alive.
-    trackingEnabled = false;
-    trackingSessionId++;
-    currentActivity = null;
     updateCurrentWebsite(null);
-    resetNotificationState();
-    resetTracking();
+    await resetNotificationState();
+    await resetTracking();
 
     if (notifyBackend) {
-        try {
-            await stopActivity(accessToken);
-        } catch (error) {
-            console.log("No active activity to stop.", error);
-        }
-
-        try {
-            await stopInactivity(accessToken);
-        } catch (error) {
-            console.log("No active inactivity to stop.", error);
-        }
+        try { await stopActivity(accessToken); } catch (e) { console.log(e); }
+        try { await stopInactivity(accessToken); } catch (e) { console.log(e); }
     }
-
 }
 
 function isValidTab(tab) {
-
-    if (!tab.url) {
-        return false;
-    }
-
+    if (!tab.url) return false;
     const hostname = new URL(tab.url).hostname;
-
-    const ignoredHosts = [
-        "127.0.0.1",
-        "localhost"
-    ];
-
+    const ignoredHosts = ["127.0.0.1", "localhost"];
     return (
         !tab.url.startsWith("chrome://") &&
         !tab.url.startsWith("chrome-extension://") &&
@@ -148,7 +99,6 @@ function extractDomain(url) {
     try {
         return new URL(url).hostname.replace(/^www\./i, "").toLowerCase();
     } catch (error) {
-        console.error("❌ Category Fetch Failed - Invalid URL", error);
         return null;
     }
 }
@@ -158,20 +108,26 @@ const DEFAULT_CATEGORY = Object.freeze({
     productivity_type: "NEUTRAL",
 });
 
-async function processTab(tab) {
+let processTabTimeout = null;
+let latestTabToProcess = null;
 
-    if (!trackingEnabled || !(await isAuthenticated())) {
+async function debouncedProcessTab(tab) {
+    latestTabToProcess = tab;
+    if (processTabTimeout) clearTimeout(processTabTimeout);
 
-    await stopFocusGuardSession({
-        notifyBackend: false,
-    });
-
-    return;
+    processTabTimeout = setTimeout(async () => {
+        const tabToProcess = latestTabToProcess;
+        if (tabToProcess) await processTab(tabToProcess);
+    }, 500);
 }
 
-    if (!isValidTab(tab)) {
+async function processTab(tab) {
+    if (!(await isAuthenticated())) {
+        await stopFocusGuardSession({ notifyBackend: false });
         return;
     }
+
+    if (!isValidTab(tab)) return;
 
     const domain = extractDomain(tab.url);
     let category = DEFAULT_CATEGORY.category;
@@ -180,136 +136,68 @@ async function processTab(tab) {
     if (domain) {
         try {
             const categoryData = await getWebsiteCategory(domain);
-
-            if (categoryData?.category) {
-                category = categoryData.category;
-            }
-
-            if (categoryData?.productivity_type) {
-                productivity_type = categoryData.productivity_type;
-            }
+            if (categoryData?.category) category = categoryData.category;
+            if (categoryData?.productivity_type) productivity_type = categoryData.productivity_type;
         } catch (error) {
-            console.error("❌ Category Fetch Failed", error);
+            console.error("Category Fetch Failed", error);
         }
     }
 
-    // A logout can happen while the category API request above is pending.
-    // Re-check before creating or sending a new activity record.
-    if (!trackingEnabled || !(await isAuthenticated())) {
-        return;
-    }
+    // Re-check after async fetch
+    if (!(await isAuthenticated())) return;
 
     const activity = {
-
         tabId: tab.id,
-
         website_name: getWebsiteName(tab.url),
-
         website_url: tab.url,
-
         favicon_url: tab.favIconUrl || "",
-
         tab_title: tab.title,
-
         domain,
-
         category,
-
         productivity_type
-
     };
 
-    // First activity
+    // Recover currentActivity from storage if SW was suspended
+    const { currentActivity } = await chrome.storage.local.get("currentActivity");
+
     if (!currentActivity) {
-
-        currentActivity = activity;
         updateCurrentWebsite(activity);
-        console.log("First Activity", activity);
         await startActivity(activity);
-
-        setCurrentActivity(activity);
-
+        await setCurrentActivity(activity);
         return;
-
     }
 
-    // Same URL
     if (currentActivity.website_url === activity.website_url) {
-
-        console.log("Same URL - Ignored");
-
-        // Chrome can provide a favicon only after navigation completes.
-        // Refresh the current backend activity once it becomes available.
         currentActivity.tab_title = activity.tab_title;
-
-        if (
-            activity.favicon_url &&
-            activity.favicon_url !== currentActivity.favicon_url
-        ) {
+        if (activity.favicon_url && activity.favicon_url !== currentActivity.favicon_url) {
             currentActivity.favicon_url = activity.favicon_url;
             await startActivity(currentActivity);
+            await setCurrentActivity(currentActivity);
         }
-
         return;
-
     }
 
-    // URL changed
-
-    currentActivity = activity;
     updateCurrentWebsite(activity);
-    console.log("New Activity", activity);
-
     await startActivity(activity);
-
-    setCurrentActivity(activity);
-
+    await setCurrentActivity(activity);
 }
 
-// -----------------------------
-
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
-
     try {
-
         const tab = await chrome.tabs.get(tabId);
-
-        await processTab(tab);
-
-    }
-
-    catch (error) {
-
+        await debouncedProcessTab(tab);
+    } catch (error) {
         console.error(error);
-
     }
-
 });
 
-// -----------------------------
-
-chrome.tabs.onUpdated.addListener(
-
-    async (tabId, changeInfo, tab) => {
-
-        if (changeInfo.status !== "complete") {
-
-            return;
-
-        }
-
-        await processTab(tab);
-
-    }
-
-);
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    if (changeInfo.status !== "complete") return;
+    await debouncedProcessTab(tab);
+});
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-
-    if (
-        message?.type !== "FOCUSGUARD_LOGIN_SUCCESS" &&
-        message?.type !== "FOCUSGUARD_LOGOUT"
-    ) {
+    if (!["FOCUSGUARD_LOGIN_SUCCESS", "FOCUSGUARD_LOGOUT", "FOCUSGUARD_AUTH_CHANGED"].includes(message?.type)) {
         return false;
     }
 
@@ -318,67 +206,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             if (message.type === "FOCUSGUARD_LOGIN_SUCCESS") {
                 await startFocusGuardSession();
                 console.log("FocusGuard tracking started after login");
-            }
-
-            if (message.type === "FOCUSGUARD_LOGOUT") {
+            } else if (message.type === "FOCUSGUARD_LOGOUT") {
                 await stopFocusGuardSession({ accessToken: message.access });
                 console.log("FocusGuard tracking stopped after logout");
+            } else if (message.type === "FOCUSGUARD_AUTH_CHANGED") {
+                await loadUserSettings();
+                const tab = await getActiveTab();
+                if (tab) {
+                    await setCurrentActivity(null);
+                    await debouncedProcessTab(tab);
+                }
             }
-
             sendResponse({ ok: true });
         } catch (error) {
             console.error(error);
-
-            sendResponse({
-                ok: false,
-                error: error.message,
-            });
+            sendResponse({ ok: false, error: error.message });
         }
     })();
-
-    return true;
-});
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-
-    if (message?.type !== "FOCUSGUARD_AUTH_CHANGED") {
-        return false;
-    }
-
-    chrome.tabs.query(
-        {
-            active: true,
-            currentWindow: true,
-        },
-        async ([tab]) => {
-
-            try {
-
-                // ⭐⭐⭐ ADD THIS
-                await loadUserSettings();
-
-                console.log("✅ Settings loaded after login");
-
-                if (tab) {
-                    currentActivity = null;
-                    await processTab(tab);
-                }
-
-                sendResponse({ ok: true });
-
-            } catch (error) {
-
-                console.error(error);
-
-                sendResponse({
-                    ok: false,
-                    error: error.message,
-                });
-
-            }
-
-        }
-    );
 
     return true;
 });

@@ -2,46 +2,39 @@ import {
     startInactivity,
     stopInactivity
 } from "./api.js";
-
-let currentWebsite = null;
+import { setIdleState } from "./productivityTracker.js";
 
 export function updateCurrentWebsite(activity) {
-
-    currentWebsite = activity ? { ...activity } : null;
-
+    // We update local storage to persist across service worker suspension
+    if (activity) {
+        chrome.storage.local.set({ idleCurrentWebsite: { ...activity } });
+    } else {
+        chrome.storage.local.remove("idleCurrentWebsite");
+    }
 }
 
 chrome.idle.setDetectionInterval(60);
 
-chrome.idle.onStateChanged.addListener(
+chrome.idle.onStateChanged.addListener(async (state) => {
+    console.log("Idle State:", state);
 
-    async (state) => {
+    const { access, idleCurrentWebsite } = await chrome.storage.local.get(["access", "idleCurrentWebsite"]);
 
-        console.log("Idle State:", state);
-
-        const { access } = await chrome.storage.local.get("access");
-
-        if (!access) {
-            return;
-        }
-
-        if (state === "idle" || state === "locked") {
-
-            if (currentWebsite) {
-
-                await startInactivity(currentWebsite);
-
-            }
-
-        }
-
-        if (state === "active") {
-
-            if (currentWebsite) {
-           await stopInactivity();
-}
-        }
-
+    if (!access) {
+        return;
     }
 
-);
+    if (state === "idle" || state === "locked") {
+        await setIdleState(true);
+        if (idleCurrentWebsite) {
+            await startInactivity(idleCurrentWebsite);
+        }
+    }
+
+    if (state === "active") {
+        await setIdleState(false);
+        if (idleCurrentWebsite) {
+            await stopInactivity();
+        }
+    }
+});

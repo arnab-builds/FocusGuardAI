@@ -1,79 +1,94 @@
 import { checkNotifications } from "./notificationManager.js";
-let productiveSeconds = 0;
-let nonProductiveSeconds = 0;
-let neutralSeconds = 0;
 
-let currentActivity = null;
-let timer = null;
+export async function setCurrentActivity(activity) {
+    await updateAccumulatedTime();
 
-export function setCurrentActivity(activity) {
-    currentActivity = activity;
+    await chrome.storage.local.set({
+        currentActivity: activity,
+        lastActivityTime: Date.now()
+    });
 }
 
-export function startTracking() {
-
-    if (timer) {
-        clearInterval(timer);
+export async function startTracking() {
+    const { trackingStats } = await chrome.storage.local.get("trackingStats");
+    if (!trackingStats) {
+        await resetTracking();
+    } else {
+        await chrome.storage.local.set({ isIdle: false, lastActivityTime: Date.now() });
     }
-
-    timer = setInterval(() => {
-
-        if (!currentActivity) {
-            return;
-        }
-
-        switch (currentActivity.productivity_type) {
-
-            case "PRODUCTIVE":
-                productiveSeconds++;
-                break;
-
-            case "NON_PRODUCTIVE":
-                nonProductiveSeconds++;
-                break;
-
-            default:
-                neutralSeconds++;
-                break;
-        }
-        checkNotifications(getTrackingStats());
-
-        console.log({
-            productiveSeconds,
-            nonProductiveSeconds,
-            neutralSeconds,
-        });
-
-    }, 1000);
-
 }
 
-export function stopTracking() {
+export async function stopTracking() {
+    await updateAccumulatedTime();
+    await chrome.storage.local.remove("currentActivity");
+}
 
-    if (timer) {
-        clearInterval(timer);
-        timer = null;
+export async function setIdleState(isIdle) {
+    if (isIdle) {
+        await updateAccumulatedTime();
+        await chrome.storage.local.set({ isIdle: true });
+    } else {
+        await chrome.storage.local.set({ isIdle: false, lastActivityTime: Date.now() });
     }
-
 }
 
-export function resetTracking() {
-
-    stopTracking();
-
-    productiveSeconds = 0;
-    nonProductiveSeconds = 0;
-    neutralSeconds = 0;
-    currentActivity = null;
-
+export async function resetTracking() {
+    await chrome.storage.local.set({
+        trackingStats: {
+            productiveSeconds: 0,
+            nonProductiveSeconds: 0,
+            neutralSeconds: 0,
+        },
+        currentActivity: null,
+        lastActivityTime: Date.now(),
+        isIdle: false
+    });
 }
 
-export function getTrackingStats() {
-
-    return {
-        productiveSeconds,
-        nonProductiveSeconds,
-        neutralSeconds,
+export async function getTrackingStats() {
+    await updateAccumulatedTime();
+    const { trackingStats } = await chrome.storage.local.get("trackingStats");
+    return trackingStats || {
+        productiveSeconds: 0,
+        nonProductiveSeconds: 0,
+        neutralSeconds: 0,
     };
+}
 
+export async function checkPeriodicThresholds() {
+    const stats = await getTrackingStats();
+    await checkNotifications(stats);
+    console.log("Stats tick:", stats);
+}
+
+export async function updateAccumulatedTime() {
+    const { currentActivity, lastActivityTime, isIdle, trackingStats = {
+        productiveSeconds: 0,
+        nonProductiveSeconds: 0,
+        neutralSeconds: 0,
+    } } = await chrome.storage.local.get(["currentActivity", "lastActivityTime", "isIdle", "trackingStats"]);
+
+    if (!currentActivity || !lastActivityTime || isIdle) return;
+
+    const now = Date.now();
+    const elapsedSeconds = Math.floor((now - lastActivityTime) / 1000);
+
+    if (elapsedSeconds > 0) {
+        switch (currentActivity.productivity_type) {
+            case "PRODUCTIVE":
+                trackingStats.productiveSeconds += elapsedSeconds;
+                break;
+            case "NON_PRODUCTIVE":
+                trackingStats.nonProductiveSeconds += elapsedSeconds;
+                break;
+            default:
+                trackingStats.neutralSeconds += elapsedSeconds;
+                break;
+        }
+
+        await chrome.storage.local.set({
+            trackingStats,
+            lastActivityTime: now
+        });
+    }
 }

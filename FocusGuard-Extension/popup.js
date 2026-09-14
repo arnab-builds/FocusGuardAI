@@ -53,46 +53,35 @@ function renderSession(isAuthenticated) {
 }
 
 async function login() {
-
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
 
     if (!username || !password) {
-
         message.innerText = "Please enter username and password.";
         return;
-
     }
 
+    const originalBtnText = loginBtn.innerText;
+    loginBtn.innerText = "Signing in...";
+    loginBtn.disabled = true;
+
     try {
-
-        const response = await fetch(
-            "http://127.0.0.1:8000/api/login/",
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json",
-                },
-
-                body: JSON.stringify({
-                    username,
-                    password,
-                }),
-            }
-        );
+        const response = await fetch(`${CONFIG.BASE_URL}/login/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                username,
+                password,
+            }),
+        });
 
         const data = await response.json();
 
         if (!response.ok) {
-
-            message.innerText =
-                data.detail ||
-                data.error ||
-                "Login failed.";
-
+            message.innerText = data.detail || data.error || "Login failed.";
             return;
-
         }
 
         await chrome.storage.local.set({
@@ -106,8 +95,6 @@ async function login() {
         localStorage.setItem("focusguard_session_state", "active");
         renderSession(true);
 
-        // Starting tracking can involve network work in the service worker.
-        // Do not keep the popup waiting for it to finish rendering.
         chrome.runtime.sendMessage({
             type: "FOCUSGUARD_LOGIN_SUCCESS",
         }).catch((error) => {
@@ -115,15 +102,13 @@ async function login() {
         });
 
         console.log("Logged In", data);
-
     } catch (error) {
-
         console.error(error);
-
         message.innerText = "Server Error.";
-
+    } finally {
+        loginBtn.innerText = originalBtnText;
+        loginBtn.disabled = false;
     }
-
 }
 
 async function logout() {
