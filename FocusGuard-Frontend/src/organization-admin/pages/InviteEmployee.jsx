@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import DashboardLayout from "../layouts/DashboardLayout";
 
 import PageHeader from "../components/common/PageHeader";
 import InviteEmployeeForm from "../components/employees/InviteEmployeeForm";
@@ -27,7 +26,6 @@ function InviteEmployee() {
     }, []);
 
     return (
-        <DashboardLayout>
             <div className="space-y-6">
                 <PageHeader
     title={t(
@@ -45,7 +43,6 @@ function InviteEmployee() {
                     <InvitationList invitations={invitations} loading={loading} />
                 </div>
             </div>
-        </DashboardLayout>
     );
 }
 

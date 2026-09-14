@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import {
   FiClock,
@@ -10,6 +10,7 @@ import {
 import { getActivityHistory } from "../../services/activityService";
 import { useLanguage } from "../../context/useLanguage";
 import WebsiteIcon from "../../components/common/WebsiteIcon";
+import { fetchWithCache, getCache } from "../../utils/apiCache";
 
 const formatDuration = (duration, t, locale) => {
   if (!duration) return "-";
@@ -42,19 +43,44 @@ const formatDate = (date, locale) => {
 
 export default function ActivityLog() {
   const { selectedDate } = useOutletContext();
-  const { currentLanguageCode, t } = useLanguage();
+  const { t, currentLanguageCode } = useLanguage();
 
-  const numberFormatter = new Intl.NumberFormat(
-    currentLanguageCode || undefined
-  );
-
-  const [activities, setActivities] = useState([]);
-  const [pagination, setPagination] = useState({});
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  
+  const cacheKey = `emp-activities-${selectedDate}-page-${page}`;
+  
+  const [activities, setActivities] = useState(() => getCache(cacheKey)?.results || []);
+  const [pagination, setPagination] = useState(() => getCache(cacheKey) || {});
+  const [loading, setLoading] = useState(() => !getCache(cacheKey));
   const [search, setSearch] = useState("");
 
+  const numberFormatter = useMemo(
+    () => new Intl.NumberFormat(currentLanguageCode),
+    [currentLanguageCode]
+  );
+
   useEffect(() => {
+    let isMounted = true;
+    
+    const fetchActivities = async (currentPage, showLoading = true) => {
+      try {
+        if (showLoading && !getCache(cacheKey)) {
+          setLoading(true);
+        }
+
+        const data = await fetchWithCache(cacheKey, () => getActivityHistory(currentPage, selectedDate));
+
+        if (isMounted) {
+          setActivities(data.results || []);
+          setPagination(data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
     fetchActivities(page);
 
     const refreshInterval = window.setInterval(() => {
@@ -63,30 +89,11 @@ export default function ActivityLog() {
       }
     }, 30_000);
 
-    return () => window.clearInterval(refreshInterval);
-  }, [page, selectedDate]);
-
-  const fetchActivities = async (currentPage, showLoading = true) => {
-    try {
-      if (showLoading) {
-        setLoading(true);
-      }
-
-      const data = await getActivityHistory(
-        currentPage,
-        selectedDate
-      );
-
-      setActivities(data.results || []);
-      setPagination(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      if (showLoading) {
-        setLoading(false);
-      }
-    }
-  };
+    return () => {
+      isMounted = false;
+      window.clearInterval(refreshInterval);
+    };
+  }, [page, selectedDate, cacheKey]);
 
   const filtered = activities.filter((activity) =>
     activity.website_name
@@ -137,11 +144,11 @@ export default function ActivityLog() {
             <div>{t("started", "Started")}</div>
           </div>
 
-          {loading ? (
+          {loading && filtered.length === 0 ? (
             <div className="p-12 text-center text-slate-500 dark:text-slate-400">
               {t("loading", "Loading...")}
             </div>
-            ) : (
+          ) : (
             filtered.map((activity) => {
               let rowHover = "hover:bg-slate-50 dark:hover:bg-slate-800/80";
               if (activity.productivity_type === "PRODUCTIVE") rowHover = "hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20";

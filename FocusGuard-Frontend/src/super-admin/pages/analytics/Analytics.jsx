@@ -2,14 +2,12 @@ import { BarChart3 } from "lucide-react";
 
 import { useLanguage } from "../../context/useLanguage";
 
-import AdminLayout from "../../components/layout/AdminLayout";
 import AnalyticsCharts from "../../components/analytics/AnalyticsCharts";
 
 function Analytics() {
     const { t } = useLanguage();
 
     return (
-        <AdminLayout>
             <div className="space-y-6 sm:space-y-8">
                 <div className="rounded-3xl bg-gradient-to-br from-blue-50 via-indigo-50/40 to-white border border-blue-100/70 shadow-sm p-6 sm:p-8">
                     <div className="flex items-center gap-4">
@@ -44,7 +42,6 @@ function Analytics() {
                     </div>
                 </div>
             </div>
-        </AdminLayout>
     );
 }
 

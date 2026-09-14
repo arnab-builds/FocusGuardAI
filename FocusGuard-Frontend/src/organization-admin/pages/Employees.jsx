@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-import DashboardLayout from "../layouts/DashboardLayout";
 
 import PageHeader from "../components/common/PageHeader";
 import SearchBar from "../components/common/SearchBar";
@@ -20,14 +19,17 @@ import {
     normalizeListResponse,
 } from "../utils/responseUtils";
 
+import { fetchWithCache, getCache } from "../../utils/apiCache";
+
 const PAGE_SIZE = 10;
 
 function Employees() {
     const { t } = useLanguage();
 
-    const [loading, setLoading] = useState(true);
+    const cacheKey = "org-employees";
 
-    const [employees, setEmployees] = useState([]);
+    const [employees, setEmployees] = useState(() => getCache(cacheKey) || []);
+    const [loading, setLoading] = useState(() => !getCache(cacheKey));
 
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
@@ -41,7 +43,8 @@ function Employees() {
 
     async function fetchEmployees() {
         try {
-            const response = await getEmployees();
+            if (!getCache(cacheKey)) setLoading(true);
+            const response = await fetchWithCache(cacheKey, getEmployees);
 
             setEmployees(
                 normalizeListResponse(
@@ -104,7 +107,7 @@ function Employees() {
     };
 
     return (
-        <DashboardLayout>
+        <>
             {loading ? (
                 <LoadingSpinner />
             ) : (
@@ -239,7 +242,7 @@ function Employees() {
                 />
             </div>
             )}
-        </DashboardLayout>
+        </>
     );
 }
 

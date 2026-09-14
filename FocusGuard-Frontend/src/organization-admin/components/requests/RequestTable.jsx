@@ -13,6 +13,7 @@ import {
     normalizeListResponse,
     normalizeStatus,
 } from "../../utils/responseUtils";
+import { fetchWithCache, getCache, setCache } from "../../../utils/apiCache";
 
 function RequestTable() {
     const { t } = useLanguage();
@@ -46,32 +47,33 @@ function RequestTable() {
         );
     };
 
-    const [requests, setRequests] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const cacheKey = "org-requests";
+
+    const [requests, setRequests] = useState(() => getCache(cacheKey) || []);
+    const [loading, setLoading] = useState(() => !getCache(cacheKey));
     const [actionId, setActionId] = useState(null);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        const timeout = setTimeout(loadRequests, 0);
-
-        return () => clearTimeout(timeout);
+        loadRequests();
     }, []);
 
     async function loadRequests() {
         try {
-            const requestData =
-                await getRequests();
+            if (!getCache(cacheKey)) setLoading(true);
+            const requestData = await fetchWithCache(cacheKey, getRequests);
 
-            setRequests(
-                normalizeListResponse(
-                    requestData,
-                    [
-                        "results",
-                        "requests",
-                        "data",
-                    ]
-                )
+            const processed = normalizeListResponse(
+                requestData,
+                [
+                    "results",
+                    "requests",
+                    "data",
+                ]
             );
+            
+            setRequests(processed);
+            setCache(cacheKey, processed);
 
             setError("");
         } catch (error) {

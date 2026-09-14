@@ -20,6 +20,7 @@ import {
   getChatHistory,
   sendChatMessage,
 } from "../../services/chatbotService";
+import { fetchWithCache, getCache, setCache } from "../../utils/apiCache";
 import { useLanguage } from "../../context/useLanguage";
 
 const AICoach = () => {
@@ -64,15 +65,19 @@ const AICoach = () => {
     },
   ];
 
-  const [messages, setMessages] = useState(getDefaultMessages);
+  const cacheKey = `emp-chat-${selectedDate}-${currentLanguageCode}`;
+
+  const [messages, setMessages] = useState(() => getCache(cacheKey) || getDefaultMessages());
 
   const [input, setInput] = useState("");
 
   const [loading, setLoading] = useState(false);
-  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [loadingHistory, setLoadingHistory] = useState(() => !getCache(cacheKey));
   const [showHistory, setShowHistory] = useState(false);
-  const [allHistory, setAllHistory] = useState([]);
-  const [loadingAllHistory, setLoadingAllHistory] = useState(false);
+  
+  const allHistoryCacheKey = `emp-all-chat-${currentLanguageCode}`;
+  const [allHistory, setAllHistory] = useState(() => getCache(allHistoryCacheKey) || []);
+  const [loadingAllHistory, setLoadingAllHistory] = useState(() => !getCache(allHistoryCacheKey));
   const [viewingHistoryDate, setViewingHistoryDate] = useState(null);
   const [historySearch, setHistorySearch] = useState("");
 
@@ -82,27 +87,29 @@ const AICoach = () => {
     let isCurrent = true;
 
     const loadChatHistory = async () => {
-      setLoadingHistory(true);
+      if (!getCache(cacheKey)) setLoadingHistory(true);
 
       try {
-        const history = await getChatHistory(
+        const history = await fetchWithCache(cacheKey, () => getChatHistory(
           selectedDate,
           currentLanguageCode
-        );
+        ));
 
         if (isCurrent) {
-          setMessages(history.length ? history : getDefaultMessages());
+          const processed = history.length ? history : getDefaultMessages();
+          setMessages(processed);
+          setCache(cacheKey, processed);
         }
       } catch (error) {
         console.error("Chat history error:", error);
 
         if (isCurrent) {
-          setMessages(getDefaultMessages());
+          const processed = getDefaultMessages();
+          setMessages(processed);
+          setCache(cacheKey, processed);
         }
       } finally {
-        if (isCurrent) {
-          setLoadingHistory(false);
-        }
+        if (isCurrent) setLoadingHistory(false);
       }
     };
 
@@ -113,19 +120,36 @@ const AICoach = () => {
     return () => {
       isCurrent = false;
     };
-  }, [selectedDate, currentLanguageCode]);
+  }, [selectedDate, currentLanguageCode, t, cacheKey]);
 
-  const loadAllHistory = async () => {
-    setLoadingAllHistory(true);
-    try {
-      setAllHistory(await getAllChatHistory(currentLanguageCode));
-      setHistorySearch("");
-      setShowHistory(true);
-    } catch (error) {
-      console.error("All chat history error:", error);
-    } finally {
-      setLoadingAllHistory(false);
+  useEffect(() => {
+    if (messages.length > 1) {
+       setCache(cacheKey, messages);
     }
+  }, [messages, cacheKey]);
+
+  useEffect(() => {
+    let isCurrent = true;
+    if (showHistory) {
+      const loadAll = async () => {
+        if (!getCache(allHistoryCacheKey)) setLoadingAllHistory(true);
+        try {
+          const data = await fetchWithCache(allHistoryCacheKey, () => getAllChatHistory(currentLanguageCode));
+          if (isCurrent) setAllHistory(data);
+        } catch (error) {
+           console.error(error);
+        } finally {
+          if (isCurrent) setLoadingAllHistory(false);
+        }
+      };
+      loadAll();
+    }
+    return () => { isCurrent = false; };
+  }, [showHistory, currentLanguageCode, allHistoryCacheKey]);
+
+  const loadAllHistory = () => {
+    setHistorySearch("");
+    setShowHistory(true);
   };
 
   const openHistoricalDate = (date, dateMessages) => {

@@ -1,7 +1,6 @@
 import { Moon, Sun } from "lucide-react";
 import { useState } from "react";
 
-import AdminLayout from "../../components/layout/AdminLayout";
 import SettingsForm from "../../components/settings/SettingsForm";
 
 import { useLanguage } from "../../context/useLanguage";
@@ -29,7 +28,6 @@ function Settings() {
     };
 
     return (
-        <AdminLayout>
             <div className="space-y-3 sm:space-y-4">
                 <div className="relative flex min-h-10 items-center justify-start pr-12 sm:pr-32">
                     <div>
@@ -56,7 +54,6 @@ function Settings() {
 
                 <SettingsForm />
             </div>
-        </AdminLayout>
     );
 }
 

@@ -1,28 +1,27 @@
 import { useEffect, useState } from "react";
 import { MailPlus, Loader2 } from "lucide-react";
 
-import AdminLayout from "../../components/layout/AdminLayout";
 import InvitationsTable from "../../components/invitations/InvitationsTable";
 
 import { useLanguage } from "../../context/useLanguage";
 
 import { getInvitations } from "../../services/superAdminService";
+import { fetchWithCache, getCache, setCache } from "../../../utils/apiCache";
 
 function Invitations() {
     const { t } = useLanguage();
+    const cacheKey = "super-invitations";
 
-    const [invitations, setInvitations] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [invitations, setInvitations] = useState(() => getCache(cacheKey) || []);
+    const [loading, setLoading] = useState(() => !getCache(cacheKey));
 
-    const loadInvitations = async () => {
+    const loadInvitations = async (showLoading = true) => {
         try {
-            setLoading(true);
+            if (showLoading && !getCache(cacheKey)) setLoading(true);
 
-            const res = await getInvitations();
-
-            console.log("Invitations API:", res.data);
-
+            const res = await fetchWithCache(cacheKey, getInvitations);
             setInvitations(res.data);
+            setCache(cacheKey, res.data);
         } catch (err) {
             console.error("Error loading invitations:", err);
         } finally {
@@ -31,11 +30,12 @@ function Invitations() {
     };
 
     useEffect(() => {
-        loadInvitations();
+        let isMounted = true;
+        loadInvitations(true);
+        return () => { isMounted = false; };
     }, []);
 
     return (
-        <AdminLayout>
             <div className="space-y-6 sm:space-y-8">
                 <div className="rounded-3xl bg-gradient-to-br from-blue-50 via-indigo-50/40 to-white border border-blue-100/70 shadow-sm p-6 sm:p-8">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -69,7 +69,7 @@ function Invitations() {
                     </div>
                 </div>
 
-                {loading ? (
+                {loading && invitations.length === 0 ? (
                     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-10 sm:p-16 flex flex-col items-center justify-center text-center">
                         <Loader2
                             className="animate-spin text-blue-600"
@@ -94,7 +94,6 @@ function Invitations() {
                     </div>
                 )}
             </div>
-        </AdminLayout>
     );
 }
 

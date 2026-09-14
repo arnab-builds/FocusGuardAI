@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 
-function AdminLayout({ children }) {
+function AdminLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [theme, setTheme] = useState(() =>
         localStorage.getItem("focusguard_superadmin_theme") === "dark"
@@ -77,7 +78,7 @@ function AdminLayout({ children }) {
 
                     <div className="mx-auto w-full max-w-screen-2xl">
 
-                        {children}
+                        <Outlet />
 
                     </div>
 

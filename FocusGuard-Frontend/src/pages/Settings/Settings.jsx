@@ -7,6 +7,7 @@ import AboutCard from "../../components/settings/AboutCard";
 import DeactivationCard from "../../components/settings/DeactivationCard";
 
 import { getProfile } from "../../services/profileService";
+import { fetchWithCache, getCache } from "../../utils/apiCache";
 import { useLanguage } from "../../context/useLanguage";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -14,25 +15,28 @@ export default function Settings() {
   const { t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
 
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const fetchProfile = async () => {
-    try {
-      const data = await getProfile();
-      setProfile(data);
-    } catch (error) {
-      console.error("Failed to load profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const cacheKey = "emp-profile";
+  const [profile, setProfile] = useState(() => getCache(cacheKey) || null);
+  const [loading, setLoading] = useState(() => !getCache(cacheKey));
 
   useEffect(() => {
+    let isMounted = true;
+    const fetchProfile = async () => {
+      try {
+        if (!getCache(cacheKey)) setLoading(true);
+        const data = await fetchWithCache(cacheKey, getProfile);
+        if (isMounted) setProfile(data);
+      } catch (error) {
+        console.error("Failed to load profile:", error);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
     fetchProfile();
+    return () => { isMounted = false; };
   }, []);
 
-  if (loading) {
+  if (loading && !profile) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-100 dark:bg-slate-900/50">
         <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-10 py-8 shadow-sm">

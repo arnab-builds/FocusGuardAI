@@ -7,7 +7,6 @@ import {
     UserRound,
 } from "lucide-react";
 
-import DashboardLayout from "../layouts/DashboardLayout";
 import PageHeader from "../components/common/PageHeader";
 import WebsiteIcon from "../../components/common/WebsiteIcon";
 
@@ -20,6 +19,7 @@ import {
     getEmployeeOnlineStatus,
     normalizeOrganizationActivities,
 } from "../utils/activityUtils";
+import { fetchWithCache, getCache } from "../../utils/apiCache";
 
 const PAGE_SIZE = 10;
 
@@ -40,8 +40,10 @@ const toDateInputValue = (value) => {
 function Activities() {
     const { currentLanguageCode, t } = useLanguage();
 
-    const [activities, setActivities] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const cacheKey = `org-activities-${currentLanguageCode}`;
+
+    const [activities, setActivities] = useState(() => getCache(cacheKey) || []);
+    const [loading, setLoading] = useState(() => !getCache(cacheKey));
     const [error, setError] = useState("");
     const [search, setSearch] = useState("");
     const [dateFilter, setDateFilter] = useState("");
@@ -49,34 +51,41 @@ function Activities() {
     const [page, setPage] = useState(1);
 
     useEffect(() => {
+        let isMounted = true;
         const loadActivities = async () => {
             try {
+                if (!getCache(cacheKey)) setLoading(true);
                 const response =
-                    await getOrganizationActivity(
+                    await fetchWithCache(cacheKey, () => getOrganizationActivity(
                         currentLanguageCode
-                    );
+                    ));
 
-                setActivities(
-                    normalizeOrganizationActivities(
-                        response
-                    )
-                );
+                if (isMounted) {
+                    setActivities(
+                        normalizeOrganizationActivities(
+                            response
+                        )
+                    );
+                }
             } catch (loadError) {
                 console.error(loadError);
 
-                setError(
-                    t(
-                        "activities_load_failed",
-                        "Activities could not be loaded."
-                    )
-                );
+                if (isMounted) {
+                    setError(
+                        t(
+                            "activities_load_failed",
+                            "Activities could not be loaded."
+                        )
+                    );
+                }
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
 
         loadActivities();
-    }, [currentLanguageCode, t]);
+        return () => { isMounted = false; };
+    }, [currentLanguageCode, t, cacheKey]);
 
     const employees = useMemo(
         () =>
@@ -165,7 +174,6 @@ function Activities() {
         );
 
     return (
-        <DashboardLayout>
             <div className="space-y-8">
                 <PageHeader
                     title={t("all_activities", "All Activities")}
@@ -288,7 +296,6 @@ function Activities() {
                     )}
                 </div>
             </div>
-        </DashboardLayout>
     );
 }
 

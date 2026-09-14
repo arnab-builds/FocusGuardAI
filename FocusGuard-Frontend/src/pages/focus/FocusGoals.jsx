@@ -11,6 +11,7 @@ import {
   regenerateFocusPlan,
   getFocusPlan,
 } from "../../services/focusGoalService";
+import { fetchWithCache, getCache, setCache } from "../../utils/apiCache";
 
 const metricValues = [
   ["Deep Work Session", "deep_work_session", "Deep Work Session"],
@@ -24,8 +25,9 @@ const metricValues = [
 
 export default function FocusGoals() {
   const { t } = useLanguage();
-  const [goals, setGoals] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = "emp-focus-goals";
+  const [goals, setGoals] = useState(() => getCache(cacheKey) || []);
+  const [loading, setLoading] = useState(() => !getCache(cacheKey));
   const [form, setForm] = useState({
     goal_metric: "Deep Work Session",
     target_value: "",
@@ -36,17 +38,22 @@ export default function FocusGoals() {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
 
-  const loadGoals = async () => {
+  const loadGoals = async (showLoading = true) => {
     try {
-      const data = await getGoals();
-      setGoals(Array.isArray(data) ? data : data.results || []);
+      if (showLoading && !getCache(cacheKey)) setLoading(true);
+      const data = await fetchWithCache(cacheKey, getGoals);
+      const processed = Array.isArray(data) ? data : data.results || [];
+      setGoals(processed);
+      setCache(cacheKey, processed);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadGoals();
+    let isMounted = true;
+    loadGoals(true);
+    return () => { isMounted = false; };
   }, []);
 
   const handleChange = (event) => {
@@ -218,9 +225,14 @@ export default function FocusGoals() {
           </div>
 
           <div className="space-y-4">
-            {loading ? (
-              <div className="rounded-xl border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-10 text-center">
-                <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-4 border-t-indigo-500 border-slate-200 dark:border-slate-700" />
+            {loading && goals.length === 0 ? (
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-10 text-center shadow-sm">
+                <div className="mx-auto mb-4 inline-flex h-12 w-12 animate-pulse items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400">
+                  <svg className="h-6 w-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
                 <div className="text-sm text-slate-600 dark:text-slate-400">{t("loading", "Loading...")}</div>
               </div>
             ) : goals.length === 0 ? (

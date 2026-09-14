@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 
 import { Loader2 } from "lucide-react";
 
-import AdminLayout from "../../components/layout/AdminLayout";
 import OrganizationOverview from "../../components/organizations/OrganizationOverview";
 import EmployeesTable from "../../components/organizations/EmployeesTable";
 
@@ -34,7 +33,6 @@ function OrganizationDetails() {
 
     if (!organization) {
         return (
-            <AdminLayout>
                 <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
                     <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-slate-100 bg-white p-12 sm:p-16 shadow-sm">
                         <Loader2
@@ -51,12 +49,10 @@ function OrganizationDetails() {
                         </p>
                     </div>
                 </div>
-            </AdminLayout>
         );
     }
 
     return (
-        <AdminLayout>
             <div className="space-y-6 sm:space-y-8 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
                 <div className="rounded-3xl border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all duration-300 p-4 sm:p-6 lg:p-7">
                     <OrganizationOverview
@@ -73,7 +69,6 @@ function OrganizationDetails() {
                     </div>
                 </div>
             </div>
-        </AdminLayout>
     );
 }
 

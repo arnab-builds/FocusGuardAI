@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-import AdminLayout from "../../components/layout/AdminLayout";
 import StatCard from "../../components/ui/StatCard";
 import RecentOrganizations from "../../components/dashboard/RecentOrganizations";
 import PendingInvitations from "../../components/dashboard/PendingInvitations";
@@ -29,6 +28,7 @@ import {
 import { useLanguage } from "../../context/useLanguage";
 
 import { getDashboard } from "../../services/superAdminService";
+import { fetchWithCache, getCache, setCache } from "../../../utils/apiCache";
 
 const COLORS = [
     "#2563EB",
@@ -39,6 +39,7 @@ const COLORS = [
 
 function Dashboard() {
     const { t } = useLanguage();
+    const cacheKey = "super-dashboard";
 
     const [isMobile, setIsMobile] = useState(
         typeof window !== "undefined" && window.innerWidth < 640
@@ -54,7 +55,7 @@ function Dashboard() {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    const [dashboard, setDashboard] = useState({
+    const [dashboard, setDashboard] = useState(() => getCache(cacheKey) || {
         stats: {
             organizations: 0,
             organization_admins: 0,
@@ -69,26 +70,11 @@ function Dashboard() {
 
     const loadDashboard = async () => {
         try {
-            console.log("Calling Dashboard API...");
-
-            const response = await getDashboard();
-
-            console.log("Dashboard Response:", response);
-            console.log("Dashboard Data:", response.data);
-
+            const response = await fetchWithCache(cacheKey, getDashboard);
             setDashboard(response.data);
+            setCache(cacheKey, response.data);
         } catch (error) {
             console.error("Dashboard Error:", error);
-
-            if (error.response) {
-                console.log("Status:", error.response.status);
-                console.log("Data:", error.response.data);
-                console.log("Headers:", error.response.headers);
-            } else if (error.request) {
-                console.log("No response received:", error.request);
-            } else {
-                console.log("Error:", error.message);
-            }
         }
     };
 
@@ -113,7 +99,6 @@ function Dashboard() {
     );
 
     return (
-        <AdminLayout>
             <div className="space-y-6 sm:space-y-8 lg:space-y-10 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
                 {/* Page Header */}
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
@@ -354,7 +339,6 @@ function Dashboard() {
                     />
                 </div>
             </div>
-        </AdminLayout>
     );
 }
 

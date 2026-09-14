@@ -11,35 +11,40 @@ import {
   updateUserSettings,
 } from "../../services/settingsService";
 
+import { fetchWithCache, getCache, setCache } from "../../utils/apiCache";
 import { useLanguage } from "../../context/useLanguage";
 
 const Reminders = () => {
   const { t } = useLanguage();
 
-  const [settings, setSettings] = useState({
+  const cacheKey = "emp-reminders-settings";
+
+  const [settings, setSettings] = useState(() => getCache(cacheKey) || {
     productive_threshold: 60,
     non_productive_threshold: 10,
     idle_threshold: 5,
     browser_notifications: true,
   });
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !getCache(cacheKey));
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+    const fetchSettings = async () => {
+      try {
+        if (!getCache(cacheKey)) setLoading(true);
+        const data = await fetchWithCache(cacheKey, getUserSettings);
+        if (isMounted) setSettings(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
     fetchSettings();
+    return () => { isMounted = false; };
   }, []);
-
-  const fetchSettings = async () => {
-    try {
-      const data = await getUserSettings();
-      setSettings(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -58,6 +63,7 @@ const Reminders = () => {
 
     try {
       await updateUserSettings(settings);
+      setCache(cacheKey, settings);
 
       setMessage(
         t(
@@ -77,7 +83,7 @@ const Reminders = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !getCache(cacheKey)) {
     return (
       <div className="flex min-h-[320px] items-center justify-center bg-slate-100 dark:bg-slate-900/50">
         <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-10 py-8 shadow-sm">

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-import DashboardLayout from "../layouts/DashboardLayout";
 
 import PageHeader from "../components/common/PageHeader";
 import AnalyticsOverview from "../components/analytics/AnalyticsOverview";
@@ -14,6 +13,7 @@ import {
     getOrganizationAnalytics,
 } from "../services/analyticsService";
 import { getApiErrorMessage } from "../utils/responseUtils";
+import { fetchWithCache, getCache } from "../../utils/apiCache";
 
 const durationToSeconds = (duration) => {
     if (!duration) {
@@ -55,7 +55,9 @@ const buildCategoryData = (analytics) => {
 function Analytics() {
     const { currentLanguageCode, t } = useLanguage();
 
-    const [analytics, setAnalytics] = useState({
+    const cacheKey = `org-analytics-${currentLanguageCode}`;
+
+    const [analytics, setAnalytics] = useState(() => getCache(cacheKey) || {
         total_employees: 0,
         active_employees: 0,
         inactive_employees: 0,
@@ -63,26 +65,18 @@ function Analytics() {
         unproductive_percentage: 0,
     });
 
-    const [categoryData, setCategoryData] = useState([]);
+    const [categoryData, setCategoryData] = useState(() => getCache(cacheKey) ? buildCategoryData(getCache(cacheKey)) : []);
     const [error, setError] = useState("");
 
     async function loadAnalytics() {
         try {
-            const analyticsResponse =
-                await getOrganizationAnalytics(
-                    currentLanguageCode
-                );
+            const analyticsResponse = await fetchWithCache(cacheKey, () => getOrganizationAnalytics(currentLanguageCode));
 
             setAnalytics(analyticsResponse);
-
-            setCategoryData(
-                buildCategoryData(analyticsResponse)
-            );
-
+            setCategoryData(buildCategoryData(analyticsResponse));
             setError("");
         } catch (error) {
             console.error(error);
-
             setError(
                 getApiErrorMessage(
                     error,
@@ -96,13 +90,10 @@ function Analytics() {
     }
 
     useEffect(() => {
-        const timeout = setTimeout(loadAnalytics, 0);
-
-        return () => clearTimeout(timeout);
+        loadAnalytics();
     }, [currentLanguageCode]);
 
     return (
-        <DashboardLayout>
             <div className="space-y-8">
                 <PageHeader
     title={t(
@@ -161,7 +152,6 @@ function Analytics() {
                     }
                 />
             </div>
-        </DashboardLayout>
     );
 }
 

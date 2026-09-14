@@ -17,31 +17,30 @@ import { Building2, Users, TrendingUp, TrendingDown, BarChart3, Loader2 } from "
 import { useLanguage } from "../../context/useLanguage";
 
 import { getAnalytics } from "../../services/superAdminService";
+import { fetchWithCache, getCache, setCache } from "../../../utils/apiCache";
 
 function truncateLabel(value) {
     if (typeof value !== "string") return value;
-    return value.length > 10 ? `${value.slice(0, 10)}…` : value;
+    return value.length > 10 ? `${value.slice(0, 10)}...` : value;
 }
 
 function AnalyticsCharts() {
     const { t } = useLanguage();
+    const cacheKey = "super-analytics-charts";
 
-    const [summary, setSummary] = useState({});
-    const [organizations, setOrganizations] =
-        useState([]);
-    const [loading, setLoading] = useState(true);
+    const [summary, setSummary] = useState(() => getCache(cacheKey)?.summary || {});
+    const [organizations, setOrganizations] = useState(() => getCache(cacheKey)?.organizations_data || []);
+    const [loading, setLoading] = useState(() => !getCache(cacheKey));
 
-    const loadAnalytics = async () => {
+    const loadAnalytics = async (showLoading = true) => {
         try {
-            setLoading(true);
+            if (showLoading && !getCache(cacheKey)) setLoading(true);
 
-            const res = await getAnalytics();
+            const res = await fetchWithCache(cacheKey, getAnalytics);
 
             setSummary(res.data.summary);
-
-            setOrganizations(
-                res.data.organizations_data
-            );
+            setOrganizations(res.data.organizations_data);
+            setCache(cacheKey, res.data);
         } catch (err) {
             console.error(err);
         } finally {
@@ -50,7 +49,9 @@ function AnalyticsCharts() {
     };
 
     useEffect(() => {
-        loadAnalytics();
+        let isMounted = true;
+        loadAnalytics(true);
+        return () => { isMounted = false; };
     }, []);
 
     const growth = organizations.map((org) => ({

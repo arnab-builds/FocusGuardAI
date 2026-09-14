@@ -1,4 +1,3 @@
-import DashboardLayout from "../layouts/DashboardLayout";
 
 import PageHeader from "../components/common/PageHeader";
 import SettingsForm from "../components/settings/SettingsForm";
@@ -42,9 +41,7 @@ function SettingsContent() {
 
 function Settings() {
     return (
-        <DashboardLayout>
             <SettingsContent />
-        </DashboardLayout>
     );
 }
 

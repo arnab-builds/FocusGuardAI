@@ -13,6 +13,7 @@ import {
 
 import { NavLink } from "react-router-dom";
 import { useLanguage } from "../../context/useLanguage";
+import { clearCache } from "../../../utils/apiCache";
 
 function Sidebar({ isOpen = true, onClose = () => {} }) {
     const { t } = useLanguage();
@@ -209,6 +210,7 @@ function Sidebar({ isOpen = true, onClose = () => {} }) {
 
                     <button
                         onClick={() => {
+                            clearCache();
                             localStorage.clear();
                             window.location.href =
                                 "/login";

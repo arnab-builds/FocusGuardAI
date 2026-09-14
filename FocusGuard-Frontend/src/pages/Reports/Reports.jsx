@@ -14,32 +14,40 @@ import {
   downloadCSVReport,
 } from "../../services/reportService";
 
+import { fetchWithCache, getCache, setCache } from "../../utils/apiCache";
 import { useLanguage } from "../../context/useLanguage";
 
 export default function Reports() {
   const { selectedDate } = useOutletContext();
   const { t } = useLanguage();
 
-  const [report, setReport] = useState(null);
+  const cacheKeyReport = `emp-reports-data-${selectedDate}`;
+  const cacheKeyType = `emp-reports-type-${selectedDate}`;
+
+  const [report, setReport] = useState(() => getCache(cacheKeyReport) || null);
+  const [reportType, setReportType] = useState(() => getCache(cacheKeyType) || "");
   const [loading, setLoading] = useState(false);
-  const [reportType, setReportType] = useState("");
 
   const generateReport = async (type) => {
     setLoading(true);
 
-    try {
-      let data;
+    const typeCacheKey = `emp-reports-data-${type}-${selectedDate}`;
 
-      if (type === "daily") {
-        data = await getDailyReport(selectedDate);
-      } else if (type === "weekly") {
-        data = await getWeeklyReport(selectedDate);
-      } else {
-        data = await getMonthlyReport(selectedDate);
-      }
+    try {
+      let data = await fetchWithCache(typeCacheKey, async () => {
+        if (type === "daily") {
+          return await getDailyReport(selectedDate);
+        } else if (type === "weekly") {
+          return await getWeeklyReport(selectedDate);
+        } else {
+          return await getMonthlyReport(selectedDate);
+        }
+      });
 
       setReport(data);
       setReportType(type);
+      setCache(cacheKeyReport, data);
+      setCache(cacheKeyType, type);
     } catch (error) {
       console.error(error);
 

@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-import DashboardLayout from "../layouts/DashboardLayout";
-
 import PageHeader from "../components/common/PageHeader";
 
 import DashboardCards from "../components/dashboard/DashboardCards";
@@ -17,6 +15,7 @@ import {
     getOrganizationMembers,
 } from "../services/dashboardService";
 import { normalizeOrganizationActivities } from "../utils/activityUtils";
+import { fetchWithCache, getCache } from "../../utils/apiCache";
 import { useLanguage } from "../context/useLanguage";
 
 const initialAnalytics = {
@@ -30,32 +29,36 @@ const initialAnalytics = {
 function Dashboard() {
     const { t } = useLanguage();
 
-    const [analytics, setAnalytics] = useState(initialAnalytics);
+    const cacheKeyAnal = "org-dash-analytics";
+    const cacheKeyTrend = "org-dash-trend";
+    const cacheKeyAct = "org-dash-activity";
+    const cacheKeyMem = "org-dash-members";
 
-    const [trend, setTrend] = useState([]);
+    const [analytics, setAnalytics] = useState(() => getCache(cacheKeyAnal) || initialAnalytics);
+    const [trend, setTrend] = useState(() => getCache(cacheKeyTrend) || []);
+    const [activities, setActivities] = useState(() => getCache(cacheKeyAct) || []);
+    const [employees, setEmployees] = useState(() => getCache(cacheKeyMem) || []);
 
-    const [activities, setActivities] = useState([]);
-
-    const [employees, setEmployees] = useState([]);
-
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(() => !getCache(cacheKeyAnal));
 
     const [error, setError] = useState("");
 
-    const [lastSynced, setLastSynced] = useState(null);
+    const [lastSynced, setLastSynced] = useState(() => getCache(cacheKeyAnal) ? new Date() : null);
 
     const loadDashboard = async () => {
         try {
+            if (!getCache(cacheKeyAnal)) setLoading(true);
+
             const [
                 analyticsResponse,
                 trendResponse,
                 activityResponse,
                 membersResponse,
             ] = await Promise.all([
-                getOrganizationAnalytics(),
-                getDashboardTrend(),
-                getOrganizationActivity(),
-                getOrganizationMembers(),
+                fetchWithCache(cacheKeyAnal, getOrganizationAnalytics),
+                fetchWithCache(cacheKeyTrend, getDashboardTrend),
+                fetchWithCache(cacheKeyAct, getOrganizationActivity),
+                fetchWithCache(cacheKeyMem, getOrganizationMembers),
             ]);
 
             setAnalytics(
@@ -120,7 +123,6 @@ function Dashboard() {
           );
 
     return (
-        <DashboardLayout>
             <div className="mx-auto max-w-[1500px] space-y-7">
                 <PageHeader
                     title={t("overview", "Overview")}
@@ -203,7 +205,6 @@ function Dashboard() {
                     )}
                 </div>
             </div>
-        </DashboardLayout>
     );
 }
 

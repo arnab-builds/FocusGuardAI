@@ -1,6 +1,5 @@
 import { ShieldAlert } from "lucide-react";
 
-import AdminLayout from "../../components/layout/AdminLayout";
 import RequestsTable from "../../components/requests/RequestsTable";
 
 import { useLanguage } from "../../context/useLanguage";
@@ -9,7 +8,6 @@ function Requests() {
     const { t } = useLanguage();
 
     return (
-        <AdminLayout>
             <div className="space-y-6 sm:space-y-8">
                 <div className="rounded-3xl bg-gradient-to-br from-amber-50 via-orange-50/40 to-white border border-amber-100/70 shadow-sm p-6 sm:p-8">
                     <div className="flex items-center gap-4">
@@ -47,7 +45,6 @@ function Requests() {
                     </div>
                 </div>
             </div>
-        </AdminLayout>
     );
 }
 

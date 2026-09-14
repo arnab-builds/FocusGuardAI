@@ -1,34 +1,39 @@
 import { useEffect, useState } from "react";
 import { Loader2, Users } from "lucide-react";
 
-import AdminLayout from "../../components/layout/AdminLayout";
 import { useLanguage } from "../../context/useLanguage";
 
 import {
   getNormalUsers,
   reviewNormalUserDeactivation,
 } from "../../services/superAdminService";
+import { fetchWithCache, getCache, setCache } from "../../../utils/apiCache";
 
 function NormalUsers() {
   const { t } = useLanguage();
+  const cacheKey = "super-normal-users";
 
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState(() => getCache(cacheKey) || []);
+  const [loading, setLoading] = useState(() => !getCache(cacheKey));
 
-  const loadUsers = async () => {
+  const loadUsers = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading && !getCache(cacheKey)) setLoading(true);
 
-      const response = await getNormalUsers();
+      const response = await fetchWithCache(cacheKey, getNormalUsers);
 
-      setUsers(response.data.results || []);
+      const processed = response.data.results || [];
+      setUsers(processed);
+      setCache(cacheKey, processed);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadUsers();
+    let isMounted = true;
+    loadUsers(true);
+    return () => { isMounted = false; };
   }, []);
 
   const review = async (requestId, action) => {
@@ -81,7 +86,6 @@ function NormalUsers() {
   };
 
   return (
-    <AdminLayout>
       <div className="space-y-6 sm:space-y-8">
         <div className="rounded-3xl bg-gradient-to-br from-blue-50 via-indigo-50/40 to-white border border-blue-100/70 shadow-sm p-6 sm:p-8">
           <div className="flex items-center gap-4">
@@ -114,8 +118,8 @@ function NormalUsers() {
         </div>
 
         <div className="rounded-3xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50/70 to-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center text-center py-16 sm:py-20 px-5">
+          {loading && users.length === 0 ? (
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-10 sm:p-16 flex flex-col items-center justify-center text-center">
               <Loader2
                 className="animate-spin text-blue-600"
                 size={36}
@@ -353,7 +357,6 @@ function NormalUsers() {
           )}
         </div>
       </div>
-    </AdminLayout>
   );
 }
 

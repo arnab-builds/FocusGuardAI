@@ -1,4 +1,3 @@
-import DashboardLayout from "../layouts/DashboardLayout";
 
 import PageHeader from "../components/common/PageHeader";
 import NotificationList from "../components/notifications/NotificationList";
@@ -9,7 +8,6 @@ function Notifications() {
     const { t } = useLanguage();
 
     return (
-        <DashboardLayout>
             <div className="space-y-8">
                 <PageHeader
     title={t(
@@ -24,7 +22,6 @@ function Notifications() {
 
                 <NotificationList />
             </div>
-        </DashboardLayout>
     );
 }
 

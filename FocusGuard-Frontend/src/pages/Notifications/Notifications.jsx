@@ -5,59 +5,51 @@ import {
   markNotificationRead,
   deleteNotification,
 } from "../../services/notificationService";
+import { fetchWithCache, getCache, setCache } from "../../utils/apiCache";
 import { useLanguage } from "../../context/useLanguage";
 
 function Notifications() {
   const { currentLanguageCode, t } = useLanguage();
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadedLanguageCode, setLoadedLanguageCode] = useState(null);
+  
+  const cacheKey = `emp-notifications-${currentLanguageCode}`;
+  
+  const [notifications, setNotifications] = useState(() => getCache(cacheKey) || []);
+  const [loading, setLoading] = useState(() => !getCache(cacheKey));
+  const [loadedLanguageCode, setLoadedLanguageCode] = useState(() => getCache(cacheKey) ? currentLanguageCode : null);
 
-  const fetchNotifications = useCallback(async (signal) => {
+  const fetchNotifications = useCallback(async () => {
     try {
-      const data = await getNotifications(currentLanguageCode, signal);
+      if (!getCache(cacheKey)) setLoading(true);
 
-      setNotifications(
-        Array.isArray(data) ? data : data.results || []
-      );
+      const data = await fetchWithCache(cacheKey, () => getNotifications(currentLanguageCode));
+
+      const processed = Array.isArray(data) ? data : data.results || [];
+      setNotifications(processed);
       setLoadedLanguageCode(currentLanguageCode);
     } catch (error) {
-      if (error.name === "CanceledError") {
-        return;
-      }
-
       console.error("Notification Error:", error);
     } finally {
-      if (!signal?.aborted) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
-  }, [currentLanguageCode]);
+  }, [currentLanguageCode, cacheKey]);
 
   useEffect(() => {
-    const controller = new AbortController();
-
-    const requestTimer = window.setTimeout(() => {
-      fetchNotifications(controller.signal);
-    }, 0);
-
-    return () => {
-      window.clearTimeout(requestTimer);
-      controller.abort();
-    };
+    fetchNotifications();
   }, [fetchNotifications]);
 
   const handleRead = async (id) => {
     try {
       await markNotificationRead(id);
 
-      setNotifications((prev) =>
-        prev.map((notification) =>
+      setNotifications((prev) => {
+        const updated = prev.map((notification) =>
           notification.id === id
             ? { ...notification, is_read: true }
             : notification
-        )
-      );
+        );
+        setCache(cacheKey, updated);
+        return updated;
+      });
     } catch (error) {
       console.error(error);
     }
@@ -73,15 +65,17 @@ function Notifications() {
     try {
       await deleteNotification(id);
 
-      setNotifications((prev) =>
-        prev.filter((notification) => notification.id !== id)
-      );
+      setNotifications((prev) => {
+        const updated = prev.filter((notification) => notification.id !== id);
+        setCache(cacheKey, updated);
+        return updated;
+      });
     } catch (error) {
       console.error(error);
     }
   };
 
-  if (loading || loadedLanguageCode !== currentLanguageCode) {
+  if ((loading && notifications.length === 0) || loadedLanguageCode !== currentLanguageCode) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
         {t("loading", "Loading...")}

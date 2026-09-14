@@ -2,30 +2,29 @@ import { useEffect, useState } from "react";
 
 import { Plus, Loader2 } from "lucide-react";
 
-import AdminLayout from "../../components/layout/AdminLayout";
 import OrganizationsTable from "../../components/organizations/OrganizationsTable";
 import CreateOrganizationModal from "../../components/organizations/CreateOrganizationModal";
 
 import { useLanguage } from "../../context/useLanguage";
 
 import { getOrganizations } from "../../services/superAdminService";
+import { fetchWithCache, getCache, setCache } from "../../../utils/apiCache";
 
 function Organizations() {
     const { t } = useLanguage();
+    const cacheKey = "super-organizations";
 
     const [open, setOpen] = useState(false);
-    const [organizations, setOrganizations] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [organizations, setOrganizations] = useState(() => getCache(cacheKey) || []);
+    const [loading, setLoading] = useState(() => !getCache(cacheKey));
 
-    const loadOrganizations = async () => {
+    const loadOrganizations = async (showLoading = true) => {
         try {
-            setLoading(true);
+            if (showLoading && !getCache(cacheKey)) setLoading(true);
 
-            const res = await getOrganizations();
-
-            console.log("Organizations API:", res.data);
-
+            const res = await fetchWithCache(cacheKey, getOrganizations);
             setOrganizations(res.data);
+            setCache(cacheKey, res.data);
         } catch (err) {
             console.error("Error loading organizations:", err);
         } finally {
@@ -34,11 +33,13 @@ function Organizations() {
     };
 
     useEffect(() => {
-        loadOrganizations();
+        let isMounted = true;
+        loadOrganizations(true);
+        return () => { isMounted = false; };
     }, []);
 
     return (
-        <AdminLayout>
+        <>
             <div className="space-y-6 sm:space-y-8 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-5">
                     <div>
@@ -69,7 +70,7 @@ function Organizations() {
                     </button>
                 </div>
 
-                {loading ? (
+                {loading && organizations.length === 0 ? (
                     <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-slate-100 bg-white p-12 sm:p-16 shadow-sm">
                         <Loader2
                             size={32}
@@ -103,7 +104,7 @@ function Organizations() {
                     loadOrganizations();
                 }}
             />
-        </AdminLayout>
+        </>
     );
 }
 

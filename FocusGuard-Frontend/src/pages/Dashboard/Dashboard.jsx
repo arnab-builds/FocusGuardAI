@@ -12,6 +12,7 @@ import {
 } from "../../services/aiRecommendationService";
 import { getDashboardTrend } from "../../services/dashboardService";
 import { useLanguage } from "../../context/useLanguage";
+import { fetchWithCache, getCache } from "../../utils/apiCache";
 
 function Dashboard() {
   const { selectedDate, dashboardHeader } = useOutletContext();
@@ -19,9 +20,13 @@ function Dashboard() {
 
   const { profile, analytics } = dashboardHeader;
 
-  const [trendActivities, setTrendActivities] = useState([]);
-  const [recentActivities, setRecentActivities] = useState([]);
-  const [recommendation, setRecommendation] = useState(null);
+  const trendCacheKey = `emp-trend-${selectedDate}`;
+  const recentCacheKey = `emp-recent-${selectedDate}`;
+  const recCacheKey = `emp-rec-${selectedDate}-${currentLanguageCode}`;
+
+  const [trendActivities, setTrendActivities] = useState(() => getCache(trendCacheKey) || []);
+  const [recentActivities, setRecentActivities] = useState(() => getCache(recentCacheKey)?.results || []);
+  const [recommendation, setRecommendation] = useState(() => getCache(recCacheKey) || null);
   const [loadingRecommendation, setLoadingRecommendation] = useState(false);
 
   const handleAnalyze = async () => {
@@ -48,10 +53,10 @@ function Dashboard() {
 
     const loadRecommendation = async () => {
       try {
-        const recommendations = await getAIRecommendations(
+        const recommendations = await fetchWithCache(recCacheKey, () => getAIRecommendations(
           selectedDate,
           currentLanguageCode
-        );
+        ));
 
         if (isCurrent) {
           setRecommendation(recommendations[0] || null);
@@ -69,32 +74,28 @@ function Dashboard() {
     return () => {
       isCurrent = false;
     };
-  }, [selectedDate, currentLanguageCode]);
+  }, [selectedDate, currentLanguageCode, recCacheKey]);
 
   useEffect(() => {
-    let activeController;
+    let isCurrent = true;
 
     const fetchData = async () => {
-      activeController?.abort();
-      const controller = new AbortController();
-      activeController = controller;
-
       try {
         const [trendData, recentData] = await Promise.all([
-          getDashboardTrend(selectedDate, controller.signal),
-          getActivityHistory(1, selectedDate, controller.signal),
+          fetchWithCache(trendCacheKey, () => getDashboardTrend(selectedDate)),
+          fetchWithCache(recentCacheKey, () => getActivityHistory(1, selectedDate)),
         ]);
 
-        if (controller.signal.aborted) return;
-
-        setTrendActivities(trendData);
-        setRecentActivities(recentData.results || []);
+        if (isCurrent) {
+          setTrendActivities(trendData);
+          setRecentActivities(recentData.results || []);
+        }
       } catch (err) {
-        if (err.name === "CanceledError") return;
-
-        console.error("Activity API Error:", err);
-        setTrendActivities([]);
-        setRecentActivities([]);
+        if (isCurrent) {
+          console.error("Activity API Error:", err);
+          setTrendActivities([]);
+          setRecentActivities([]);
+        }
       }
     };
 
@@ -107,10 +108,10 @@ function Dashboard() {
     }, 30_000);
 
     return () => {
+      isCurrent = false;
       window.clearInterval(refreshInterval);
-      activeController?.abort();
     };
-  }, [selectedDate]);
+  }, [selectedDate, trendCacheKey, recentCacheKey]);
 
   if (!profile || !analytics) {
     return (

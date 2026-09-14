@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import { OrgThemeProvider, useOrgTheme } from "../context/OrgThemeContext";
 
-function DashboardLayoutContent({ children }) {
+function DashboardLayoutContent() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { theme } = useOrgTheme();
 
@@ -47,7 +48,7 @@ function DashboardLayoutContent({ children }) {
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 md:px-8 lg:px-10 xl:px-12">
           <div className="mx-auto w-full max-w-[1700px]">
-            {children}
+            <Outlet />
           </div>
         </main>
       </div>
@@ -56,10 +57,10 @@ function DashboardLayoutContent({ children }) {
   );
 }
 
-export default function DashboardLayout({ children }) {
+export default function DashboardLayout() {
   return (
     <OrgThemeProvider>
-      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      <DashboardLayoutContent />
     </OrgThemeProvider>
   );
 }

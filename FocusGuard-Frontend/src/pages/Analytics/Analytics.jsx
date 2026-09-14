@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { getAnalytics } from "../../services/analyticsService";
+import { fetchWithCache, getCache } from "../../utils/apiCache";
 
 import SummaryCards from "../../components/analytics/SummaryCards";
 import ProductivityPieChart from "../../components/analytics/ProductivityPieChart";
@@ -12,33 +13,41 @@ export default function Analytics() {
   const { selectedDate, setDashboardHeader } = useOutletContext();
   const { t } = useLanguage();
 
-  const [analytics, setAnalytics] = useState({});
-  const [loading, setLoading] = useState(true);
+  const cacheKey = `emp-analytics-${selectedDate}`;
+  const [analytics, setAnalytics] = useState(() => getCache(cacheKey) || {});
+  const [loading, setLoading] = useState(() => !getCache(cacheKey));
 
   useEffect(() => {
+    let isMounted = true;
+    
+    const fetchAnalytics = async () => {
+      try {
+        if (!getCache(cacheKey)) setLoading(true);
+
+        const data = await fetchWithCache(cacheKey, () => getAnalytics(selectedDate));
+
+        if (isMounted) {
+          setAnalytics(data);
+          setDashboardHeader((prev) => ({
+            ...prev,
+            analytics: data,
+          }));
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
     fetchAnalytics();
-  }, [selectedDate]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedDate, setDashboardHeader]);
 
-  const fetchAnalytics = async () => {
-    try {
-      setLoading(true);
-
-      const data = await getAnalytics(selectedDate);
-
-      setAnalytics(data);
-
-      setDashboardHeader((prev) => ({
-        ...prev,
-        analytics: data,
-      }));
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (loading && !analytics.user_id) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center rounded-2xl bg-white dark:bg-slate-800 text-lg font-medium text-slate-600 dark:text-slate-400 shadow-sm">
         {t("loading_analytics", "Loading Analytics...")}

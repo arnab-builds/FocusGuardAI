@@ -83,6 +83,8 @@ export const getTranslations = async (languageCode) => {
 
 };
 
+import { clearCache } from "../../utils/apiCache";
+
 export const logout = async () => {
 
     try {
@@ -103,6 +105,7 @@ export const logout = async () => {
     finally {
 
         localStorage.clear();
+        clearCache();
 
     }
 

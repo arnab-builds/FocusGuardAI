@@ -15,6 +15,7 @@ import {
     getOrganizationChatHistory,
 } from "../../services/aiService";
 import { getApiErrorMessage } from "../../utils/responseUtils";
+import { fetchWithCache, getCache, setCache } from "../../../utils/apiCache";
 
 const SUGGESTED_PROMPTS = [
     "Top productive employees",
@@ -58,13 +59,15 @@ function ChatWindow() {
     );
 
     const [message, setMessage] = useState("");
+    const [selectedDate, setSelectedDate] = useState(getLocalDate);
+
+    const cacheKey = `org-chat-${selectedDate}`;
 
     const getDefaultMessages = () => [{ sender: "ai", text: welcomeMessage }];
-    const [selectedDate, setSelectedDate] = useState(getLocalDate);
-    const [messages, setMessages] = useState(getDefaultMessages);
+    const [messages, setMessages] = useState(() => getCache(cacheKey) || getDefaultMessages());
 
     const [loading, setLoading] = useState(false);
-    const [loadingHistory, setLoadingHistory] = useState(true);
+    const [loadingHistory, setLoadingHistory] = useState(() => !getCache(cacheKey));
 
     const scrollRef = useRef(null);
 
@@ -85,29 +88,38 @@ function ChatWindow() {
         let isCurrent = true;
 
         const loadHistory = async () => {
-            setLoadingHistory(true);
+            if (!getCache(cacheKey)) setLoadingHistory(true);
             try {
-                const history = await getOrganizationChatHistory(selectedDate);
+                const history = await fetchWithCache(cacheKey, () => getOrganizationChatHistory(selectedDate));
                 if (isCurrent) {
-                    setMessages(
-                        history.length
+                    const processed = history.length
                             ? history
-                            : [{ sender: "ai", text: welcomeMessage }]
-                    );
+                            : [{ sender: "ai", text: welcomeMessage }];
+                    setMessages(processed);
+                    setCache(cacheKey, processed);
                 }
             } catch (error) {
                 console.error("Organization chat history error:", error);
                 if (isCurrent) {
-                    setMessages([{ sender: "ai", text: welcomeMessage }]);
+                    const processed = [{ sender: "ai", text: welcomeMessage }];
+                    setMessages(processed);
+                    setCache(cacheKey, processed);
                 }
             } finally {
                 if (isCurrent) setLoadingHistory(false);
             }
         };
-
         loadHistory();
-        return () => { isCurrent = false; };
-    }, [selectedDate, welcomeMessage]);
+        return () => {
+            isCurrent = false;
+        };
+    }, [selectedDate, welcomeMessage, cacheKey]);
+
+    useEffect(() => {
+        if (messages.length > 1) {
+           setCache(cacheKey, messages);
+        }
+    }, [messages, cacheKey]);
 
     useEffect(() => {
         const now = new Date();

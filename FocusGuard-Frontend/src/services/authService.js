@@ -34,6 +34,8 @@ export const getTranslations = async (languageCode, config = {}) => {
   return response.data;
 };
 
+import { clearCache } from "../utils/apiCache";
+
 export const logoutUser = async () => {
   try {
     const refresh = localStorage.getItem("refresh");
@@ -46,5 +48,6 @@ export const logoutUser = async () => {
   } finally {
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
+    clearCache();
   }
 };
