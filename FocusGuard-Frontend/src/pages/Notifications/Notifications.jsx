@@ -37,42 +37,46 @@ function Notifications() {
     fetchNotifications();
   }, [fetchNotifications]);
 
-  const handleRead = async (id) => {
-    try {
-      await markNotificationRead(id);
+  const handleRead = (id) => {
+    const prevNotifications = [...notifications];
 
-      setNotifications((prev) => {
-        const updated = prev.map((notification) =>
-          notification.id === id
-            ? { ...notification, is_read: true }
-            : notification
-        );
-        setCache(cacheKey, updated);
-        return updated;
-      });
-    } catch (error) {
+    setNotifications((prev) => {
+      const updated = prev.map((notification) =>
+        notification.id === id
+          ? { ...notification, is_read: true }
+          : notification
+      );
+      setCache(cacheKey, updated);
+      return updated;
+    });
+
+    markNotificationRead(id).catch((error) => {
       console.error(error);
-    }
+      setNotifications(prevNotifications);
+      setCache(cacheKey, prevNotifications);
+    });
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
     const confirmed = window.confirm(
       t("delete_notification_confirmation", "Delete this notification?")
     );
 
     if (!confirmed) return;
 
-    try {
-      await deleteNotification(id);
+    const prevNotifications = [...notifications];
 
-      setNotifications((prev) => {
-        const updated = prev.filter((notification) => notification.id !== id);
-        setCache(cacheKey, updated);
-        return updated;
-      });
-    } catch (error) {
+    setNotifications((prev) => {
+      const updated = prev.filter((notification) => notification.id !== id);
+      setCache(cacheKey, updated);
+      return updated;
+    });
+
+    deleteNotification(id).catch((error) => {
       console.error(error);
-    }
+      setNotifications(prevNotifications);
+      setCache(cacheKey, prevNotifications);
+    });
   };
 
   if ((loading && notifications.length === 0) || loadedLanguageCode !== currentLanguageCode) {

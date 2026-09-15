@@ -57,7 +57,7 @@ def generate_notification(user, event):
         message=selected["message"],
     )
 
-    print(f"🔥 Notification Created [{event}] for {user.username}")
+    print(f"Notification Created [{event}] for {user.username}")
 
     return notification
 

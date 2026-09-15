@@ -32,32 +32,45 @@ export async function loadUserSettings() {
 }
 
 export async function resetNotificationState() {
-    await chrome.storage.local.remove(["lastNotification", "lastSettingsRefresh", "userThreshold"]);
+    await chrome.storage.local.remove(["notifiedProductive", "notifiedNonProductive", "lastSettingsRefresh", "userThreshold", "notifiedIdle"]);
 }
 
 export async function checkNotifications(stats) {
-    const data = await chrome.storage.local.get(["userThreshold", "lastNotification"]);
+    const data = await chrome.storage.local.get(["userThreshold", "isIdle", "lastActivityTime", "notifiedIdle", "notifiedProductive", "notifiedNonProductive"]);
     const userThreshold = data.userThreshold || DEFAULT_THRESHOLDS;
-    const lastNotification = data.lastNotification;
 
     let event = null;
+    let updateStorage = {};
 
-    if (
-        stats.nonProductiveSeconds >= userThreshold.nonProductive &&
-        lastNotification !== "NON_PRODUCTIVE"
-    ) {
-        event = "NON_PRODUCTIVE";
+    if (data.isIdle && data.lastActivityTime) {
+        // chrome.idle.setDetectionInterval is 60s, so lastActivityTime was recorded exactly 60s after the user actually went idle.
+        const idleSeconds = Math.floor((Date.now() - data.lastActivityTime) / 1000) + 60;
+        if (idleSeconds >= userThreshold.idle && !data.notifiedIdle) {
+            event = "IDLE";
+            updateStorage.notifiedIdle = true;
+        }
     }
-    else if (
-        stats.productiveSeconds >= userThreshold.productive &&
-        lastNotification !== "PRODUCTIVE_SESSION"
-    ) {
-        event = "PRODUCTIVE_SESSION";
+
+    if (!event) {
+        if (
+            stats.nonProductiveSeconds >= userThreshold.nonProductive &&
+            !data.notifiedNonProductive
+        ) {
+            event = "NON_PRODUCTIVE";
+            updateStorage.notifiedNonProductive = true;
+        }
+        else if (
+            stats.productiveSeconds >= userThreshold.productive &&
+            !data.notifiedProductive
+        ) {
+            event = "PRODUCTIVE_SESSION";
+            updateStorage.notifiedProductive = true;
+        }
     }
 
     if (!event) return;
 
-    await chrome.storage.local.set({ lastNotification: event });
+    await chrome.storage.local.set(updateStorage);
 
     try {
         const notification = await generateNotification(event);

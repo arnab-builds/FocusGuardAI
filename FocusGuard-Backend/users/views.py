@@ -2019,6 +2019,13 @@ class RejectEmployeeDeactivationRequestView(TranslatedResponseMixin, APIView):
         deactivation_request.reviewed_at = timezone.now()
         deactivation_request.save()
 
+        create_user_notification(
+            user=deactivation_request.employee,
+            title="Deactivation Request Rejected",
+            message=f"Your deactivation request was rejected by {request.user.username}.",
+            notification_type="REQUEST",
+        )
+
         return Response(
             {
                 "message": "Request rejected successfully.",

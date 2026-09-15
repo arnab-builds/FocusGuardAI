@@ -111,29 +111,42 @@ function Navbar({ onToggleSidebar }) {
             );
     }, []);
 
-    const handleNotificationClick =
-        async (notification) => {
-            if (notification.is_read) return;
+    const handleNotificationClick = (notification) => {
+        if (notification.is_read) return;
 
-            try {
-                await markNotificationRead(
-                    notification.id
-                );
+        const prevNotifications = [...notifications];
+        const prevUnreadCount = unreadCount;
 
-                await loadNotifications();
-            } catch (err) {
-                console.error(err);
-            }
-        };
+        setNotifications((prev) =>
+            prev.map((n) =>
+                n.id === notification.id
+                    ? { ...n, is_read: true }
+                    : n
+            )
+        );
+        setUnreadCount((prev) => prev - 1);
 
-    const handleMarkAllRead = async () => {
-        try {
-            await markAllNotificationsRead();
-
-            await loadNotifications();
-        } catch (err) {
+        markNotificationRead(notification.id).catch((err) => {
             console.error(err);
-        }
+            setNotifications(prevNotifications);
+            setUnreadCount(prevUnreadCount);
+        });
+    };
+
+    const handleMarkAllRead = () => {
+        const prevNotifications = [...notifications];
+        const prevUnreadCount = unreadCount;
+
+        setNotifications((prev) =>
+            prev.map((n) => ({ ...n, is_read: true }))
+        );
+        setUnreadCount(0);
+
+        markAllNotificationsRead().catch((err) => {
+            console.error(err);
+            setNotifications(prevNotifications);
+            setUnreadCount(prevUnreadCount);
+        });
     };
 
     const handleLanguageChange =

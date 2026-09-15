@@ -28,6 +28,7 @@ export async function setIdleState(isIdle) {
         await updateAccumulatedTime();
         await chrome.storage.local.set({ isIdle: true });
     } else {
+        await chrome.storage.local.remove("notifiedIdle");
         await chrome.storage.local.set({ isIdle: false, lastActivityTime: Date.now() });
     }
 }
