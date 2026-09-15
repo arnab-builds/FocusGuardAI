@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   FiBell,
   FiCheckCircle,
@@ -10,6 +10,7 @@ import { getNotifications } from "../services/notificationService";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/useLanguage";
 import { updatePreferredLanguage } from "../services/settingsService";
+import { fetchWithCache } from "../utils/apiCache";
 
 const getGreetingKey = (now = new Date()) => {
   const hour = now.getHours();
@@ -127,18 +128,38 @@ export default function TopNavbar({
     return () => clearInterval(interval);
   }, []);
 
+  const loadNotifications = useCallback(async () => {
+    try {
+      const cacheKey = `emp-notifications-${currentLanguageCode}`;
+      const data = await fetchWithCache(cacheKey, () =>
+        getNotifications(currentLanguageCode)
+      );
+      const processed = Array.isArray(data) ? data : data.results || [];
+      setNotifications(processed);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [currentLanguageCode]);
+
   useEffect(() => {
-    const loadNotifications = async () => {
-      try {
-        const data = await getNotifications(currentLanguageCode);
-        setNotifications(data);
-      } catch (err) {
-        console.error(err);
+    loadNotifications();
+  }, [loadNotifications]);
+
+  useEffect(() => {
+    const handleCacheUpdate = (e) => {
+      const expectedKey = `emp-notifications-${currentLanguageCode}`;
+      if (e.detail?.key === expectedKey) {
+        const data = e.detail.data;
+        const processed = Array.isArray(data) ? data : data.results || [];
+        setNotifications(processed);
       }
     };
 
-    loadNotifications();
+    window.addEventListener("cacheUpdated", handleCacheUpdate);
+    return () => window.removeEventListener("cacheUpdated", handleCacheUpdate);
   }, [currentLanguageCode]);
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   return (
     <header className="border-b border-indigo-100 dark:border-slate-800 bg-gradient-to-r from-blue-50 to-indigo-50/80 dark:bg-none dark:bg-[#0B1120] px-4 py-4 sm:px-8 sm:py-5 shadow-sm">
@@ -226,12 +247,16 @@ export default function TopNavbar({
 
           <div className="relative">
             <button
-              onClick={() => setShowNotifications(!showNotifications)}
+              onClick={() => {
+                const nextState = !showNotifications;
+                setShowNotifications(nextState);
+                if (nextState) loadNotifications();
+              }}
               className="relative rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 text-slate-900 dark:text-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               aria-label={t("notifications", "Notifications")}
             >
               <FiBell size={22} />
-              {notifications.some((n) => !n.is_read) && (
+              {unreadCount > 0 && (
                  <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-slate-800 bg-red-500" />
               )}
             </button>
@@ -245,7 +270,7 @@ export default function TopNavbar({
                         {t("notifications", "Notifications")}
                       </p>
                       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                        {notifications.length} {t("new", "new")}
+                        {unreadCount} {t("new", "new")}
                       </p>
                     </div>
                   </div>

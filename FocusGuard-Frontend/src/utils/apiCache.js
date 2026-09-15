@@ -26,6 +26,11 @@ export const getCache = (key) => memoryCache.get(key);
 export const setCache = (key, data) => {
   memoryCache.set(key, data);
   syncCache();
+  window.dispatchEvent(
+    new CustomEvent("cacheUpdated", {
+      detail: { key, data },
+    })
+  );
 };
 
 export const clearCache = () => {
