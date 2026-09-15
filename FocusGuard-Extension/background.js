@@ -27,6 +27,7 @@ async function isAuthenticated() {
 chrome.alarms.create("focusGuardMaintenance", { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "focusGuardMaintenance" && await isAuthenticated()) {
+        console.log("FocusGuard maintenance alarm fired");
         await checkPeriodicThresholds();
     }
 });
@@ -202,7 +203,7 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-    if (changeInfo.status !== "complete") return;
+    if (changeInfo.status !== "complete" || !tab.active) return;
     await debouncedProcessTab(tab);
 });
 

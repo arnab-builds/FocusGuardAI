@@ -10,12 +10,14 @@ export async function setCurrentActivity(activity) {
 }
 
 export async function startTracking() {
-    const { trackingStats } = await chrome.storage.local.get("trackingStats");
+    const { trackingStats, isIdle } = await chrome.storage.local.get(["trackingStats", "isIdle"]);
     if (!trackingStats) {
         await resetTracking();
     } else {
         await updateAccumulatedTime();
-        await chrome.storage.local.set({ isIdle: false, lastActivityTime: Date.now() });
+        if (!isIdle) {
+            await chrome.storage.local.set({ lastActivityTime: Date.now() });
+        }
     }
 }
 
@@ -26,8 +28,17 @@ export async function stopTracking() {
 
 export async function setIdleState(isIdle) {
     if (isIdle) {
+        const { isIdle: wasIdle } = await chrome.storage.local.get("isIdle");
+        if (wasIdle) return;
+
         await updateAccumulatedTime();
-        await chrome.storage.local.set({ isIdle: true });
+        // From this point on lastActivityTime represents the beginning of the
+        // current idle period.  It must not be changed by service-worker
+        // startup or maintenance work while isIdle remains true.
+        await chrome.storage.local.set({
+            isIdle: true,
+            lastActivityTime: Date.now()
+        });
     } else {
         await chrome.storage.local.remove("notifiedIdle");
         await chrome.storage.local.set({ isIdle: false, lastActivityTime: Date.now() });
@@ -35,6 +46,7 @@ export async function setIdleState(isIdle) {
 }
 
 export async function resetTracking() {
+    await chrome.storage.local.remove(["notifiedIdle", "notifiedProductive", "notifiedNonProductive"]);
     await chrome.storage.local.set({
         trackingStats: {
             productiveSeconds: 0,

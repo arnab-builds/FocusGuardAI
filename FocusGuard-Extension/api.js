@@ -356,6 +356,11 @@ export async function generateNotification(notification_type) {
             return null;
         }
 
+        if (!response.ok) {
+            console.error("Notification API Error:", response.status);
+            return null;
+        }
+
         return await response.json();
     } catch (error) {
         console.error("Notification API Error:", error);
