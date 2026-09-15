@@ -14,6 +14,7 @@ export async function startTracking() {
     if (!trackingStats) {
         await resetTracking();
     } else {
+        await updateAccumulatedTime();
         await chrome.storage.local.set({ isIdle: false, lastActivityTime: Date.now() });
     }
 }
