@@ -1,3 +1,5 @@
+import smtplib
+import socket
 import uuid
 from urllib.parse import quote
 from collections import defaultdict
@@ -559,18 +561,20 @@ class InvitationCreateView(TranslatedResponseMixin, APIView):
 
             organization = request.user.organization
 
-        invitation = serializer.save(
-            organization=organization,
-            invited_by=request.user,
-            token=str(uuid.uuid4()),
-        )
+        try:
+            with transaction.atomic():
+                invitation = serializer.save(
+                    organization=organization,
+                    invited_by=request.user,
+                    token=str(uuid.uuid4()),
+                )
 
-        if role == "SUB_ADMIN":
-            subject = (
-                "Welcome to FocusGuardAI - "
-                "Organization Administrator Invitation"
-            )
-            message = f"""
+                if role == "SUB_ADMIN":
+                    subject = (
+                        "Welcome to FocusGuardAI - "
+                        "Organization Administrator Invitation"
+                    )
+                    message = f"""
 Hello,
 
 You have been invited to join FocusGuardAI as an Organization Administrator.
@@ -592,9 +596,9 @@ Regards,
 FocusGuardAI Team
 """
 
-        else:
-            subject = "Welcome to FocusGuardAI - Employee Invitation"
-            message = f"""
+                else:
+                    subject = "Welcome to FocusGuardAI - Employee Invitation"
+                    message = f"""
 Hello,
 
 You have been invited to join FocusGuardAI.
@@ -613,21 +617,26 @@ Regards,
 FocusGuardAI Team
 """
 
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=f"FocusGuardAI <{settings.DEFAULT_FROM_EMAIL}>",
-            recipient_list=[invitation.email],
-            fail_silently=False,
-        )
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=f"FocusGuardAI <{settings.DEFAULT_FROM_EMAIL}>",
+                    recipient_list=[invitation.email],
+                    fail_silently=False,
+                )
 
-        return Response(
-            {
-                "message": "Invitation sent successfully.",
-                "invitation": InvitationSerializer(invitation).data,
-            },
-            status=status.HTTP_201_CREATED,
-        )
+                return Response(
+                    {
+                        "message": "Invitation sent successfully.",
+                        "invitation": InvitationSerializer(invitation).data,
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
+        except (smtplib.SMTPException, socket.error, socket.timeout):
+            return Response(
+                {"error": "Unable to send the invitation email right now. Please try again later."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
 
 
 class InvitationLookupView(TranslatedResponseMixin, APIView):
