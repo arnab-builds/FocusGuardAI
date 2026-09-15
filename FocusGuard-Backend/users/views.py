@@ -1,5 +1,4 @@
-import smtplib
-import socket
+
 import uuid
 from urllib.parse import quote
 from collections import defaultdict
@@ -7,6 +6,7 @@ from datetime import timedelta
 from datetime import datetime
 from django.conf import settings
 from django.core.mail import send_mail
+from users.email_service import send_brevo_email, BrevoAPIError
 from django.db import transaction
 from django.utils import duration, timezone
 from rest_framework import generics, serializers, status
@@ -617,12 +617,10 @@ Regards,
 FocusGuardAI Team
 """
 
-                send_mail(
+                send_brevo_email(
                     subject=subject,
                     message=message,
-                    from_email=f"FocusGuardAI <{settings.DEFAULT_FROM_EMAIL}>",
-                    recipient_list=[invitation.email],
-                    fail_silently=False,
+                    recipient_email=invitation.email,
                 )
 
                 return Response(
@@ -632,7 +630,7 @@ FocusGuardAI Team
                     },
                     status=status.HTTP_201_CREATED,
                 )
-        except (smtplib.SMTPException, socket.error, socket.timeout):
+        except BrevoAPIError:
             return Response(
                 {"error": "Unable to send the invitation email right now. Please try again later."},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
