@@ -72,7 +72,7 @@ FocusGuard AI watches the tabs, learns your patterns, and hands you the receipts
 ### 📦 Install the Chrome Extension
 
 1. **Download the FocusGuard AI Extension**
-   [⬇️ Download Extension](YOUR_EXTENSION_DOWNLOAD_LINK)
+ [⬇️ Download Extension](https://focusguard-platform.vercel.app/FocusGuard-Extension.zip)
 2. **Extract** the ZIP file.
 3. Open Chrome and go to:
    ```text
