@@ -28,6 +28,9 @@ chrome.alarms.create("focusGuardMaintenance", { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "focusGuardMaintenance" && await isAuthenticated()) {
         console.log("FocusGuard maintenance alarm fired");
+        // Reuse the existing maintenance alarm so Self Settings changes reach
+        // the extension without a Chrome restart or an additional poller.
+        await loadUserSettings();
         await checkPeriodicThresholds();
     }
 });
@@ -156,6 +159,12 @@ async function processTab(tab) {
 
     // Re-check after async fetch
     if (!(await isAuthenticated())) return;
+
+    // Category lookups are asynchronous. Do not let a response for a tab that
+    // is no longer active overwrite the activity being tracked for the active
+    // tab.
+    const activeTab = await getActiveTab();
+    if (!activeTab || activeTab.id !== tab.id) return;
 
     const activity = {
         tabId: tab.id,

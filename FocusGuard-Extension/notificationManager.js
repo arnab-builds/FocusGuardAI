@@ -3,41 +3,64 @@ import {
     getUserSettings,
 } from "./api.js";
 
-const DEFAULT_THRESHOLDS = {
-    productive: 60 * 60,
-    nonProductive: 10 * 60,
-    idle: 5 * 60,
-};
+function toSeconds(value) {
+    const minutes = Number(value);
+    return Number.isFinite(minutes) && minutes > 0 ? minutes * 60 : null;
+}
+
+function normalizeThresholds(settings) {
+    if (!settings || typeof settings !== "object") return null;
+
+    const userThreshold = {
+        productive: toSeconds(settings.productive_threshold),
+        nonProductive: toSeconds(settings.non_productive_threshold),
+        idle: toSeconds(settings.idle_threshold),
+    };
+
+    return Object.values(userThreshold).every(Boolean) ? userThreshold : null;
+}
+
+function hasValidCachedThresholds(thresholds) {
+    return thresholds && Object.values(thresholds).every(
+        (value) => Number.isFinite(value) && value > 0
+    );
+}
 
 export async function loadUserSettings() {
     try {
         const settings = await getUserSettings();
 
-        if (!settings) {
-            console.log("Using default notification thresholds.");
-            return;
+        const userThreshold = normalizeThresholds(settings);
+        if (!userThreshold) {
+            console.error("Settings response did not contain valid notification thresholds.");
+            return false;
         }
 
-        const userThreshold = {
-            productive: settings.productive_threshold * 60,
-            nonProductive: settings.non_productive_threshold * 60,
-            idle: settings.idle_threshold * 60,
-        };
-
-        await chrome.storage.local.set({ userThreshold, lastSettingsRefresh: Date.now() });
+        await chrome.storage.local.set({
+            userThreshold,
+            browserNotifications: settings.browser_notifications !== false,
+            lastSettingsRefresh: Date.now(),
+        });
         console.log("User Settings Loaded:", userThreshold);
+        return true;
     } catch (error) {
         console.error("Failed to load user settings:", error);
+        return false;
     }
 }
 
 export async function resetNotificationState() {
-    await chrome.storage.local.remove(["notifiedProductive", "notifiedNonProductive", "lastSettingsRefresh", "userThreshold", "notifiedIdle"]);
+    await chrome.storage.local.remove(["notifiedProductive", "notifiedNonProductive", "lastSettingsRefresh", "userThreshold", "browserNotifications", "notifiedIdle"]);
 }
 
 export async function checkNotifications(stats) {
-    const data = await chrome.storage.local.get(["userThreshold", "isIdle", "lastActivityTime", "notifiedIdle", "notifiedProductive", "notifiedNonProductive"]);
-    const userThreshold = data.userThreshold || DEFAULT_THRESHOLDS;
+    const data = await chrome.storage.local.get(["userThreshold", "isIdle", "lastActivityTime", "notifiedIdle", "notifiedProductive", "notifiedNonProductive", "browserNotifications"]);
+    const userThreshold = data.userThreshold;
+
+    // The backend provides the application defaults. Never substitute a
+    // different client-side threshold when a cache read or settings request
+    // is temporarily unavailable.
+    if (!hasValidCachedThresholds(userThreshold) || data.browserNotifications === false) return;
 
     let event = null;
     let updateStorage = {};

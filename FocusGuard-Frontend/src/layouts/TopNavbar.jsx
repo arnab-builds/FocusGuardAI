@@ -144,22 +144,24 @@ export default function TopNavbar({
   useEffect(() => {
     const onRealtime = ({ detail }) => {
       const cacheKey = `emp-notifications-${currentLanguageCode}`;
-      if (detail?.event === "NOTIFICATION_CREATED") {
+      const notification = detail?.notification;
+      if (detail?.event === "NOTIFICATION_CREATED" && notification?.id != null) {
         setNotifications((previous) => {
-          if (previous.some((item) => item.id === detail.notification.id)) return previous;
-          const next = [detail.notification, ...previous];
+          const current = Array.isArray(previous) ? previous : [];
+          if (current.some((item) => item?.id === notification.id)) return current;
+          const next = [notification, ...current];
           setCache(cacheKey, next);
           return next;
         });
       }
-      if (detail?.event === "NOTIFICATION_READ") {
-        setNotifications((previous) => previous.map((item) => item.id === detail.notification.id ? detail.notification : item));
+      if (detail?.event === "NOTIFICATION_READ" && notification?.id != null) {
+        setNotifications((previous) => (Array.isArray(previous) ? previous : []).map((item) => item?.id === notification.id ? notification : item));
       }
       if (detail?.event === "NOTIFICATION_DELETED") {
-        setNotifications((previous) => previous.filter((item) => item.id !== detail.notification_id));
+        setNotifications((previous) => (Array.isArray(previous) ? previous : []).filter((item) => item?.id !== detail.notification_id));
       }
       if (detail?.event === "NOTIFICATIONS_READ_ALL") {
-        setNotifications((previous) => previous.map((item) => ({ ...item, is_read: true })));
+        setNotifications((previous) => (Array.isArray(previous) ? previous : []).map((item) => ({ ...item, is_read: true })));
       }
     };
     window.addEventListener("focusguard:realtime", onRealtime);

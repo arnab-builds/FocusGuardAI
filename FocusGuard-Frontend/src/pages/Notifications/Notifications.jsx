@@ -39,14 +39,18 @@ function Notifications() {
 
   useEffect(() => {
     const onRealtime = ({ detail }) => {
-      if (detail?.event === "NOTIFICATION_CREATED") {
-        setNotifications((previous) => previous.some((item) => item.id === detail.notification.id) ? previous : [detail.notification, ...previous]);
-      } else if (detail?.event === "NOTIFICATION_READ") {
-        setNotifications((previous) => previous.map((item) => item.id === detail.notification.id ? detail.notification : item));
+      const notification = detail?.notification;
+      if (detail?.event === "NOTIFICATION_CREATED" && notification?.id != null) {
+        setNotifications((previous) => {
+          const current = Array.isArray(previous) ? previous : [];
+          return current.some((item) => item?.id === notification.id) ? current : [notification, ...current];
+        });
+      } else if (detail?.event === "NOTIFICATION_READ" && notification?.id != null) {
+        setNotifications((previous) => (Array.isArray(previous) ? previous : []).map((item) => item?.id === notification.id ? notification : item));
       } else if (detail?.event === "NOTIFICATION_DELETED") {
-        setNotifications((previous) => previous.filter((item) => item.id !== detail.notification_id));
+        setNotifications((previous) => (Array.isArray(previous) ? previous : []).filter((item) => item?.id !== detail.notification_id));
       } else if (detail?.event === "NOTIFICATIONS_READ_ALL") {
-        setNotifications((previous) => previous.map((item) => ({ ...item, is_read: true })));
+        setNotifications((previous) => (Array.isArray(previous) ? previous : []).map((item) => ({ ...item, is_read: true })));
       }
     };
     window.addEventListener("focusguard:realtime", onRealtime);
