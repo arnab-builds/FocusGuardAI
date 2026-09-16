@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from users.email_service import send_brevo_email, BrevoAPIError
 from django.db import transaction
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Count, Prefetch, Q, Sum
 from django.utils import duration, timezone
 from rest_framework import generics, serializers, status
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
@@ -1016,7 +1016,7 @@ class ActivityStartView(TranslatedResponseMixin, APIView):
 
 from datetime import datetime
 
-class ActivityHistoryView(TranslatedResponseMixin, APIView):
+class ActivityHistoryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -1253,8 +1253,13 @@ def calculate_user_analytics(user, selected_date=None):
     activities = user.activity_logs.all()
 
     if selected_date:
+        day_start = timezone.make_aware(
+            datetime.combine(selected_date, datetime.min.time())
+        )
+        day_end = day_start + timedelta(days=1)
         activities = activities.filter(
-            start_time__date=selected_date
+            start_time__gte=day_start,
+            start_time__lt=day_end,
         )
 
     productive_time = timedelta()
@@ -1324,7 +1329,8 @@ def calculate_user_analytics(user, selected_date=None):
 
     if selected_date:
         inactivity_logs = inactivity_logs.filter(
-            inactive_from__date=selected_date
+            inactive_from__gte=day_start,
+            inactive_from__lt=day_end,
         )
 
     for inactivity in inactivity_logs:
@@ -1495,7 +1501,7 @@ def calculate_user_analytics(user, selected_date=None):
     }
 from datetime import datetime
 
-class UserAnalyticsView(TranslatedResponseMixin, APIView):
+class UserAnalyticsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -1527,11 +1533,15 @@ class UserAnalyticsView(TranslatedResponseMixin, APIView):
             selected_date,
         )
 
-        category_summary = analytics.get("category_summary", {})
-        analytics["category_summary"] = {
-            translate_text(category, get_user_language(request)): duration
-            for category, duration in category_summary.items()
-        }
+        # Category labels are optional display enrichment. Translating them on
+        # the dashboard request can add several external round-trips, so only
+        # do it for the detailed analytics view that explicitly asks for it.
+        if request.query_params.get("translate_categories") == "1":
+            category_summary = analytics.get("category_summary", {})
+            analytics["category_summary"] = {
+                translate_text(category, get_user_language(request)): duration
+                for category, duration in category_summary.items()
+            }
 
         return Response(
             {
@@ -1555,7 +1565,7 @@ class UserAnalyticsView(TranslatedResponseMixin, APIView):
             },
             status=status.HTTP_200_OK,
         )
-class OrganizationAnalyticsView(TranslatedResponseMixin, APIView):
+class OrganizationAnalyticsView(APIView):
     permission_classes = [IsAuthenticated, IsOrganizationAdmin]
 
     def get(self, request):
@@ -1569,105 +1579,74 @@ class OrganizationAnalyticsView(TranslatedResponseMixin, APIView):
         users = User.objects.filter(
             organization=organization,
             role="USER",
-        ).order_by("id").prefetch_related(
-            Prefetch(
-                "activity_logs",
-                queryset=ActivityLog.objects.order_by("start_time"),
-            ),
-            Prefetch(
-                "inactivity_logs",
-                queryset=UserInactivity.objects.all(),
-            ),
-        )
+        ).order_by("id")
 
         total_employees = users.count()
         active_employees = users.filter(is_active=True).count()
         inactive_employees = total_employees - active_employees
 
+        activity_totals = ActivityLog.objects.filter(
+            user__organization=organization,
+            user__role="USER",
+        ).values("user_id").annotate(
+            productive_time=Sum("duration", filter=Q(productivity_type="PRODUCTIVE")),
+            non_productive_time=Sum("duration", filter=Q(productivity_type="NON_PRODUCTIVE")),
+            neutral_time=Sum("duration", filter=Q(productivity_type="NEUTRAL")),
+        )
+        translate_categories = request.query_params.get("translate_categories") == "1"
+
+        def display_category(category):
+            category = str(category or DEFAULT_CATEGORY)
+            return translate_text(category, language_code) if translate_categories else category
+        inactivity_totals = UserInactivity.objects.filter(
+            user__organization=organization,
+            user__role="USER",
+        ).values("user_id").annotate(idle_time=Sum("duration"))
+        totals_by_user = {row["user_id"]: row for row in activity_totals}
+        idle_by_user = {row["user_id"]: row["idle_time"] or timedelta() for row in inactivity_totals}
+
         members = []
-        productivity_sum = 0
-        non_productivity_sum = 0
-        website_totals = {}
-
+        productive_total = non_productive_total = neutral_total = timedelta()
         for user in users:
-
-            analytics = calculate_user_analytics(user)
-            category_summary = analytics.get("category_summary", {})
-
-            # Category summaries use category names as dictionary keys. Those
-            # keys are normally protected by the response translation layer to
-            # preserve API contracts, so translate them here for chart labels.
-            analytics["category_summary"] = {
-                translate_text(str(category), language_code): duration
-                for category, duration in category_summary.items()
-            }
-
-            productivity = analytics.get(
-                "productive_percentage",
-                0
-            )
-
-            productivity_sum += productivity
-            non_productivity_sum += analytics.get(
-                "non_productive_percentage",
-                0,
-            )
-
-            for website in analytics.get("top_websites", []):
-                website_name = website.get("website_name") or "Unknown"
-
-                if website_name not in website_totals:
-                    website_totals[website_name] = {
-                        "website_name": website_name,
-                        "website_url": website.get("website_url", ""),
-                        "favicon_url": website.get("favicon_url", ""),
-                        # Unlike category_summary, top_websites is assembled
-                        # manually below. Translate its category here so old
-                        # records and newly tracked websites use the same
-                        # preferred-language label in the table.
-                        "category": translate_text(
-                            str(website.get("category", "Unknown")),
-                            language_code,
-                        ),
-                        "duration_seconds": 0,
-                        "visits": 0,
-                    }
-
-                website_totals[website_name]["duration_seconds"] += (
-                    website.get("duration_seconds", 0)
-                )
-                website_totals[website_name]["visits"] += website.get(
-                    "visits",
-                    0,
-                )
-
+            totals = totals_by_user.get(user.id, {})
+            productive = totals.get("productive_time") or timedelta()
+            non_productive = totals.get("non_productive_time") or timedelta()
+            neutral = totals.get("neutral_time") or timedelta()
+            total = productive + non_productive + neutral
+            productive_total += productive
+            non_productive_total += non_productive
+            neutral_total += neutral
+            total_seconds = total.total_seconds()
             members.append({
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "role": user.role,
-                **analytics,
+                "id": user.id, "username": user.username, "email": user.email,
+                "role": user.role, "productive_time": str(productive),
+                "non_productive_time": str(non_productive), "neutral_time": str(neutral),
+                "idle_time": str(idle_by_user.get(user.id, timedelta())),
+                "total_time": str(total),
+                "productive_percentage": round(productive.total_seconds() * 100 / total_seconds, 2) if total_seconds else 0,
+                "non_productive_percentage": round(non_productive.total_seconds() * 100 / total_seconds, 2) if total_seconds else 0,
+                "category_summary": {},
             })
 
-        average_productivity = (
-            productivity_sum / total_employees
-            if total_employees else 0
-        )
-        average_non_productivity = (
-            non_productivity_sum / total_employees
-            if total_employees else 0
-        )
+        overall_seconds = (productive_total + non_productive_total + neutral_total).total_seconds()
+        average_productivity = round(productive_total.total_seconds() * 100 / overall_seconds, 2) if overall_seconds else 0
+        average_non_productivity = round(non_productive_total.total_seconds() * 100 / overall_seconds, 2) if overall_seconds else 0
 
-        top_websites = sorted(
-            website_totals.values(),
-            key=lambda website: website["duration_seconds"],
-            reverse=True,
-        )[:5]
-
-        for website in top_websites:
-            website["duration"] = str(
-                timedelta(seconds=website["duration_seconds"])
-            )
+        category_summary = {
+            display_category(row["category"]): str(row["duration"] or timedelta())
+            for row in ActivityLog.objects.filter(user__organization=organization, user__role="USER")
+            .values("category").annotate(duration=Sum("duration"))
+        }
+        top_websites = []
+        for row in ActivityLog.objects.filter(user__organization=organization, user__role="USER").values(
+            "website_name", "website_url", "favicon_url", "category"
+        ).annotate(duration=Sum("duration"), visits=Count("id")).order_by("-duration")[:5]:
+            duration_value = row["duration"] or timedelta()
+            top_websites.append({
+                "website_name": row["website_name"] or "Unknown", "website_url": row["website_url"] or "",
+                "favicon_url": row["favicon_url"] or "", "category": display_category(row["category"] or "Unknown"),
+                "duration": str(duration_value), "duration_seconds": round(duration_value.total_seconds(), 2), "visits": row["visits"],
+            })
 
         return Response({
 
@@ -1693,6 +1672,8 @@ class OrganizationAnalyticsView(TranslatedResponseMixin, APIView):
             ),
 
             "top_websites": top_websites,
+
+            "category_summary": category_summary,
 
             "members": members,
             "users": members,
@@ -2411,7 +2392,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-class DashboardTrendAPIView(TranslatedResponseMixin, APIView):
+class DashboardTrendAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

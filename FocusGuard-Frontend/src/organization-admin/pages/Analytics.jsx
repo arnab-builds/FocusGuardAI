@@ -36,6 +36,18 @@ const durationToSeconds = (duration) => {
 const buildCategoryData = (analytics) => {
     const totals = {};
 
+    // Newer organization responses provide this already aggregated by the
+    // database, avoiding a large per-member payload and client-side loop.
+    if (analytics.category_summary) {
+        Object.entries(analytics.category_summary).forEach(([category, duration]) => {
+            totals[category] = durationToSeconds(duration);
+        });
+        return Object.entries(totals).map(([name, seconds]) => ({
+            name,
+            value: Math.round(seconds / 60),
+        }));
+    }
+
     (analytics.members || analytics.users || []).forEach((member) => {
         Object.entries(member.category_summary || {}).forEach(
             ([category, duration]) => {
