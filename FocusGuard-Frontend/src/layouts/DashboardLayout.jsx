@@ -22,6 +22,7 @@ const getTodayInputValue = () => {
 
 function DashboardLayoutContent() {
   const [selectedDate, setSelectedDate] = useState(getTodayInputValue());
+  const [activityRevision, setActivityRevision] = useState(0);
   const isFollowingToday = useRef(true);
   const { currentLanguageCode } = useLanguage();
 
@@ -142,7 +143,7 @@ function DashboardLayoutContent() {
       }
     };
 
-    loadDashboard();
+    loadDashboard({ force: activityRevision > 0 });
 
     const refreshInterval = window.setInterval(() => {
       if (!document.hidden) {
@@ -162,11 +163,15 @@ function DashboardLayoutContent() {
       window.clearInterval(refreshInterval);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [selectedDate, currentLanguageCode, profileCacheKey, analyticsCacheKey]);
+  }, [selectedDate, currentLanguageCode, profileCacheKey, analyticsCacheKey, activityRevision]);
 
   useEffect(() => {
     const onRealtime = ({ detail }) => {
       if (detail?.event !== "ACTIVITY_STATUS_CHANGED") return;
+      // The backend has persisted the activity and recalculated analytics
+      // before it publishes this event. Reload totals and history now instead
+      // of leaving the dashboard on a stale cache until its next interval.
+      setActivityRevision((revision) => revision + 1);
       setDashboardData((previous) => {
         if (!detail.activity?.id) return previous;
         const nextActivity = detail.activity;

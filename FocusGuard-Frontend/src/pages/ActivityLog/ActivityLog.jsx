@@ -62,13 +62,17 @@ export default function ActivityLog() {
   useEffect(() => {
     let isMounted = true;
     
-    const fetchActivities = async (currentPage, showLoading = true) => {
+    const fetchActivities = async (currentPage, showLoading = true, force = false) => {
       try {
         if (showLoading && !getCache(cacheKey)) {
           setLoading(true);
         }
 
-        const data = await fetchWithCache(cacheKey, () => getActivityHistory(currentPage, selectedDate));
+        const data = await fetchWithCache(
+          cacheKey,
+          () => getActivityHistory(currentPage, selectedDate),
+          { force }
+        );
 
         if (isMounted) {
           setActivities(data.results || []);
@@ -85,13 +89,21 @@ export default function ActivityLog() {
 
     const refreshInterval = window.setInterval(() => {
       if (!document.hidden) {
-        fetchActivities(page, false);
+        fetchActivities(page, false, true);
       }
     }, 30_000);
+
+    const onRealtime = ({ detail }) => {
+      if (detail?.event === "ACTIVITY_STATUS_CHANGED") {
+        void fetchActivities(page, false, true);
+      }
+    };
+    window.addEventListener("focusguard:realtime", onRealtime);
 
     return () => {
       isMounted = false;
       window.clearInterval(refreshInterval);
+      window.removeEventListener("focusguard:realtime", onRealtime);
     };
   }, [page, selectedDate, cacheKey]);
 
