@@ -79,11 +79,11 @@ function Dashboard() {
   useEffect(() => {
     let isCurrent = true;
 
-    const fetchData = async () => {
+    const fetchData = async ({ force = false } = {}) => {
       try {
         const [trendData, recentData] = await Promise.all([
-          fetchWithCache(trendCacheKey, () => getDashboardTrend(selectedDate)),
-          fetchWithCache(recentCacheKey, () => getActivityHistory(1, selectedDate)),
+          fetchWithCache(trendCacheKey, () => getDashboardTrend(selectedDate), { force }),
+          fetchWithCache(recentCacheKey, () => getActivityHistory(1, selectedDate), { force }),
         ]);
 
         if (isCurrent) {
@@ -105,11 +105,11 @@ function Dashboard() {
       if (!document.hidden) {
         fetchData();
       }
-    }, 30_000);
+    }, 60_000);
 
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        fetchData();
+        fetchData({ force: true });
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);

@@ -23,8 +23,9 @@ function Organizations() {
             if (showLoading && !getCache(cacheKey)) setLoading(true);
 
             const res = await fetchWithCache(cacheKey, getOrganizations);
-            setOrganizations(res.data);
-            setCache(cacheKey, res.data);
+            const data = res.data ?? res;
+            setOrganizations(data);
+            setCache(cacheKey, data);
         } catch (err) {
             console.error("Error loading organizations:", err);
         } finally {

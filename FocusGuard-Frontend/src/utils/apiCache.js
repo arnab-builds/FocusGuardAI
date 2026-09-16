@@ -52,7 +52,11 @@ export const invalidateCache = (key) => {
   syncCache();
 };
 
-export const fetchWithCache = async (key, fetcher) => {
+export const fetchWithCache = async (key, fetcher, { force = false } = {}) => {
+  if (!force && memoryCache.has(key)) {
+    return memoryCache.get(key);
+  }
+
   if (activePromises.has(key)) {
     return activePromises.get(key);
   }

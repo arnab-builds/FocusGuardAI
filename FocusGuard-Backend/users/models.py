@@ -290,6 +290,12 @@ class ActivityLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.website_name}"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "start_time"], name="activity_user_start_idx"),
+        ]
+
 class UserInactivity(models.Model):
 
     user = models.ForeignKey(
@@ -333,6 +339,11 @@ class UserInactivity(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - Inactive"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "inactive_from"], name="inactive_user_start_idx"),
+        ]
 
 class EmployeeDeactivationRequest(models.Model):
 

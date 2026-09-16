@@ -97,11 +97,11 @@ function DashboardLayoutContent() {
   useEffect(() => {
     let isMounted = true;
 
-    const loadHeader = async () => {
+    const loadHeader = async ({ force = false } = {}) => {
       try {
         const [profile, analytics] = await Promise.all([
-          fetchWithCache(profileCacheKey, getProfile),
-          fetchWithCache(analyticsCacheKey, () => getAnalytics(selectedDate)),
+          fetchWithCache(profileCacheKey, getProfile, { force }),
+          fetchWithCache(analyticsCacheKey, () => getAnalytics(selectedDate), { force }),
         ]);
         if (isMounted) {
           setDashboardHeader({ profile, analytics });
@@ -117,11 +117,11 @@ function DashboardLayoutContent() {
       if (!document.hidden) {
         loadHeader();
       }
-    }, 30_000);
+    }, 60_000);
 
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        loadHeader();
+        loadHeader({ force: true });
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);

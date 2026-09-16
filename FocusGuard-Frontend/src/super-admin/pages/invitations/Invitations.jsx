@@ -20,8 +20,9 @@ function Invitations() {
             if (showLoading && !getCache(cacheKey)) setLoading(true);
 
             const res = await fetchWithCache(cacheKey, getInvitations);
-            setInvitations(res.data);
-            setCache(cacheKey, res.data);
+            const data = res.data ?? res;
+            setInvitations(data);
+            setCache(cacheKey, data);
         } catch (err) {
             console.error("Error loading invitations:", err);
         } finally {

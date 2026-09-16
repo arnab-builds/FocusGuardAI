@@ -22,7 +22,8 @@ function NormalUsers() {
 
       const response = await fetchWithCache(cacheKey, getNormalUsers);
 
-      const processed = response.data.results || [];
+      const data = response.data ?? response;
+      const processed = data.results || [];
       setUsers(processed);
       setCache(cacheKey, processed);
     } finally {

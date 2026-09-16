@@ -17,10 +17,10 @@ def calculate_analytics(user, start_date, end_date):
     neutral_time = timedelta()
     idle_time = timedelta()
 
-    activities = ActivityLog.objects.filter(
+    activities = list(ActivityLog.objects.filter(
         user=user,
         start_time__date__range=[start_date, end_date],
-    ).order_by("start_time")
+    ).order_by("start_time"))
 
     unique_websites = {
         activity.website_url or activity.website_name
@@ -55,7 +55,7 @@ def calculate_analytics(user, start_date, end_date):
         "neutral_time": neutral_time,
         "idle_time": idle_time,
         "websites_visited": len(unique_websites),
-        "tab_switches": max(activities.count() - 1, 0),
+        "tab_switches": max(len(activities) - 1, 0),
         "activities": activities,
     }
 
@@ -95,7 +95,7 @@ def generate_ai_recommendation(user, start_date, end_date, language="en-IN"):
 
     activities = analytics["activities"]
     # Add this block here
-    if not activities.exists():
+    if not activities:
      Recommendation.objects.filter(
         user=user,
         recommendation_date=start_date,

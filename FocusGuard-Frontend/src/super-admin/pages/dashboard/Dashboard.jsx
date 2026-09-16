@@ -71,8 +71,9 @@ function Dashboard() {
     const loadDashboard = async () => {
         try {
             const response = await fetchWithCache(cacheKey, getDashboard);
-            setDashboard(response.data);
-            setCache(cacheKey, response.data);
+            const data = response.data ?? response;
+            setDashboard(data);
+            setCache(cacheKey, data);
         } catch (error) {
             console.error("Dashboard Error:", error);
         }

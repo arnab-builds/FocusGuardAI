@@ -9,6 +9,7 @@ import {
 } from "react-icons/fi";
 
 import { loginUser } from "../../services/authService";
+import { setCache } from "../../utils/apiCache";
 import { useLanguage } from "../../context/useLanguage";
 import ThemeToggle from "../../components/ThemeToggle";
 
@@ -80,6 +81,15 @@ function Login() {
         "user",
         JSON.stringify(data.user)
       );
+
+      // Seed the dashboard header from the successful login response so the
+      // user's name is visible immediately while the full profile refreshes.
+      const profileLanguage =
+        data.user?.preferred_language?.language_code || currentLanguageCode;
+      setCache(`emp-profile-${profileLanguage}`, data.user);
+      if (profileLanguage !== currentLanguageCode) {
+        setCache(`emp-profile-${currentLanguageCode}`, data.user);
+      }
 
       // Do not block navigation on translation fetch
       setLanguageFromPreference(

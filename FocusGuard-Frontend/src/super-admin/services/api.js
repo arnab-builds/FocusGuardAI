@@ -1,11 +1,12 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/",
   baseURL: import.meta.env.VITE_API_URL 
     ? import.meta.env.VITE_API_URL.replace(/\/$/, "") + "/"
     : "http://127.0.0.1:8000/api/",
 });
+
+let refreshPromise = null;
 
 API.interceptors.request.use(
   (config) => {
@@ -49,17 +50,16 @@ API.interceptors.response.use(
       }
 
       try {
-        const refreshUrl = import.meta.env.VITE_API_URL 
-          ? import.meta.env.VITE_API_URL.replace(/\/$/, "") + "/token/refresh/"
-          : "http://127.0.0.1:8000/api/token/refresh/";
+        if (!refreshPromise) {
+          refreshPromise = axios.post(
+            `${API.defaults.baseURL}token/refresh/`,
+            { refresh }
+          ).finally(() => {
+            refreshPromise = null;
+          });
+        }
 
-        const response = await axios.post(
-          "http://127.0.0.1:8000/api/token/refresh/",
-          refreshUrl,
-          {
-            refresh,
-          }
-        );
+        const response = await refreshPromise;
 
         const newAccess = response.data.access;
 

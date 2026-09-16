@@ -1,12 +1,13 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
   baseURL: import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, "") : "http://127.0.0.1:8000",
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+let refreshPromise = null;
 
 // ==========================
 // Attach Access Token
@@ -92,17 +93,18 @@ api.interceptors.response.use(
       }
 
       try {
-        const refreshUrl = import.meta.env.VITE_API_URL 
-          ? import.meta.env.VITE_API_URL.replace(/\/$/, "") + "/token/refresh/"
-          : "http://127.0.0.1:8000/api/token/refresh/";
+        // Several requests can discover an expired token at once.  Share one
+        // refresh request so they resume together instead of creating a burst.
+        if (!refreshPromise) {
+          refreshPromise = axios.post(
+            `${api.defaults.baseURL}/api/token/refresh/`,
+            { refresh }
+          ).finally(() => {
+            refreshPromise = null;
+          });
+        }
 
-        const response = await axios.post(
-          "http://127.0.0.1:8000/api/token/refresh/",
-          refreshUrl,
-          {
-            refresh,
-          }
-        );
+        const response = await refreshPromise;
 
         const newAccess = response.data.access;
 

@@ -38,9 +38,10 @@ function AnalyticsCharts() {
 
             const res = await fetchWithCache(cacheKey, getAnalytics);
 
-            setSummary(res.data.summary);
-            setOrganizations(res.data.organizations_data);
-            setCache(cacheKey, res.data);
+            const data = res.data ?? res;
+            setSummary(data.summary);
+            setOrganizations(data.organizations_data);
+            setCache(cacheKey, data);
         } catch (err) {
             console.error(err);
         } finally {

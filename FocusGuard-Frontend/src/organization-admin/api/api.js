@@ -1,7 +1,6 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "http://127.0.0.1:8000/api/",
     baseURL: import.meta.env.VITE_API_URL 
       ? import.meta.env.VITE_API_URL.replace(/\/$/, "") + "/"
       : "http://127.0.0.1:8000/api/",
@@ -9,6 +8,8 @@ const api = axios.create({
         "Content-Type": "application/json",
     },
 });
+
+let refreshPromise = null;
 
 api.interceptors.request.use(
     (config) => {
@@ -31,10 +32,40 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
-        if (error.response?.status === 401) {
+        const originalRequest = error.config;
+
+        if (
+            error.response?.status === 401 &&
+            originalRequest &&
+            !originalRequest?._retry &&
+            !originalRequest?.url?.includes("token/refresh/")
+        ) {
+            originalRequest._retry = true;
+            const refresh = localStorage.getItem("refresh");
+
+            if (refresh) {
+                try {
+                    if (!refreshPromise) {
+                        refreshPromise = axios.post(
+                            `${api.defaults.baseURL}token/refresh/`,
+                            { refresh }
+                        ).finally(() => {
+                            refreshPromise = null;
+                        });
+                    }
+
+                    const response = await refreshPromise;
+                    const access = response.data.access;
+                    localStorage.setItem("access", access);
+                    originalRequest.headers.Authorization = `Bearer ${access}`;
+                    return api(originalRequest);
+                } catch (refreshError) {
+                    console.error("Session refresh failed", refreshError);
+                }
+            }
+
             localStorage.removeItem("access");
             localStorage.removeItem("refresh");
-
             window.location.href = "/login";
         }
 
