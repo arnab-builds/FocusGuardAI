@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "channels",
 
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
@@ -102,6 +103,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
+
+# Redis is the shared production channel layer. Set REDIS_URL on Render to a
+# managed Redis connection string; PostgreSQL remains the persistent database.
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [config("REDIS_URL", default="redis://127.0.0.1:6379/0")]},
+    },
+}
 
 # ------------------------------------------------------------------------------
 # DATABASE

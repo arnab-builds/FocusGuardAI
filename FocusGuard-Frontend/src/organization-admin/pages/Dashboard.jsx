@@ -116,6 +116,21 @@ function Dashboard() {
         return () => clearTimeout(timeout);
     }, []);
 
+    useEffect(() => {
+        const onRealtime = ({ detail }) => {
+            if (detail?.event !== "ACTIVITY_STATUS_CHANGED" || !detail.activity?.id) return;
+            const activity = {
+                ...detail.activity,
+                employee: detail.activity.username,
+                website: detail.activity.website_name,
+                duration: "0:00:00",
+            };
+            setActivities((previous) => [activity, ...previous.filter((item) => item.id !== activity.id)].slice(0, 20));
+        };
+        window.addEventListener("focusguard:realtime", onRealtime);
+        return () => window.removeEventListener("focusguard:realtime", onRealtime);
+    }, []);
+
     const syncedLabel = lastSynced
         ? lastSynced.toLocaleTimeString([], {
               hour: "numeric",

@@ -164,6 +164,20 @@ function DashboardLayoutContent() {
     };
   }, [selectedDate, currentLanguageCode, profileCacheKey, analyticsCacheKey]);
 
+  useEffect(() => {
+    const onRealtime = ({ detail }) => {
+      if (detail?.event !== "ACTIVITY_STATUS_CHANGED") return;
+      setDashboardData((previous) => {
+        if (!detail.activity?.id) return previous;
+        const nextActivity = detail.activity;
+        const recent = [nextActivity, ...previous.recent.filter((item) => item.id !== nextActivity.id)].slice(0, 20);
+        return { ...previous, recent };
+      });
+    };
+    window.addEventListener("focusguard:realtime", onRealtime);
+    return () => window.removeEventListener("focusguard:realtime", onRealtime);
+  }, []);
+
   const outletContext = useMemo(
     () => ({
       selectedDate,

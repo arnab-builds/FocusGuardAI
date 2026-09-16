@@ -105,6 +105,7 @@ function Login() {
         "user",
         JSON.stringify(data.user)
       );
+      window.dispatchEvent(new Event("focusguard:auth-changed"));
 
       // Seed the dashboard header from the successful login response so the
       // user's name is visible immediately while the full profile refreshes.

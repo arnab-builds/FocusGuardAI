@@ -19,6 +19,7 @@ from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from admin_notifications.utils import create_admin_notification
 from notifications.services import create_user_notification
+from users.realtime import publish_activity
 from users.services.response_translation import TranslatedResponseMixin
 from users.services.translation_service import (
     get_user_language,
@@ -966,6 +967,8 @@ class ActivityStartView(TranslatedResponseMixin, APIView):
             if update_fields:
                 active_activity.save(update_fields=update_fields)
 
+            publish_activity(request.user, active_activity)
+
             return Response(
                 {
                     "message": "Activity updated successfully.",
@@ -1004,6 +1007,7 @@ class ActivityStartView(TranslatedResponseMixin, APIView):
         )
 
         calculate_user_analytics(request.user)
+        publish_activity(request.user, activity)
 
         return Response(
             {
@@ -1708,6 +1712,7 @@ class InactivityStartView(TranslatedResponseMixin, APIView):
 )
 
         calculate_user_analytics(request.user)
+        publish_activity(request.user, None, "IDLE")
 
         return Response(
             {
@@ -1788,6 +1793,7 @@ class InactivityStopView(TranslatedResponseMixin, APIView):
         inactivity.save()
 
         calculate_user_analytics(request.user)
+        publish_activity(request.user, None, "ACTIVE")
 
         return Response(
             {
@@ -2248,6 +2254,7 @@ class ActivityStopView(TranslatedResponseMixin, APIView):
         activity.save()
 
         calculate_user_analytics(request.user)
+        publish_activity(request.user, activity, "INACTIVE")
 
         return Response(
             {

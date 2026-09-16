@@ -37,6 +37,22 @@ function Notifications() {
     fetchNotifications();
   }, [fetchNotifications]);
 
+  useEffect(() => {
+    const onRealtime = ({ detail }) => {
+      if (detail?.event === "NOTIFICATION_CREATED") {
+        setNotifications((previous) => previous.some((item) => item.id === detail.notification.id) ? previous : [detail.notification, ...previous]);
+      } else if (detail?.event === "NOTIFICATION_READ") {
+        setNotifications((previous) => previous.map((item) => item.id === detail.notification.id ? detail.notification : item));
+      } else if (detail?.event === "NOTIFICATION_DELETED") {
+        setNotifications((previous) => previous.filter((item) => item.id !== detail.notification_id));
+      } else if (detail?.event === "NOTIFICATIONS_READ_ALL") {
+        setNotifications((previous) => previous.map((item) => ({ ...item, is_read: true })));
+      }
+    };
+    window.addEventListener("focusguard:realtime", onRealtime);
+    return () => window.removeEventListener("focusguard:realtime", onRealtime);
+  }, []);
+
   const handleRead = (id) => {
     const prevNotifications = [...notifications];
 

@@ -142,6 +142,31 @@ export default function TopNavbar({
   }, [currentLanguageCode]);
 
   useEffect(() => {
+    const onRealtime = ({ detail }) => {
+      const cacheKey = `emp-notifications-${currentLanguageCode}`;
+      if (detail?.event === "NOTIFICATION_CREATED") {
+        setNotifications((previous) => {
+          if (previous.some((item) => item.id === detail.notification.id)) return previous;
+          const next = [detail.notification, ...previous];
+          setCache(cacheKey, next);
+          return next;
+        });
+      }
+      if (detail?.event === "NOTIFICATION_READ") {
+        setNotifications((previous) => previous.map((item) => item.id === detail.notification.id ? detail.notification : item));
+      }
+      if (detail?.event === "NOTIFICATION_DELETED") {
+        setNotifications((previous) => previous.filter((item) => item.id !== detail.notification_id));
+      }
+      if (detail?.event === "NOTIFICATIONS_READ_ALL") {
+        setNotifications((previous) => previous.map((item) => ({ ...item, is_read: true })));
+      }
+    };
+    window.addEventListener("focusguard:realtime", onRealtime);
+    return () => window.removeEventListener("focusguard:realtime", onRealtime);
+  }, [currentLanguageCode]);
+
+  useEffect(() => {
     loadNotifications();
   }, [loadNotifications]);
 

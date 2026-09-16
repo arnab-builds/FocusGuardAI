@@ -1,6 +1,7 @@
 import random
 
 from .models import Notification
+from users.realtime import publish_notification
 
 NOTIFICATION_MESSAGES = {
     "IDLE": [
@@ -58,14 +59,17 @@ def generate_notification(user, event):
     )
 
     print(f"Notification Created [{event}] for {user.username}")
+    publish_notification(user, notification)
 
     return notification
 
 
 def create_user_notification(user, title, message, notification_type="SYSTEM"):
-    return Notification.objects.create(
+    notification = Notification.objects.create(
         user=user,
         notification_type=notification_type,
         title=title,
         message=message,
     )
+    publish_notification(user, notification)
+    return notification

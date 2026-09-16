@@ -1,5 +1,6 @@
 from users.models import User
 from .models import AdminNotification
+from users.realtime import publish_notification
 
 
 def create_admin_notification(
@@ -8,7 +9,7 @@ def create_admin_notification(
     notification_type="system",
 ):
 
-    AdminNotification.objects.bulk_create(
+    notifications = AdminNotification.objects.bulk_create(
         [
             AdminNotification(
                 user=admin,
@@ -70,3 +71,5 @@ def deactivation_rejected(organization, rejected_by):
         message=f"{organization} request rejected by {rejected_by}.",
         notification_type="request",
     )
+    for notification in notifications:
+        publish_notification(notification.user, notification)

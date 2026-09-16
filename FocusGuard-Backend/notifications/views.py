@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from .models import Notification
 from .serializers import NotificationSerializer
 from .services import generate_notification
+from users.realtime import publish_notification
 from rest_framework.generics import DestroyAPIView
 from users.services.response_translation import TranslatedResponseMixin
 
@@ -44,6 +45,7 @@ class MarkNotificationReadAPIView(TranslatedResponseMixin, UpdateAPIView):
 
         notification.is_read = True
         notification.save(update_fields=["is_read"])
+        publish_notification(request.user, notification, "NOTIFICATION_READ")
 
         serializer = NotificationSerializer(notification)
 
@@ -60,6 +62,10 @@ class MarkAllNotificationsReadAPIView(TranslatedResponseMixin, APIView):
             user=request.user,
             is_read=False,
         ).update(is_read=True)
+
+        from users.realtime import publish
+        from users.consumers import user_group
+        publish([user_group(request.user.id)], {"event": "NOTIFICATIONS_READ_ALL"})
 
         return Response(
             {
@@ -147,7 +153,11 @@ class DeleteNotificationAPIView(TranslatedResponseMixin, DestroyAPIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        notification_id = notification.id
         notification.delete()
+        from users.realtime import publish
+        from users.consumers import user_group
+        publish([user_group(request.user.id)], {"event": "NOTIFICATION_DELETED", "notification_id": notification_id})
 
         return Response(
             {
