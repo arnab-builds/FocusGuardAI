@@ -16,15 +16,19 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 from django.core.asgi import get_asgi_application
 django_asgi_app = get_asgi_application()
 
+from django.conf import settings
 from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.security.websocket import AllowedHostsOriginValidator
+from channels.security.websocket import OriginValidator
 from django.urls import path
 from users.consumers import RealtimeConsumer
 from users.websocket_auth import JwtQueryAuthMiddleware
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
-    "websocket": AllowedHostsOriginValidator(JwtQueryAuthMiddleware(
-        URLRouter([path("ws/realtime/", RealtimeConsumer.as_asgi())])
-    )),
+    "websocket": OriginValidator(
+        JwtQueryAuthMiddleware(
+            URLRouter([path("ws/realtime/", RealtimeConsumer.as_asgi())])
+        ),
+        settings.CORS_ALLOWED_ORIGINS,
+    ),
 })
