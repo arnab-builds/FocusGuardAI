@@ -4,7 +4,9 @@ import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 
 function AdminLayout() {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(() =>
+        typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches
+    );
     const [theme, setTheme] = useState(() =>
         localStorage.getItem("focusguard_superadmin_theme") === "dark"
             ? "dark"
@@ -25,8 +27,6 @@ function AdminLayout() {
 
     useEffect(() => {
         const mql = window.matchMedia("(min-width: 768px)");
-
-        setIsSidebarOpen(mql.matches);
 
         const handler = (event) =>
             setIsSidebarOpen(event.matches);

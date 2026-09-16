@@ -12,11 +12,10 @@ import {
     getOrganizationAnalytics,
     getDashboardTrend,
     getOrganizationActivity,
-    getOrganizationMembers,
 } from "../services/dashboardService";
 import { normalizeOrganizationActivities } from "../utils/activityUtils";
 import { normalizeListResponse } from "../utils/responseUtils";
-import { fetchWithCache, getCache } from "../../utils/apiCache";
+import { fetchWithCache, getCache, setCache } from "../../utils/apiCache";
 import { useLanguage } from "../context/useLanguage";
 
 const initialAnalytics = {
@@ -63,12 +62,10 @@ function Dashboard() {
                 analyticsResponse,
                 trendResponse,
                 activityResponse,
-                membersResponse,
             ] = await Promise.all([
                 fetchWithCache(cacheKeyAnal, getOrganizationAnalytics),
                 fetchWithCache(cacheKeyTrend, getDashboardTrend),
                 fetchWithCache(cacheKeyAct, getOrganizationActivity),
-                fetchWithCache(cacheKeyMem, getOrganizationMembers),
             ]);
 
             setAnalytics(
@@ -87,14 +84,11 @@ function Dashboard() {
                 )
             );
 
-            setEmployees(
-                Array.isArray(membersResponse)
-                    ? membersResponse
-                    : membersResponse?.members ||
-                          membersResponse?.users ||
-                          membersResponse?.results ||
-                          []
-            );
+            // Organization analytics already includes member summaries. Reuse
+            // them instead of issuing a duplicate members request on entry.
+            const members = analyticsResponse?.members || analyticsResponse?.users || [];
+            setEmployees(members);
+            setCache(cacheKeyMem, members);
 
             setLastSynced(new Date());
 

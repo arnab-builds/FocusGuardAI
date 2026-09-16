@@ -161,17 +161,15 @@ function Navbar({ onToggleSidebar }) {
                 return;
 
             try {
-                setLanguageSaving(true);
-
-                await updatePreferredLanguage(
-                    languageId
-                );
-
+                // Local language resources can switch immediately. Persist
+                // the preference asynchronously so navigation is never held
+                // up by a settings request or full-page reload.
                 await setLanguageById(
                     languageId
                 );
-
-                window.location.reload();
+                void updatePreferredLanguage(languageId).catch((error) => {
+                    console.error(error);
+                });
             } catch (error) {
                 console.error(error);
             } finally {

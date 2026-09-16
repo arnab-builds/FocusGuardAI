@@ -4,6 +4,9 @@ import Sidebar from "./Sidebar";
 import TopNavbar from "./TopNavbar";
 import { getProfile } from "../services/profileService";
 import { getAnalytics } from "../services/analyticsService";
+import { getActivityHistory } from "../services/activityService";
+import { getDashboardTrend } from "../services/dashboardService";
+import { getAIRecommendations } from "../services/aiRecommendationService";
 import { useTheme } from "../context/ThemeContext";
 import { fetchWithCache, getCache } from "../utils/apiCache";
 
@@ -29,6 +32,14 @@ function DashboardLayoutContent() {
     profile: getCache(profileCacheKey) || null,
     analytics: getCache(analyticsCacheKey) || null,
   }));
+  const [dashboardData, setDashboardData] = useState(() => ({
+    trend: getCache(`emp-trend-${selectedDate}-${currentLanguageCode}`) || [],
+    recent: getCache(`emp-recent-${selectedDate}-${currentLanguageCode}`)?.results || [],
+    recommendation: getCache(`emp-rec-${selectedDate}-${currentLanguageCode}`)?.[0] || null,
+  }));
+  const [dashboardLoading, setDashboardLoading] = useState(() =>
+    !getCache(analyticsCacheKey)
+  );
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { theme } = useTheme();
@@ -97,31 +108,51 @@ function DashboardLayoutContent() {
   useEffect(() => {
     let isMounted = true;
 
-    const loadHeader = async ({ force = false } = {}) => {
+    const trendCacheKey = `emp-trend-${selectedDate}-${currentLanguageCode}`;
+    const recentCacheKey = `emp-recent-${selectedDate}-${currentLanguageCode}`;
+    const recommendationCacheKey = `emp-rec-${selectedDate}-${currentLanguageCode}`;
+
+    const loadDashboard = async ({ force = false } = {}) => {
       try {
-        const [profile, analytics] = await Promise.all([
+        // Start every independent dashboard request together.  State is
+        // committed once the batch settles so sections do not cascade in.
+        const [profile, analytics, trend, recent, recommendations] = await Promise.all([
           fetchWithCache(profileCacheKey, getProfile, { force }),
           fetchWithCache(analyticsCacheKey, () => getAnalytics(selectedDate), { force }),
+          fetchWithCache(trendCacheKey, () => getDashboardTrend(selectedDate), { force }),
+          fetchWithCache(recentCacheKey, () => getActivityHistory(1, selectedDate), { force }),
+          fetchWithCache(
+            recommendationCacheKey,
+            () => getAIRecommendations(selectedDate, currentLanguageCode),
+            { force }
+          ),
         ]);
         if (isMounted) {
           setDashboardHeader({ profile, analytics });
+          setDashboardData({
+            trend,
+            recent: recent.results || [],
+            recommendation: recommendations[0] || null,
+          });
         }
       } catch (error) {
-        console.error("Header Error:", error);
+        console.error("Dashboard bootstrap error:", error);
+      } finally {
+        if (isMounted) setDashboardLoading(false);
       }
     };
 
-    loadHeader();
+    loadDashboard();
 
     const refreshInterval = window.setInterval(() => {
       if (!document.hidden) {
-        loadHeader();
+        loadDashboard({ force: true });
       }
     }, 60_000);
 
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        loadHeader({ force: true });
+        loadDashboard({ force: true });
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -131,16 +162,18 @@ function DashboardLayoutContent() {
       window.clearInterval(refreshInterval);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [selectedDate, profileCacheKey, analyticsCacheKey]);
+  }, [selectedDate, currentLanguageCode, profileCacheKey, analyticsCacheKey]);
 
   const outletContext = useMemo(
     () => ({
       selectedDate,
       setSelectedDate: handleDateChange,
       dashboardHeader,
+      dashboardData,
+      dashboardLoading,
       setDashboardHeader,
     }),
-    [dashboardHeader, selectedDate]
+    [dashboardData, dashboardHeader, dashboardLoading, selectedDate]
   );
 
   return (

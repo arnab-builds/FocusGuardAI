@@ -9,7 +9,14 @@ import {
 } from "react-icons/fi";
 
 import { loginUser } from "../../services/authService";
-import { setCache } from "../../utils/apiCache";
+import { setCache, fetchWithCache } from "../../utils/apiCache";
+import {
+  getOrganizationAnalytics,
+  getDashboardTrend as getOrganizationDashboardTrend,
+  getOrganizationActivity,
+  getProfile as getOrganizationProfile,
+} from "../../organization-admin/services/dashboardService";
+import { getDashboard as getSuperAdminDashboard } from "../../super-admin/services/superAdminService";
 import { useLanguage } from "../../context/useLanguage";
 import ThemeToggle from "../../components/ThemeToggle";
 
@@ -59,6 +66,23 @@ function Login() {
     });
   };
 
+  const prewarmRoleDashboard = (role, languageCode) => {
+    const ignoreFailure = (promise) => promise.catch(() => undefined);
+
+    if (role === "SUB_ADMIN") {
+      // These exact cache keys are consumed by the destination layout/page.
+      // Starting them before navigation eliminates the post-login wait.
+      ignoreFailure(fetchWithCache("org-dash-analytics", getOrganizationAnalytics));
+      ignoreFailure(fetchWithCache("org-dash-trend", getOrganizationDashboardTrend));
+      ignoreFailure(fetchWithCache("org-dash-activity", getOrganizationActivity));
+      ignoreFailure(fetchWithCache(`org-profile-${languageCode}`, getOrganizationProfile));
+    }
+
+    if (role === "SUPER_ADMIN") {
+      ignoreFailure(fetchWithCache("super-dashboard", getSuperAdminDashboard));
+    }
+  };
+
   const handleLogin = async () => {
     if (loading) return;
     setLoading(true);
@@ -95,6 +119,8 @@ function Login() {
       setLanguageFromPreference(
         data.user?.preferred_language
       ).catch(console.error);
+
+      prewarmRoleDashboard(data.user?.role, profileLanguage);
 
       const dashboardByRole = {
         SUPER_ADMIN: "/super-admin/dashboard",

@@ -40,10 +40,15 @@ const NormalUsers = lazy(() => import("../super-admin/pages/normal-users/NormalU
 function RouteLoading() {
   return (
     <div
-      className="flex min-h-screen items-center justify-center text-slate-500"
+      className="flex min-h-screen items-center justify-center bg-[#F3F7FF] text-slate-500"
       aria-busy="true"
     >
-      Loading...
+      <div className="w-full max-w-screen-2xl space-y-6 px-6">
+        <div className="h-24 animate-pulse rounded-2xl bg-slate-200/70" />
+        <div className="grid gap-6 md:grid-cols-3">
+          {[1, 2, 3].map((item) => <div key={item} className="h-40 animate-pulse rounded-2xl bg-white" />)}
+        </div>
+      </div>
     </div>
   );
 }

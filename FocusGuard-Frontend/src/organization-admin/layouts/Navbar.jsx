@@ -24,6 +24,7 @@ import {
 import { useLanguage } from "../context/useLanguage";
 
 import { updatePreferredLanguage } from "../services/settingsService";
+import { fetchWithCache, getCache } from "../../utils/apiCache";
 
 const getGreeting = (t) => {
   const hour = new Date().getHours();
@@ -50,7 +51,9 @@ function Navbar({ onToggleSidebar }) {
 
   const notificationRef = useRef(null);
 
-  const [notifications, setNotifications] = useState([]);
+  const notificationCacheKey = `org-notifications-${currentLanguageCode}`;
+  const profileCacheKey = `org-profile-${currentLanguageCode}`;
+  const [notifications, setNotifications] = useState(() => getCache(notificationCacheKey) || []);
 
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -76,7 +79,11 @@ function Navbar({ onToggleSidebar }) {
 
   const loadNotifications = async () => {
     try {
-      const data = await getNotifications();
+      const data = await fetchWithCache(
+        notificationCacheKey,
+        getNotifications,
+        { force: true }
+      );
 
       const notificationList =
         data.notifications ||
@@ -109,7 +116,7 @@ function Navbar({ onToggleSidebar }) {
 
     const interval = setInterval(
       loadNotifications,
-      30000
+      60000
     );
 
     return () => {
@@ -121,7 +128,7 @@ function Navbar({ onToggleSidebar }) {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const data = await getProfile();
+        const data = await fetchWithCache(profileCacheKey, getProfile);
 
         const organizationName =
           getOrganizationName(data) ||
@@ -164,7 +171,7 @@ function Navbar({ onToggleSidebar }) {
     };
 
     loadProfile();
-  }, []);
+  }, [profileCacheKey]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

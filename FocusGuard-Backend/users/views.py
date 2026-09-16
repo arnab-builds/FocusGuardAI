@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from users.email_service import send_brevo_email, BrevoAPIError
 from django.db import transaction
+from django.db.models import Count, Prefetch, Q
 from django.utils import duration, timezone
 from rest_framework import generics, serializers, status
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
@@ -1246,14 +1247,15 @@ DEFAULT_CATEGORY = "Uncategorized"
 
 def calculate_user_analytics(user, selected_date=None):
 
-    activities = ActivityLog.objects.filter(user=user)
+    # Reverse managers reuse prefetched activity data when callers need a
+    # summary for many users (organization/super-admin pages).  For an
+    # individual user this remains the same lazy database query.
+    activities = user.activity_logs.all()
 
     if selected_date:
         activities = activities.filter(
             start_time__date=selected_date
         )
-
-    activities = activities.order_by("start_time")
 
     productive_time = timedelta()
     non_productive_time = timedelta()
@@ -1318,9 +1320,7 @@ def calculate_user_analytics(user, selected_date=None):
 
             neutral_time += duration
 
-    inactivity_logs = UserInactivity.objects.filter(
-        user=user
-    )
+    inactivity_logs = user.inactivity_logs.all()
 
     if selected_date:
         inactivity_logs = inactivity_logs.filter(
@@ -1567,9 +1567,18 @@ class OrganizationAnalyticsView(TranslatedResponseMixin, APIView):
         )
 
         users = User.objects.filter(
-    organization=organization,
-    role="USER",
-).order_by("id")
+            organization=organization,
+            role="USER",
+        ).order_by("id").prefetch_related(
+            Prefetch(
+                "activity_logs",
+                queryset=ActivityLog.objects.order_by("start_time"),
+            ),
+            Prefetch(
+                "inactivity_logs",
+                queryset=UserInactivity.objects.all(),
+            ),
+        )
 
         total_employees = users.count()
         active_employees = users.filter(is_active=True).count()
@@ -2559,7 +2568,9 @@ class SuperAdminDashboardView(TranslatedResponseMixin, APIView):
 
     def get(self, request):
 
-        organizations = Organization.objects.all()
+        organizations = Organization.objects.annotate(
+            employee_count=Count("user", filter=Q(user__role="USER"))
+        )
         employees = User.objects.filter(role="USER")
         organization_admins = User.objects.filter(role="SUB_ADMIN")
 
@@ -2581,10 +2592,7 @@ class SuperAdminDashboardView(TranslatedResponseMixin, APIView):
         for organization in organizations:
             organization_growth.append({
                 "name": organization.name,
-                "employees": User.objects.filter(
-                    organization=organization,
-                    role="USER"
-                ).count()
+                "employees": organization.employee_count
             })
 
         employee_distribution = {
@@ -2648,23 +2656,39 @@ class SuperAdminOrganizationListView(TranslatedResponseMixin, APIView):
                 float(seconds)
             )
 
-        organizations = Organization.objects.all().order_by("name")
+        organizations = Organization.objects.all().order_by("name").prefetch_related(
+            Prefetch(
+                "user_set",
+                queryset=User.objects.filter(
+                    role__in=["SUB_ADMIN", "USER"]
+                ).prefetch_related(
+                    Prefetch(
+                        "activity_logs",
+                        queryset=ActivityLog.objects.order_by("start_time"),
+                    ),
+                    Prefetch(
+                        "inactivity_logs",
+                        queryset=UserInactivity.objects.all(),
+                    ),
+                ),
+                to_attr="performance_users",
+            )
+        )
 
         data = []
 
         for organization in organizations:
 
-            admin = User.objects.filter(
-                organization=organization,
-                role="SUB_ADMIN"
-            ).first()
-
-            employees = User.objects.filter(
-                organization=organization,
-                role="USER"
+            organization_users = organization.performance_users
+            admin = next(
+                (user for user in organization_users if user.role == "SUB_ADMIN"),
+                None,
             )
+            employees = [
+                user for user in organization_users if user.role == "USER"
+            ]
 
-            total = employees.count()
+            total = len(employees)
 
             analytics = []
 

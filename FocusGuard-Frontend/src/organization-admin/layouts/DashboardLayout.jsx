@@ -5,13 +5,13 @@ import Navbar from "./Navbar";
 import { OrgThemeProvider, useOrgTheme } from "../context/OrgThemeContext";
 
 function DashboardLayoutContent() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches
+  );
   const { theme } = useOrgTheme();
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 768px)");
-
-    setIsSidebarOpen(mql.matches);
 
     const handler = (e) => setIsSidebarOpen(e.matches);
 
