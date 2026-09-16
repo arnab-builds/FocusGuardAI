@@ -1,13 +1,3 @@
-# FocusGuard AI
-
-### AI-Powered Human Attention Preservation & Digital Distraction Intelligence Platform
-
-**Turn digital activity into actionable productivity insights.**
-
-FocusGuard AI is an intelligent productivity platform that helps individuals and organizations **understand digital behavior, identify distractions, measure productivity, and build better focus habits**.
-
-Powered by **AI, real-time browser activity tracking, automatic website categorization, and role-based analytics**, FocusGuard AI transforms everyday digital activity into meaningful insights through a modern web platform and Chrome Extension.
-A<div align="center">
 
 # 🎯 FocusGuard AI
 
