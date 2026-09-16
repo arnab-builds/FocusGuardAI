@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "channels",
+    "drf_spectacular",
 
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
@@ -177,8 +178,18 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-    'users.authentication.FocusGuardJWTAuthentication',
-),
+        'users.authentication.FocusGuardJWTAuthentication',
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'FocusGuard AI API',
+    'DESCRIPTION': 'Interactive API documentation for FocusGuard AI',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SECURITY': [{'jwt': []}],
 }
 
 # ------------------------------------------------------------------------------
