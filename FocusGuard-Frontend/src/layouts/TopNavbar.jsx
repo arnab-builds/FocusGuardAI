@@ -10,7 +10,7 @@ import { getNotifications } from "../services/notificationService";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/useLanguage";
 import { updatePreferredLanguage } from "../services/settingsService";
-import { fetchWithCache } from "../utils/apiCache";
+import { fetchWithCache, setCache } from "../utils/apiCache";
 
 const getGreetingKey = (now = new Date()) => {
   const hour = now.getHours();
