@@ -9,16 +9,18 @@ https://docs.djangoproject.com/en/6.0/howto/deployment/asgi/
 
 import os
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+
+# Initialize Django's app registry before importing websocket modules. JWT
+# authentication imports Django's user model transitively.
+from django.core.asgi import get_asgi_application
+django_asgi_app = get_asgi_application()
+
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
-from django.core.asgi import get_asgi_application
 from django.urls import path
 from users.consumers import RealtimeConsumer
 from users.websocket_auth import JwtQueryAuthMiddleware
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-
-django_asgi_app = get_asgi_application()
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
