@@ -1,3 +1,4 @@
+<div align="center">
 
 # 🎯 FocusGuard AI
 
@@ -397,5 +398,3 @@ GitHub: [arnab-builds](https://github.com/arnab-builds)
 If you find FocusGuard AI useful, consider giving the repo a ⭐
 
 </div>
-
-
