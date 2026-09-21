@@ -8,11 +8,11 @@
   Turn digital activity into actionable productivity insights.
 </p>
 
-![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
-![Django](https://img.shields.io/badge/Django-6-092E20?logo=django&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?logo=postgresql&logoColor=white)
-![Chrome Extension](https://img.shields.io/badge/Chrome-Extension%20MV3-4285F4?logo=googlechrome&logoColor=white)
-![AI](https://img.shields.io/badge/AI-Powered-8A2BE2)
+![React](https://img.shields.io/badge/React%2019-61DAFB?logo=react&logoColor=white)
+![Django](https://img.shields.io/badge/Django%206-44B78B?logo=django&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL%20Database-4169E1?logo=postgresql&logoColor=white)
+![Chrome Extension](https://img.shields.io/badge/Chrome%20Extension%20MV3-4285F4?logo=googlechrome&logoColor=white)
+![AI](https://img.shields.io/badge/AI%20Powered-8A2BE2?logo=sparkles&logoColor=white)
 
 **Your browser knows exactly where your focus went today. Do you?** 🕵️‍♂️
 
