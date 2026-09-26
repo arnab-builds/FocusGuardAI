@@ -1257,6 +1257,18 @@ def calculate_user_analytics(user, selected_date=None):
     activities = user.activity_logs.all()
 
     if selected_date:
+        if isinstance(selected_date, str):
+            try:
+                selected_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
+            except ValueError:
+                try:
+                    selected_date = datetime.fromisoformat(selected_date).date()
+                except ValueError:
+                    selected_date = None
+        elif isinstance(selected_date, datetime):
+            selected_date = selected_date.date()
+
+    if selected_date:
         day_start = timezone.make_aware(
             datetime.combine(selected_date, datetime.min.time())
         )
