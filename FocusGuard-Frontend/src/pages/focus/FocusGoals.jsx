@@ -11,7 +11,12 @@ import {
   regenerateFocusPlan,
   getFocusPlan,
 } from "../../services/focusGoalService";
-import { fetchWithCache, getCache, setCache } from "../../utils/apiCache";
+import {
+  fetchWithCache,
+  getCache,
+  setCache,
+  invalidateCache,
+} from "../../utils/apiCache";
 
 const metricValues = [
   ["Deep Work Session", "deep_work_session", "Deep Work Session"],
@@ -38,13 +43,15 @@ export default function FocusGoals() {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
 
-  const loadGoals = async (showLoading = true) => {
+  const loadGoals = async (showLoading = true, force = true) => {
     try {
-      if (showLoading && !getCache(cacheKey)) setLoading(true);
-      const data = await fetchWithCache(cacheKey, getGoals);
-      const processed = Array.isArray(data) ? data : data.results || [];
+      if (showLoading && (!getCache(cacheKey) || force)) setLoading(true);
+      const data = await fetchWithCache(cacheKey, getGoals, { force });
+      const processed = Array.isArray(data) ? data : data?.results || [];
       setGoals(processed);
       setCache(cacheKey, processed);
+    } catch (error) {
+      console.error("Failed to load focus goals:", error);
     } finally {
       setLoading(false);
     }
@@ -52,7 +59,7 @@ export default function FocusGoals() {
 
   useEffect(() => {
     let isMounted = true;
-    loadGoals(true);
+    loadGoals(true, true);
     return () => { isMounted = false; };
   }, []);
 
@@ -69,13 +76,14 @@ export default function FocusGoals() {
         deadline: form.deadline ? form.deadline : null,
       };
       await createGoal(payload);
+      invalidateCache(cacheKey);
       setForm((currentForm) => ({
         ...currentForm,
         target_value: "",
         deadline: "",
         notes: "",
       }));
-      await loadGoals();
+      await loadGoals(false, true);
     } catch (error) {
       console.error("Failed to create goal:", error);
       alert(t("unable_to_create_goal", "Unable to create goal. Please check your inputs."));
@@ -87,14 +95,21 @@ export default function FocusGoals() {
       return;
     }
 
-    await deleteGoal(id);
-    await loadGoals();
+    try {
+      await deleteGoal(id);
+      invalidateCache(cacheKey);
+      await loadGoals(false, true);
+    } catch (error) {
+      console.error("Failed to delete goal:", error);
+      alert(t("unable_to_delete_goal", "Unable to delete goal."));
+    }
   };
 
   const createPlan = async (id) => {
     try {
       await generateFocusPlan(id);
-      await loadGoals();
+      invalidateCache(cacheKey);
+      await loadGoals(false, true);
     } catch {
       alert(t("unable_to_generate_plan", "Unable to generate plan."));
     }
@@ -103,7 +118,8 @@ export default function FocusGoals() {
   const regeneratePlan = async (id) => {
     try {
       await regenerateFocusPlan(id);
-      await loadGoals();
+      invalidateCache(cacheKey);
+      await loadGoals(false, true);
     } catch {
       alert(t("unable_to_regenerate_plan", "Unable to regenerate plan."));
     }
@@ -120,7 +136,7 @@ export default function FocusGoals() {
   };
 
   const priorityLabel = (priority) =>
-    t(priority.toLowerCase(), priority);
+    priority ? t(String(priority).toLowerCase(), priority) : "";
 
   return (
     <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
