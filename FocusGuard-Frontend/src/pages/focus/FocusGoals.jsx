@@ -63,14 +63,23 @@ export default function FocusGoals() {
 
   const handleCreateGoal = async (event) => {
     event.preventDefault();
-    await createGoal(form);
-    setForm((currentForm) => ({
-      ...currentForm,
-      target_value: "",
-      deadline: "",
-      notes: "",
-    }));
-    await loadGoals();
+    try {
+      const payload = {
+        ...form,
+        deadline: form.deadline ? form.deadline : null,
+      };
+      await createGoal(payload);
+      setForm((currentForm) => ({
+        ...currentForm,
+        target_value: "",
+        deadline: "",
+        notes: "",
+      }));
+      await loadGoals();
+    } catch (error) {
+      console.error("Failed to create goal:", error);
+      alert(t("unable_to_create_goal", "Unable to create goal. Please check your inputs."));
+    }
   };
 
   const removeGoal = async (id) => {

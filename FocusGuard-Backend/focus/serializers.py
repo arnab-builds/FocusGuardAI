@@ -24,6 +24,21 @@ class FocusGoalSerializer(serializers.ModelSerializer):
     plan = FocusPlanSerializer(
         read_only=True,
     )
+    deadline = serializers.DateField(
+        required=False,
+        allow_null=True,
+    )
+
+    def to_internal_value(self, data):
+        if hasattr(data, "copy"):
+            data = data.copy()
+        elif isinstance(data, dict):
+            data = dict(data)
+        if "deadline" in data:
+            val = data.get("deadline")
+            if val == "" or (isinstance(val, str) and not val.strip()):
+                data["deadline"] = None
+        return super().to_internal_value(data)
 
     class Meta:
         model = FocusGoal
