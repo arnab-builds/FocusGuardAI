@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_safe
 
 HTML_CONTENT = """<!DOCTYPE html>
 <html lang="en">
@@ -88,7 +88,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 </body>
 </html>"""
 
-@require_GET
+@require_safe
 def root_view(request):
     """Return a simple landing page for the root URL."""
     return HttpResponse(HTML_CONTENT)

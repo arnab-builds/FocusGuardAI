@@ -61,3 +61,17 @@ class HealthEndpointTests(SimpleTestCase):
 
         self.assertEqual(response.status_code, 503)
         self.assertEqual(response.json(), {"status": "error"})
+
+
+@override_settings(ALLOWED_HOSTS=["testserver", "127.0.0.1", "localhost"])
+class RootEndpointTests(SimpleTestCase):
+    def test_root_get_returns_200(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"FocusGuard AI", response.content)
+
+    def test_root_head_returns_200_without_body(self):
+        response = self.client.head("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"")
+
