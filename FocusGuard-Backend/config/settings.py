@@ -299,3 +299,7 @@ if _cors_origins:
 
 CORS_ALLOW_CREDENTIALS = True
 
+# Cloudflare Keepalive Database Health Check Secret
+CLOUDFLARE_DB_HEALTH_SECRET = config("CLOUDFLARE_DB_HEALTH_SECRET", default="")
+
+

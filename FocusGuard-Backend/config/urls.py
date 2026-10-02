@@ -18,12 +18,13 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from .health import health
+from .health import health, health_db
 from .views import root_view
 
 urlpatterns = [
     path("", root_view, name="root"),
     path("health/", health, name="health"),
+    path("health/db/", health_db, name="health_db"),
     path('admin/', admin.site.urls),
     path('api/', include('users.urls')),
     path('api/reports/', include('reports.urls')),
