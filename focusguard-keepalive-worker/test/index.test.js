@@ -99,7 +99,7 @@ describe("FocusGuard Keepalive Worker", () => {
   });
 
   it("fetch handler returns active status", async () => {
-    const res = worker.fetch();
+    const res = await worker.fetch();
     assert.equal(res.status, 200);
     const text = await res.text();
     assert.match(text, /active/i);

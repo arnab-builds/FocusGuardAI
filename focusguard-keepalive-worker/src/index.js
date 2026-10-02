@@ -78,3 +78,4 @@ export default {
     return new Response("FocusGuard keep-alive worker is active.");
   },
 };
+
